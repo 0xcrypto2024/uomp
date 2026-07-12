@@ -1,0 +1,16 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { Content } from '../../content/auth/design.en.md';
+import { baseUrl } from '../../utils/base.ts';
+---
+
+<Layout
+  title="UOMP Authentication & Authorization - User-Owned Memory Protocol"
+  description="UOMP authentication, Capability Token, and Memory Guard authorization."
+  lang="en"
+  switchHref={`${baseUrl}auth/`}
+>
+  <div class="container spec-content">
+    <Content />
+  </div>
+</Layout>

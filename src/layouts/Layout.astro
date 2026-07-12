@@ -14,6 +14,7 @@ const nav = {
   zh: {
     home: '首页',
     spec: '规范',
+    auth: '认证',
     roadmap: '路线图',
     github: 'GitHub',
     switch: 'EN',
@@ -22,6 +23,7 @@ const nav = {
   en: {
     home: 'Home',
     spec: 'Spec',
+    auth: 'Auth',
     roadmap: 'Roadmap',
     github: 'GitHub',
     switch: '中文',
@@ -32,6 +34,7 @@ const nav = {
 const t = nav[lang];
 const homeHref = lang === 'zh' ? baseUrl : `${baseUrl}en/`;
 const specHref = lang === 'zh' ? `${baseUrl}spec/` : `${baseUrl}en/spec/`;
+const authHref = lang === 'zh' ? `${baseUrl}auth/` : `${baseUrl}en/auth/`;
 const roadmapHref = lang === 'zh' ? `${baseUrl}roadmap/` : `${baseUrl}en/roadmap/`;
 const resolvedSwitchHref = switchHref ?? (lang === 'zh' ? `${baseUrl}en/` : baseUrl);
 ---
@@ -54,6 +57,7 @@ const resolvedSwitchHref = switchHref ?? (lang === 'zh' ? `${baseUrl}en/` : base
         <nav>
           <a href={homeHref}>{t.home}</a>
           <a href={specHref}>{t.spec}</a>
+          <a href={authHref}>{t.auth}</a>
           <a href={roadmapHref}>{t.roadmap}</a>
           <a href="https://github.com/0xcrypto2024/uomp" target="_blank" rel="noopener">{t.github}</a>
           <a href={resolvedSwitchHref} class="lang-switch">{t.switch}</a>

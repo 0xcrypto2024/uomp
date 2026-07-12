@@ -1,0 +1,44 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="路线图 - UOMP">
+  <section>
+    <div class="container">
+      <h1>路线图</h1>
+      <p>UOMP 从协议草案到完整生态的发展规划。</p>
+
+      <h2>Milestone 1：核心协议与参考实现（当前）</h2>
+      <ul class="roadmap-list">
+        <li><span class="status status-current">进行中</span>发布 UOMP-Draft-00 规范草案</li>
+        <li><span class="status status-current">进行中</span>基于 SQLite 的 Memory Store</li>
+        <li><span class="status status-current">进行中</span>Auth Service HTTP API：Session 创建/授权/关闭/撤销</li>
+        <li><span class="status status-current">进行中</span>Memory Guard HTTP API：只读访问，按 tag/key 过滤</li>
+        <li><span class="status status-current">进行中</span>JWT Capability Token 签发与校验</li>
+        <li><span class="status status-current">进行中</span>Token 黑名单持久化到 SQLite</li>
+        <li><span class="status status-current">进行中</span><code>uom.json</code> Agent Manifest 解析</li>
+        <li><span class="status status-current">进行中</span>DID / GPG / X.509 身份验证支持</li>
+        <li><span class="status status-current">进行中</span>ERC8004 兼容 Registry 客户端</li>
+        <li><span class="status status-current">进行中</span>TypeScript SDK 初版（只读）</li>
+      </ul>
+
+      <h2>Milestone 2：写入与体验增强</h2>
+      <ul class="roadmap-list">
+        <li><span class="status status-next">计划</span>Agent 写入暂存区（Staging）机制</li>
+        <li><span class="status status-next">计划</span><code>uom memory review</code> 用户审核命令</li>
+        <li><span class="status status-next">计划</span>图形化授权面板</li>
+        <li><span class="status status-next">计划</span>审计日志可视化</li>
+        <li><span class="status status-next">计划</span>Token 安全托管模式（反向代理）</li>
+      </ul>
+
+      <h2>Milestone 3：远程与高级能力</h2>
+      <ul class="roadmap-list">
+        <li><span class="status status-future">未来</span>Remote Profile 参考实现（TLS 1.3 + mTLS）</li>
+        <li><span class="status status-future">未来</span>语义检索（<code>query</code> 接口）</li>
+        <li><span class="status status-future">未来</span>写入版本历史与回滚</li>
+        <li><span class="status status-future">未来</span>策略模板（如"仅偏好"、"偏好+公开身份"）</li>
+        <li><span class="status status-future">未来</span>授权与访问事件区块链锚定</li>
+      </ul>
+    </div>
+  </section>
+</Layout>

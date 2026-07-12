@@ -1,0 +1,42 @@
+---
+export interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'User-Owned Memory Protocol - 用户主权型 Agent 记忆授权协议' } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link rel="stylesheet" href={`${import.meta.env.BASE_URL}styles/global.css`} />
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <a href={`${import.meta.env.BASE_URL}`} class="logo">
+          <span>UOMP</span>
+        </a>
+        <nav>
+          <a href={`${import.meta.env.BASE_URL}`}>首页</a>
+          <a href={`${import.meta.env.BASE_URL}spec`}>规范</a>
+          <a href={`${import.meta.env.BASE_URL}roadmap`}>路线图</a>
+          <a href="https://github.com/0xcrypto2024/uomp" target="_blank" rel="noopener">GitHub</a>
+        </nav>
+      </div>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer>
+      <div class="container">
+        <p>UOMP 是一个开放协议草案。欢迎通过 <a href="https://github.com/0xcrypto2024/uomp">GitHub</a> 参与讨论。</p>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -14,7 +14,7 @@ import { baseUrl } from '../utils/base.ts';
       </p>
       <div class="cta">
         <a href={`${baseUrl}spec/`} class="btn btn-primary">阅读规范</a>
-        <a href="https://github.com/0xcrypto2024/uomp" target="_blank" rel="noopener" class="btn btn-secondary">GitHub 讨论</a>
+        <a href="https://github.com/0xaicrypto/uomp" target="_blank" rel="noopener" class="btn btn-secondary">GitHub 讨论</a>
       </div>
     </div>
   </section>
@@ -37,18 +37,22 @@ import { baseUrl } from '../utils/base.ts';
       <h2>核心原则</h2>
       <div class="grid">
         <div class="card">
+          <div class="card-icon">🔒</div>
           <h3>用户主权</h3>
           <p>记忆数据始终由用户拥有和控制，不迁移到 Agent 提供商。</p>
         </div>
         <div class="card">
+          <div class="card-icon">🎯</div>
           <h3>最小授权</h3>
           <p>按标签（Tag）或键（Key）精确授权，未授权数据默认不可访问。</p>
         </div>
         <div class="card">
+          <div class="card-icon">⏱️</div>
           <h3>会话隔离</h3>
           <p>每个授权绑定到独立 Session，会话结束或撤销后立即失效。</p>
         </div>
         <div class="card">
+          <div class="card-icon">📋</div>
           <h3>可审计</h3>
           <p>所有访问行为记录审计日志，用户可追踪 Agent 查看了什么。</p>
         </div>
@@ -59,21 +63,46 @@ import { baseUrl } from '../utils/base.ts';
   <section class="alt">
     <div class="container">
       <h2>工作流程</h2>
-      <div class="mermaid">
-flowchart LR
-    subgraph UserSide["用户本机 / User Side"]
-        UI["uomp CLI / GUI"]
-        Auth["Auth Service"]
-        Guard["Memory Guard"]
-        Store[("Memory Store")]
-    end
-    Agent["Agent\n(独立进程)"]
+      <div class="diagram">
+        <svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="UOMP 工作流程图">
+          <defs>
+            <marker id="arrowhead-zh" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0, 10 3.5, 0 7" fill="#22d3ee" />
+            </marker>
+          </defs>
+          <rect x="260" y="20" width="440" height="220" rx="12" fill="#12121a" stroke="#2a2a3a" stroke-width="2" />
+          <text x="480" y="45" text-anchor="middle" fill="#a1a1aa" font-size="12" font-family="system-ui, sans-serif">用户本机 / User Host</text>
 
-    Agent -->|"1. 提供 uom.json"| UI
-    UI -->|"2. 确认授权范围"| Auth
-    Auth -->|"3. 签发 Capability Token"| Agent
-    Agent -->|"4. HTTP + Token"| Guard
-    Guard -->|"5. 按 scope 过滤"| Store
+          <rect x="20" y="100" width="110" height="60" rx="8" fill="#0a0a0f" stroke="#22d3ee" stroke-width="2" />
+          <text x="75" y="135" text-anchor="middle" fill="#e4e4e7" font-size="13" font-family="system-ui, sans-serif">Agent</text>
+
+          <rect x="300" y="60" width="120" height="44" rx="8" fill="#0a0a0f" stroke="#22d3ee" stroke-width="2" />
+          <text x="360" y="87" text-anchor="middle" fill="#e4e4e7" font-size="13" font-family="system-ui, sans-serif">uomp CLI / GUI</text>
+
+          <rect x="560" y="60" width="120" height="44" rx="8" fill="#0a0a0f" stroke="#22d3ee" stroke-width="2" />
+          <text x="620" y="87" text-anchor="middle" fill="#e4e4e7" font-size="13" font-family="system-ui, sans-serif">Auth Service</text>
+
+          <rect x="300" y="170" width="120" height="44" rx="8" fill="#0a0a0f" stroke="#22d3ee" stroke-width="2" />
+          <text x="360" y="197" text-anchor="middle" fill="#e4e4e7" font-size="13" font-family="system-ui, sans-serif">Memory Guard</text>
+
+          <rect x="560" y="170" width="120" height="44" rx="8" fill="#0a0a0f" stroke="#22d3ee" stroke-width="2" />
+          <text x="620" y="197" text-anchor="middle" fill="#e4e4e7" font-size="13" font-family="system-ui, sans-serif">Memory Store</text>
+
+          <line x1="130" y1="115" x2="300" y2="90" stroke="#22d3ee" stroke-width="2" marker-end="url(#arrowhead-zh)" />
+          <text x="210" y="95" text-anchor="middle" fill="#a1a1aa" font-size="10" font-family="system-ui, sans-serif">1. uom.json</text>
+
+          <line x1="420" y1="82" x2="560" y2="82" stroke="#22d3ee" stroke-width="2" marker-end="url(#arrowhead-zh)" />
+          <text x="490" y="75" text-anchor="middle" fill="#a1a1aa" font-size="10" font-family="system-ui, sans-serif">2. 授权</text>
+
+          <line x1="620" y1="104" x2="130" y2="145" stroke="#22d3ee" stroke-width="2" marker-end="url(#arrowhead-zh)" />
+          <text x="380" y="155" text-anchor="middle" fill="#a1a1aa" font-size="10" font-family="system-ui, sans-serif">3. Capability Token</text>
+
+          <line x1="130" y1="155" x2="300" y2="192" stroke="#22d3ee" stroke-width="2" marker-end="url(#arrowhead-zh)" />
+          <text x="210" y="185" text-anchor="middle" fill="#a1a1aa" font-size="10" font-family="system-ui, sans-serif">4. HTTP + Token</text>
+
+          <line x1="420" y1="192" x2="560" y2="192" stroke="#22d3ee" stroke-width="2" marker-end="url(#arrowhead-zh)" />
+          <text x="490" y="215" text-anchor="middle" fill="#a1a1aa" font-size="10" font-family="system-ui, sans-serif">5. 按 scope 过滤</text>
+        </svg>
       </div>
       <ol>
         <li><strong>发现 Agent</strong>：用户在 Agent 市场（如基于 ERC8004 的 Registry）发现合适的 Agent。</li>
@@ -90,17 +119,31 @@ flowchart LR
       <h2>谁应该关注 UOMP？</h2>
       <div class="grid">
         <div class="card">
+          <div class="card-icon">👤</div>
           <h3>用户</h3>
           <p>重新掌控个人数据，明确知道哪些 Agent 访问了什么。</p>
         </div>
         <div class="card">
+          <div class="card-icon">🤖</div>
           <h3>Agent 开发者</h3>
           <p>通过标准协议访问用户授权的数据，无需自建数据存储。</p>
         </div>
         <div class="card">
+          <div class="card-icon">🔬</div>
           <h3>协议研究者</h3>
           <p>参与设计一个开放、去中心化的 Agent 授权标准。</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <div class="container">
+      <h2>开始探索 UOMP</h2>
+      <p>阅读协议草案，查看参考实现，或加入 GitHub 讨论，一起构建用户主权的 Agent 记忆授权标准。</p>
+      <div class="cta">
+        <a href={`${baseUrl}spec/`} class="btn btn-primary">阅读规范</a>
+        <a href="https://github.com/0xaicrypto/uomp-core" target="_blank" rel="noopener" class="btn btn-secondary">查看实现</a>
       </div>
     </div>
   </section>

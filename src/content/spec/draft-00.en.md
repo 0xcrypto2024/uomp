@@ -66,20 +66,43 @@ UOMP's design goals are:
 
 ### 5.1 Architecture
 
-<div class="mermaid">
-flowchart LR
-    subgraph UserHost["User Host"]
-        UI["User UI / CLI"]
-        Auth["Auth Service"]
-        Guard["Memory Guard"]
-        Store[("Memory Store")]
-    end
-    Agent["Agent\n(independent process)"]
+<div class="diagram">
+  <svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="UOMP architecture diagram">
+    <defs>
+      <marker id="arrowhead-spec-en" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#22d3ee" />
+      </marker>
+    </defs>
+    <rect x="260" y="20" width="440" height="220" rx="12" fill="#12121a" stroke="#2a2a3a" stroke-width="2" />
+    <text x="480" y="45" text-anchor="middle" fill="#a1a1aa" font-size="12" font-family="system-ui, sans-serif">User Host</text>
 
-    UI <-->|"create / grant / revoke"| Auth
-    Auth -->|"Capability Token"| Agent
-    Agent -->|"HTTP + Authorization"| Guard
-    Guard -->|"read / write (filtered)"| Store
+    <rect x="20" y="100" width="110" height="60" rx="8" fill="#0a0a0f" stroke="#22d3ee" stroke-width="2" />
+    <text x="75" y="135" text-anchor="middle" fill="#e4e4e7" font-size="13" font-family="system-ui, sans-serif">Agent</text>
+
+    <rect x="300" y="60" width="120" height="44" rx="8" fill="#0a0a0f" stroke="#22d3ee" stroke-width="2" />
+    <text x="360" y="87" text-anchor="middle" fill="#e4e4e7" font-size="13" font-family="system-ui, sans-serif">User UI / CLI</text>
+
+    <rect x="560" y="60" width="120" height="44" rx="8" fill="#0a0a0f" stroke="#22d3ee" stroke-width="2" />
+    <text x="620" y="87" text-anchor="middle" fill="#e4e4e7" font-size="13" font-family="system-ui, sans-serif">Auth Service</text>
+
+    <rect x="300" y="170" width="120" height="44" rx="8" fill="#0a0a0f" stroke="#22d3ee" stroke-width="2" />
+    <text x="360" y="197" text-anchor="middle" fill="#e4e4e7" font-size="13" font-family="system-ui, sans-serif">Memory Guard</text>
+
+    <rect x="560" y="170" width="120" height="44" rx="8" fill="#0a0a0f" stroke="#22d3ee" stroke-width="2" />
+    <text x="620" y="197" text-anchor="middle" fill="#e4e4e7" font-size="13" font-family="system-ui, sans-serif">Memory Store</text>
+
+    <line x1="420" y1="82" x2="560" y2="82" stroke="#22d3ee" stroke-width="2" marker-end="url(#arrowhead-spec-en)" />
+    <text x="490" y="75" text-anchor="middle" fill="#a1a1aa" font-size="10" font-family="system-ui, sans-serif">create / grant / revoke</text>
+
+    <line x1="560" y1="104" x2="300" y2="170" stroke="#22d3ee" stroke-width="2" marker-end="url(#arrowhead-spec-en)" />
+    <text x="470" y="155" text-anchor="middle" fill="#a1a1aa" font-size="10" font-family="system-ui, sans-serif">Capability Token</text>
+
+    <line x1="130" y1="130" x2="300" y2="192" stroke="#22d3ee" stroke-width="2" marker-end="url(#arrowhead-spec-en)" />
+    <text x="210" y="185" text-anchor="middle" fill="#a1a1aa" font-size="10" font-family="system-ui, sans-serif">HTTP + Authorization</text>
+
+    <line x1="420" y1="192" x2="560" y2="192" stroke="#22d3ee" stroke-width="2" marker-end="url(#arrowhead-spec-en)" />
+    <text x="490" y="215" text-anchor="middle" fill="#a1a1aa" font-size="10" font-family="system-ui, sans-serif">read / write (filtered)</text>
+  </svg>
 </div>
 
 ### 5.2 Flow

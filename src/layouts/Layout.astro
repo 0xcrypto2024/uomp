@@ -18,7 +18,7 @@ const nav = {
     roadmap: '路线图',
     github: 'GitHub',
     switch: 'EN',
-    footer: 'UOMP 是一个开放协议草案。欢迎通过 <a href="https://github.com/0xcrypto2024/uomp">GitHub</a> 参与讨论。',
+    footer: 'UOMP 是一个开放协议草案。欢迎通过 <a href="https://github.com/0xaicrypto/uomp">GitHub</a> 参与讨论。',
   },
   en: {
     home: 'Home',
@@ -27,7 +27,7 @@ const nav = {
     roadmap: 'Roadmap',
     github: 'GitHub',
     switch: '中文',
-    footer: 'UOMP is an open protocol draft. Join the discussion on <a href="https://github.com/0xcrypto2024/uomp">GitHub</a>.',
+    footer: 'UOMP is an open protocol draft. Join the discussion on <a href="https://github.com/0xaicrypto/uomp">GitHub</a>.',
   },
 };
 
@@ -37,6 +37,12 @@ const specHref = lang === 'zh' ? `${baseUrl}spec/` : `${baseUrl}en/spec/`;
 const designHref = lang === 'zh' ? `${baseUrl}design/` : `${baseUrl}en/design/`;
 const roadmapHref = lang === 'zh' ? `${baseUrl}roadmap/` : `${baseUrl}en/roadmap/`;
 const resolvedSwitchHref = switchHref ?? (lang === 'zh' ? `${baseUrl}en/` : baseUrl);
+
+const pathname = Astro.url.pathname;
+const isHome = pathname === baseUrl || pathname === `${baseUrl}en/` || pathname === `${baseUrl}index.html`;
+const isSpec = pathname.startsWith(`${baseUrl}spec/`) || pathname.startsWith(`${baseUrl}en/spec/`);
+const isDesign = pathname.startsWith(`${baseUrl}design/`) || pathname.startsWith(`${baseUrl}en/design/`);
+const isRoadmap = pathname.startsWith(`${baseUrl}roadmap/`) || pathname.startsWith(`${baseUrl}en/roadmap/`);
 ---
 
 <!DOCTYPE html>
@@ -55,11 +61,11 @@ const resolvedSwitchHref = switchHref ?? (lang === 'zh' ? `${baseUrl}en/` : base
           <span>UOMP</span>
         </a>
         <nav>
-          <a href={homeHref}>{t.home}</a>
-          <a href={specHref}>{t.spec}</a>
-          <a href={designHref}>{t.design}</a>
-          <a href={roadmapHref}>{t.roadmap}</a>
-          <a href="https://github.com/0xcrypto2024/uomp" target="_blank" rel="noopener">{t.github}</a>
+          <a href={homeHref} class={isHome ? 'active' : ''}>{t.home}</a>
+          <a href={specHref} class={isSpec ? 'active' : ''}>{t.spec}</a>
+          <a href={designHref} class={isDesign ? 'active' : ''}>{t.design}</a>
+          <a href={roadmapHref} class={isRoadmap ? 'active' : ''}>{t.roadmap}</a>
+          <a href="https://github.com/0xaicrypto/uomp" target="_blank" rel="noopener">{t.github}</a>
           <a href={resolvedSwitchHref} class="lang-switch">{t.switch}</a>
         </nav>
       </div>
@@ -70,12 +76,5 @@ const resolvedSwitchHref = switchHref ?? (lang === 'zh' ? `${baseUrl}en/` : base
     <footer>
       <div class="container" set:html={t.footer} />
     </footer>
-    <script>
-      import mermaid from 'mermaid';
-      mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
-      document.addEventListener('DOMContentLoaded', () => {
-        mermaid.run({ querySelector: '.mermaid' });
-      });
-    </script>
   </body>
 </html>

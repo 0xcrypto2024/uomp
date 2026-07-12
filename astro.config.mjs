@@ -3,8 +3,7 @@ import mdx from '@astrojs/mdx';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://0xcrypto2024.github.io',
-  base: '/uomp',
+  site: 'https://uomp.org',
   integrations: [mdx()],
   output: 'static',
   trailingSlash: 'always',

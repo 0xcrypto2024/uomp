@@ -1,0 +1,16 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { Content } from '../../content/spec/draft-00.en.md';
+import { baseUrl } from '../../utils/base.ts';
+---
+
+<Layout
+  title="UOMP Specification - User-Owned Memory Protocol"
+  description="UOMP protocol specification draft."
+  lang="en"
+  switchHref={`${baseUrl}spec/`}
+>
+  <div class="container spec-content">
+    <Content />
+  </div>
+</Layout>

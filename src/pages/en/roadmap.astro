@@ -1,0 +1,50 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { baseUrl } from '../../utils/base.ts';
+---
+
+<Layout
+  title="Roadmap - UOMP"
+  description="UOMP development roadmap from protocol draft to full ecosystem."
+  lang="en"
+  switchHref={`${baseUrl}roadmap/`}
+>
+  <section>
+    <div class="container">
+      <h1>Roadmap</h1>
+      <p>From protocol draft to a complete ecosystem.</p>
+
+      <h2>Milestone 1: Core Protocol & Reference Implementation</h2>
+      <ul class="roadmap-list">
+        <li><span class="status status-current">In Progress</span>Publish UOMP-Draft-00 specification</li>
+        <li><span class="status status-current">In Progress</span>SQLite-based Memory Store</li>
+        <li><span class="status status-current">In Progress</span>Auth Service HTTP API: create/grant/close/revoke sessions</li>
+        <li><span class="status status-current">In Progress</span>Memory Guard HTTP API: read-only access filtered by tag/key</li>
+        <li><span class="status status-current">In Progress</span>JWT Capability Token issuance and validation</li>
+        <li><span class="status status-current">In Progress</span>Token blacklist persistence in SQLite</li>
+        <li><span class="status status-current">In Progress</span><code>uom.json</code> Agent Manifest parsing</li>
+        <li><span class="status status-current">In Progress</span>DID / GPG / X.509 identity verification</li>
+        <li><span class="status status-current">In Progress</span>ERC8004-compatible Registry client</li>
+        <li><span class="status status-current">In Progress</span>TypeScript SDK (read-only)</li>
+      </ul>
+
+      <h2>Milestone 2: Writes & UX</h2>
+      <ul class="roadmap-list">
+        <li><span class="status status-next">Planned</span>Agent write staging: writes enter <code>pending</code> until user approval</li>
+        <li><span class="status status-next">Planned</span><code>uom memory review</code> approval command</li>
+        <li><span class="status status-next">Planned</span>Graphical authorization panel</li>
+        <li><span class="status status-next">Planned</span>Audit log visualization</li>
+        <li><span class="status status-next">Planned</span>Secure token delegation mode (reverse proxy)</li>
+      </ul>
+
+      <h2>Milestone 3: Remote & Advanced Features</h2>
+      <ul class="roadmap-list">
+        <li><span class="status status-future">Future</span>Remote Profile reference implementation (TLS 1.3 + mTLS)</li>
+        <li><span class="status status-future">Future</span>Semantic retrieval (<code>query</code> endpoint)</li>
+        <li><span class="status status-future">Future</span>Write version history and rollback</li>
+        <li><span class="status status-future">Future</span>Policy templates (e.g., "preferences only", "preferences + public identity")</li>
+        <li><span class="status status-future">Future</span>Blockchain anchoring for authorization and access events</li>
+      </ul>
+    </div>
+  </section>
+</Layout>

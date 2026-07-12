@@ -1,0 +1,100 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { baseUrl } from '../../utils/base.ts';
+---
+
+<Layout
+  title="UOMP - User-Owned Memory Protocol"
+  description="A user-sovereign authorization protocol for AI Agent memory access."
+  lang="en"
+  switchHref={baseUrl}
+>
+  <section class="hero">
+    <div class="container">
+      <span class="badge">Draft-00</span>
+      <h1>Your Memory, Your Authorization</h1>
+      <p>
+        UOMP (User-Owned Memory Protocol) is a user-sovereign authorization protocol that lets you
+        temporarily grant AI Agents access to your personal memory data—scoped by tag or key,
+        bound to a session, and automatically revoked when the session ends.
+      </p>
+      <div class="cta">
+        <a href={`${baseUrl}en/spec/`} class="btn btn-primary">Read the Spec</a>
+        <a href="https://github.com/0xcrypto2024/uomp" target="_blank" rel="noopener" class="btn btn-secondary">GitHub Discussions</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="alt">
+    <div class="container">
+      <h2>Why UOMP?</h2>
+      <p>
+        Today's AI Agents need access to vast amounts of personal data to provide personalized
+        service. Existing solutions usually require users to upload data to third-party servers,
+        which means users lose direct control, Agents may retain data indefinitely, and access is
+        hard to audit.
+      </p>
+      <p>
+        UOMP changes this: your memory stays on your device, and Agents only receive temporary,
+        minimal, auditable access.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2>Core Principles</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>User Sovereignty</h3>
+          <p>You always own and control your memory data. It never moves to an Agent provider.</p>
+        </div>
+        <div class="card">
+          <h3>Least Privilege</h3>
+          <p>Authorize by tag or exact key. Unauthorized data is inaccessible by default.</p>
+        </div>
+        <div class="card">
+          <h3>Session Isolation</h3>
+          <p>Each grant is bound to an independent session. Access ends when the session ends.</p>
+        </div>
+        <div class="card">
+          <h3>Auditable</h3>
+          <p>Every access is logged so you can see exactly what each Agent read or wrote.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="alt">
+    <div class="container">
+      <h2>How It Works</h2>
+      <ol>
+        <li><strong>Discover an Agent</strong>: Browse an Agent marketplace (e.g., an ERC8004-based registry).</li>
+        <li><strong>Review the Manifest</strong>: The Agent declares its identity and requested memory scope in <code>uom.json</code>.</li>
+        <li><strong>Connect & Authorize</strong>: You confirm the scope, and the Auth Service issues a short-lived Capability Token.</li>
+        <li><strong>Access Data</strong>: The Agent accesses Memory Guard within the authorized scope.</li>
+        <li><strong>Disconnect</strong>: The session ends or you revoke it, and the token becomes invalid immediately.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2>Who Is UOMP For?</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Users</h3>
+          <p>Regain control over personal data and know exactly which Agents accessed what.</p>
+        </div>
+        <div class="card">
+          <h3>Agent Developers</h3>
+          <p>Access user-authorized data through a standard protocol without building your own store.</p>
+        </div>
+        <div class="card">
+          <h3>Protocol Researchers</h3>
+          <p>Help design an open, decentralized authorization standard for Agent memory.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>

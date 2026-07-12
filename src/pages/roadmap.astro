@@ -1,8 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { baseUrl } from '../utils/base.ts';
 ---
 
-<Layout title="路线图 - UOMP">
+<Layout title="路线图 - UOMP" switchHref={`${baseUrl}en/roadmap/`}>
   <section>
     <div class="container">
       <h1>路线图</h1>

@@ -78,7 +78,7 @@ a {
   position: sticky;
   top: 0;
   z-index: 100;
-  padding: 14px 0;
+  padding: 16px 0;
   pointer-events: none;
   display: flex;
   justify-content: center;
@@ -86,8 +86,9 @@ a {
 
 nav {
   pointer-events: all;
-  height: 54px;
-  background: rgba(255, 255, 255, 0.92);
+  position: relative;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1.5px solid var(--border2);
@@ -95,9 +96,11 @@ nav {
   box-shadow: var(--shadow);
   display: flex;
   align-items: center;
-  padding: 4px 6px 4px 4px;
-  gap: 2px;
-  width: min(900px, calc(100vw - 32px));
+  justify-content: space-between;
+  padding: 4px 6px 4px 6px;
+  gap: 8px;
+  width: min(840px, calc(100vw - 32px));
+  margin: 0 auto;
 }
 
 .nav-logo {
@@ -111,9 +114,8 @@ nav {
   text-decoration: none;
   letter-spacing: -0.3px;
   flex-shrink: 0;
-  padding: 0 16px 0 8px;
+  padding: 0 14px 0 6px;
   border-right: 1px solid var(--border);
-  margin-right: 4px;
   height: 100%;
 }
 
@@ -122,10 +124,10 @@ nav {
 }
 
 .nav-lm {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   background: var(--ink);
-  border-radius: 7px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -133,27 +135,30 @@ nav {
 }
 
 .nav-lm svg {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
 }
 
 .nav-links {
   display: flex;
-  gap: 0;
+  gap: 2px;
   list-style: none;
-  flex: 1;
   margin: 0;
   padding: 0;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .nav-links a {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--mid);
   text-decoration: none;
-  padding: 7px 14px;
+  padding: 8px 16px;
   border-radius: 100px;
   transition: color 0.15s, background 0.15s;
+  white-space: nowrap;
 }
 
 .nav-links a:hover,
@@ -164,12 +169,13 @@ nav {
 
 .nav-r {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .btn-ng {
-  padding: 7px 14px;
+  padding: 8px 16px;
   border: 1.5px solid var(--border2);
   background: transparent;
   color: var(--mid);
@@ -179,6 +185,7 @@ nav {
   cursor: pointer;
   text-decoration: none;
   transition: 0.15s;
+  white-space: nowrap;
 }
 
 .btn-ng:hover {
@@ -187,7 +194,7 @@ nav {
 }
 
 .btn-np {
-  padding: 8px 18px;
+  padding: 9px 18px;
   background: var(--ink);
   color: #fff;
   border-radius: 100px;
@@ -200,6 +207,7 @@ nav {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  white-space: nowrap;
 }
 
 .btn-np:hover {
@@ -700,29 +708,29 @@ footer {
 .footer-logo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-family: var(--font-serif);
-  font-size: 17px;
+  font-size: 22px;
   color: #fff;
   text-decoration: none;
   font-weight: 400;
-  letter-spacing: -0.3px;
-  margin-bottom: 12px;
+  letter-spacing: -0.4px;
+  margin-bottom: 14px;
 }
 
 .footer-lm {
-  width: 26px;
-  height: 26px;
+  width: 34px;
+  height: 34px;
   background: rgba(255, 255, 255, 0.15);
-  border-radius: 7px;
+  border-radius: 9px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .footer-lm svg {
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
 }
 
 .footer-brand p {
@@ -979,12 +987,14 @@ footer {
   }
 
   nav {
-    justify-content: space-between;
+    justify-content: center;
+    gap: 12px;
+    width: min(640px, calc(100vw - 32px));
   }
 
   .nav-logo {
     border-right: none;
-    margin-right: 0;
+    padding-left: 0;
   }
 
   .grid {

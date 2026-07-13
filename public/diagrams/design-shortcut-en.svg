@@ -1,19 +1,19 @@
 <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="UOMP local development shortcut sequence diagram">
   <defs>
     <marker id="shortcut-arrow-en" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#0A0A0A"/></marker>
-    <marker id="shortcut-return-en" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#6B7280"/></marker>
+    <marker id="shortcut-return-en" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#0A0A0A"/></marker>
   </defs>
   <rect x="30" y="20" width="120" height="36" rx="8" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="2"/><text x="90" y="43" text-anchor="middle" fill="#0A0A0A" font-size="12" font-family="Inter, system-ui, sans-serif">uomp CLI</text>
-  <line x1="90" y1="56" x2="90" y2="290" stroke="#D4D4D0" stroke-width="2" stroke-dasharray="4 4"/>
+  <line x1="90" y1="56" x2="90" y2="290" stroke="#9CA3AF" stroke-width="2" stroke-dasharray="4 4"/>
   <rect x="190" y="20" width="120" height="36" rx="8" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="2"/><text x="250" y="43" text-anchor="middle" fill="#0A0A0A" font-size="12" font-family="Inter, system-ui, sans-serif">Auth Service</text>
-  <line x1="250" y1="56" x2="250" y2="290" stroke="#D4D4D0" stroke-width="2" stroke-dasharray="4 4"/>
+  <line x1="250" y1="56" x2="250" y2="290" stroke="#9CA3AF" stroke-width="2" stroke-dasharray="4 4"/>
   <rect x="350" y="20" width="120" height="36" rx="8" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="2"/><text x="410" y="43" text-anchor="middle" fill="#0A0A0A" font-size="12" font-family="Inter, system-ui, sans-serif">Memory Guard</text>
-  <line x1="410" y1="56" x2="410" y2="290" stroke="#D4D4D0" stroke-width="2" stroke-dasharray="4 4"/>
+  <line x1="410" y1="56" x2="410" y2="290" stroke="#9CA3AF" stroke-width="2" stroke-dasharray="4 4"/>
   <rect x="510" y="20" width="120" height="36" rx="8" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="2"/><text x="570" y="43" text-anchor="middle" fill="#0A0A0A" font-size="12" font-family="Inter, system-ui, sans-serif">Agent (child)</text>
-  <line x1="570" y1="56" x2="570" y2="290" stroke="#D4D4D0" stroke-width="2" stroke-dasharray="4 4"/>
-  <path d="M90 80 L110 80 L110 100 L90 100" fill="none" stroke="#0A0A0A" stroke-width="2" marker-end="url(#shortcut-arrow-en)"/><text x="115" y="95" text-anchor="start" fill="#6B7280" font-size="10" font-family="Inter, system-ui, sans-serif">Read uom.json</text>
-  <line x1="90" y1="140" x2="250" y2="140" stroke="#0A0A0A" stroke-width="2" marker-end="url(#shortcut-arrow-en)"/><text x="170" y="135" text-anchor="middle" fill="#6B7280" font-size="10" font-family="Inter, system-ui, sans-serif">create &amp; grant</text>
-  <line x1="250" y1="180" x2="90" y2="180" stroke="#6B7280" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#shortcut-return-en)"/><text x="170" y="175" text-anchor="middle" fill="#6B7280" font-size="10" font-family="Inter, system-ui, sans-serif">UOM_TOKEN</text>
-  <line x1="90" y1="220" x2="410" y2="220" stroke="#0A0A0A" stroke-width="2" marker-end="url(#shortcut-arrow-en)"/><text x="250" y="215" text-anchor="middle" fill="#6B7280" font-size="10" font-family="Inter, system-ui, sans-serif">Start local Guard</text>
-  <line x1="90" y1="260" x2="570" y2="260" stroke="#0A0A0A" stroke-width="2" marker-end="url(#shortcut-arrow-en)"/><text x="330" y="255" text-anchor="middle" fill="#6B7280" font-size="10" font-family="Inter, system-ui, sans-serif">Spawn child + inject Token</text>
+  <line x1="570" y1="56" x2="570" y2="290" stroke="#9CA3AF" stroke-width="2" stroke-dasharray="4 4"/>
+  <path d="M90 80 L110 80 L110 100 L90 100" fill="none" stroke="#0A0A0A" stroke-width="2" marker-end="url(#shortcut-arrow-en)"/><text x="115" y="95" text-anchor="start" fill="#0A0A0A" font-size="10" font-family="Inter, system-ui, sans-serif">Read uom.json</text>
+  <line x1="90" y1="140" x2="250" y2="140" stroke="#0A0A0A" stroke-width="2" marker-end="url(#shortcut-arrow-en)"/><text x="170" y="135" text-anchor="middle" fill="#0A0A0A" font-size="10" font-family="Inter, system-ui, sans-serif">create &amp; grant</text>
+  <line x1="250" y1="180" x2="90" y2="180" stroke="#0A0A0A" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#shortcut-return-en)"/><text x="170" y="175" text-anchor="middle" fill="#0A0A0A" font-size="10" font-family="Inter, system-ui, sans-serif">UOM_TOKEN</text>
+  <line x1="90" y1="220" x2="410" y2="220" stroke="#0A0A0A" stroke-width="2" marker-end="url(#shortcut-arrow-en)"/><text x="250" y="215" text-anchor="middle" fill="#0A0A0A" font-size="10" font-family="Inter, system-ui, sans-serif">Start local Guard</text>
+  <line x1="90" y1="260" x2="570" y2="260" stroke="#0A0A0A" stroke-width="2" marker-end="url(#shortcut-arrow-en)"/><text x="330" y="255" text-anchor="middle" fill="#0A0A0A" font-size="10" font-family="Inter, system-ui, sans-serif">Spawn child + inject Token</text>
 </svg>

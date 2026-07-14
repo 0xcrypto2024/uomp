@@ -39,7 +39,9 @@
 4. 他用 uomp connect 验证这个 Agent 的身份和声明。
 5. 他用 uomp authorize 授权 stock-analyst 读取持仓和风险偏好。
 6. CLI 给他一段 export UOM_TOKEN=... 命令。
-7. 小王把这段命令复制到自己启动 Agent 的终端里。
+7. 小王把这段命令复制到**运行 Agent 的终端里**。
+   - Phase 1 的示例通常在本机运行 Agent，但 CLI/SDK 的设计不假设 Agent 和用户必须在同一台机器上。
+   - 如果 Agent 运行在远程服务器，用户需要把 `UOM_TOKEN` 和 `UOMP_BASE_URL` 复制到远程环境，并确保远程能访问 Memory Guard。
 8. Agent 启动后：
      - 通过 SDK 读取 portfolio:holdings 和 profile:risk
      - 通过 SDK 调用 Yahoo Finance / Alpha Vantage 获取公开数据
@@ -109,7 +111,18 @@
 
 **填补**：用户 CLI 只保留 `discover`、`connect`、`authorize`。启动 Agent 是用户自己的行为，CLI 只输出 Token。开发者才有 `uomp agent run`。
 
-### 4.2 缺口 2：导入命令必须通用且支持字段映射
+### 4.2 缺口 1.5：CLI 不应假设 Agent 和用户在同一台机器上
+
+**问题**：如果 CLI/SDK 的设计假设 Agent 必须运行在本机，就无法支持远程 Agent 服务（如云上部署的股票分析服务）。
+
+**填补**：
+
+- Token 交付方式是位置无关的：CLI 只输出 `UOM_TOKEN` 和 `UOMP_BASE_URL`，用户可以把它们复制到任何运行 Agent 的终端或环境中。
+- `UOMP_BASE_URL` 默认是 `http://127.0.0.1:9374`，但用户可以配置为远程 Guard 端点。
+- 远程场景下，用户需要自己负责把 Memory Guard 暴露给 Agent（例如通过反向隧道、自托管网关或 Remote Profile）。
+- Phase 1 示例为方便起见让 Agent 运行在本机，但协议和 CLI/SDK 设计不限制 Agent 位置。
+
+### 4.3 缺口 2：导入命令必须通用且支持字段映射
 
 **问题**：持仓 CSV 来自不同券商，列名不统一（`股票代码`、`symbol`、`Code` 等）。如果 import 命令要求严格格式，用户无法使用。
 
@@ -119,7 +132,7 @@
 - `--tag` / `--sensitivity` 显式标记
 - 多种格式（CSV/JSON）
 
-### 4.3 缺口 3：授权前需要字段级摘要
+### 4.4 缺口 3：授权前需要字段级摘要
 
 **问题**：如果只告诉用户“Agent 要读 portfolio:holdings”，用户不知道 Agent 会读到成本价、股数等敏感字段。
 
@@ -132,7 +145,7 @@ portfolio:holdings（8 条记录）
   脱敏选项: 仅保留 symbol 和 weight
 ```
 
-### 4.4 缺口 4：Token 交付方式要明确
+### 4.5 缺口 4：Token 交付方式要明确
 
 **问题**：如果 CLI 自动把 Token 注入 Agent 进程，用户会失去对 Token 流向的感知。
 
@@ -140,7 +153,7 @@ portfolio:holdings（8 条记录）
 - 终端打印 `export` 命令，用户手动复制。
 - `--output` 保存到 `.env` 文件，用户手动 `source`。
 
-### 4.5 缺口 5：Agent SDK 需要市场数据封装
+### 4.6 缺口 5：Agent SDK 需要市场数据封装
 
 **问题**：股票 Agent 需要调用 Yahoo Finance / Alpha Vantage 等公开 API。如果每个 Agent 都自己写一遍，开发成本高。
 
@@ -149,13 +162,13 @@ portfolio:holdings（8 条记录）
 - Agent 不能把用户持仓作为参数传给外部 API。
 - 最终分析逻辑在本地完成。
 
-### 4.6 缺口 6：输出报告默认保存到本地文件
+### 4.7 缺口 6：输出报告默认保存到本地文件
 
 **问题**：如果 Agent 把分析报告写回 Memory Store，会增加授权复杂度和泄露风险。
 
 **填补**：MVP 阶段 Agent 不应写入 Memory Store。SDK 提供 `agent.output.save(path, content)`，直接保存到用户本地文件。
 
-### 4.7 缺口 7：会话监控需要足够信息
+### 4.8 缺口 7：会话监控需要足够信息
 
 **问题**：用户授权后需要知道 Agent 是否真的在访问、访问了什么。
 
@@ -518,6 +531,12 @@ Agent 自行通过 SDK `market.*` 调用外部 API：
 - 用户通过手机、浏览器或轻量 CLI 授权。
 - Agent 运行在云端或第三方服务器。
 - Agent 不跟用户设备处于同一本地网络。
+
+值得强调的是，CLI/SDK 的设计从第一阶段就不假设 Agent 和用户同机：
+
+- `uomp authorize` 只输出 Token 和 Guard URL，不替用户启动 Agent。
+- Token 交付方式（终端打印 / 文件保存）与 Agent 所在位置无关。
+- Agent 只要能访问 `UOMP_BASE_URL`，就可以运行在任何地方。
 
 这要求 UOMP 支持 Remote Profile：
 

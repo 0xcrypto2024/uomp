@@ -515,15 +515,141 @@ If any check fails, MUST return `ACCESS_DENIED` and record an audit log.
 - Agents MUST NOT write any Memory Items during the MVP phase.
 - After Milestone 2 introduces Staging writes, Agent writes to high-sensitivity items MUST still be rejected.
 
-## 12. Session
+## 12. Memory Import Format
 
-### 12.1 States
+### 12.1 Overview
+
+UOMP defines not only how Agents access Memory, but also how users populate the Memory Store from external data sources. A standard import format allows data from CSV, JSON, database exports, and other sources to be mapped unambiguously to Memory Items.
+
+### 12.2 Design Goals
+
+- **Generality**: Not tied to any specific application domain.
+- **Simplicity**: Ordinary users can import using CSV or JSON directly.
+- **Extensibility**: Implementations may define field aliases and mapping rules.
+- **Security**: The tag and sensitivity of imported data must be explicit.
+
+### 12.3 Supported Input Formats
+
+- **CSV**: UTF-8 encoded, first row is a header, comma-separated.
+- **JSON**: A single object or an array of objects.
+
+### 12.4 CSV Format Requirements
+
+1. The file MUST be UTF-8 encoded.
+2. The first row MUST be a header row.
+3. The delimiter SHOULD be a comma; implementations MAY support other delimiters.
+4. Field values containing the delimiter MUST be wrapped in double quotes.
+5. Empty lines SHOULD be ignored.
+6. Numeric fields SHOULD NOT contain currency symbols or thousand separators; implementations MAY clean them automatically.
+7. Date fields SHOULD be ISO8601; implementations MAY recognize common formats and convert them.
+
+### 12.5 JSON Format Requirements
+
+1. The root node MAY be a single object or an array of objects.
+2. Each object MAY contain:
+   - `key` (string)
+   - `value` (object)
+   - `tags` (string or string array)
+   - `sensitivity` (`low` | `medium` | `high`)
+   - `source` (string)
+   - `description` (string)
+   - `created_at` / `updated_at` (ISO8601)
+
+If `value` is omitted, all non-reserved top-level fields are treated as `value.*`.
+
+### 12.6 Reserved Fields
+
+The following top-level fields have protocol meaning and are NOT part of `value`:
+
+- `key`
+- `tags`
+- `sensitivity`
+- `source`
+- `description`
+- `created_at`
+- `updated_at`
+
+All other top-level fields belong to `value`.
+
+### 12.7 Field Mapping
+
+Implementations SHOULD support canonical field aliases:
+
+| Memory Item Field | Canonical Aliases |
+|-------------------|-------------------|
+| `key` | `key`, `id`, `item_id`, `record_id` |
+| `tags` | `tags`, `tag` |
+| `sensitivity` | `sensitivity`, `level` |
+| `source` | `source`, `origin` |
+| `description` | `description`, `desc` |
+| `created_at` | `created_at`, `created` |
+| `updated_at` | `updated_at`, `updated` |
+
+Implementations MAY support locale-specific aliases (e.g., Chinese names) and user-defined mappings via `--map` or equivalent configuration.
+
+### 12.8 Sensitivity
+
+Imported data MUST have an explicit sensitivity. If the input does not specify sensitivity, the import tool MUST either:
+
+1. Require the user to specify it via CLI/GUI, or
+2. Refuse the import.
+
+Implementations MAY provide application-specific default sensitivity based on tag, but such defaults MUST be clearly communicated to the user.
+
+### 12.9 Validation
+
+Before writing to the Memory Store, the import tool MUST validate:
+
+1. `key` is present and non-empty for every record.
+2. `key` is unique within the target tag (unless `--replace` is specified).
+3. `sensitivity` is one of `low`, `medium`, `high`.
+4. `tags` is non-empty.
+5. `created_at` and `updated_at`, if present, are valid ISO8601 timestamps.
+
+### 12.10 Examples
+
+#### CSV Example
+
+```csv
+key,tags,sensitivity,value.title,value.content
+note-1,notes,low,Shopping list,Buy milk
+contact-1,contacts,medium,Alice,alice@example.com
+```
+
+#### JSON Example
+
+```json
+[
+  {
+    "key": "note-1",
+    "tags": ["notes"],
+    "sensitivity": "low",
+    "value": {
+      "title": "Shopping list",
+      "content": "Buy milk"
+    }
+  },
+  {
+    "key": "contact-1",
+    "tags": ["contacts"],
+    "sensitivity": "medium",
+    "value": {
+      "name": "Alice",
+      "email": "alice@example.com"
+    }
+  }
+]
+```
+
+## 13. Session
+
+### 13.1 States
 
 ```
 [created] --grant--> [active] --close/timeout/revoke--> [closed/expired/revoked]
 ```
 
-### 12.2 Fields
+### 13.2 Fields
 
 ```json
 {
@@ -538,23 +664,23 @@ If any check fails, MUST return `ACCESS_DENIED` and record an audit log.
 }
 ```
 
-### 12.3 Multi-Session Support
+### 13.3 Multi-Session Support
 
 UOMP MUST support multiple independent Sessions existing simultaneously. Each Session has its own Token and lifecycle. Access from different Sessions MUST be audited independently.
 
-### 12.4 Real-Time Revocation
+### 13.4 Real-Time Revocation
 
 After a Session is revoked, the corresponding Token MUST become invalid immediately. The Auth Service MUST add the Token to the persistent blacklist, and Memory Guard MUST check the blacklist on every request.
 
-## 13. Local Profile
+## 14. Local Profile
 
-### 13.1 Requirements
+### 14.1 Requirements
 
 - Memory Guard MUST listen on `127.0.0.1:9374` by default.
 - Memory Guard MUST NOT bind to `0.0.0.0` or public interfaces by default.
 - The Token's `profile` claim MUST be `"local"` under Local Profile.
 
-### 13.2 Token Delivery
+### 14.2 Token Delivery
 
 In the Local Profile, the Token is issued by the Auth Service / CLI on the user's machine and injected into the Agent process via environment variables:
 
@@ -569,13 +695,13 @@ uom-calendar-agent
 
 The user UI (e.g. CLI) runs on the same host as the Memory Store / Guard, performs identity verification and authorization, issues the Token, and only then hands the Token to the Agent. The Agent itself does not participate in authorization decisions.
 
-## 14. Remote Profile
+## 15. Remote Profile
 
-### 14.1 Overview
+### 15.1 Overview
 
 Remote Profile allows Agents not running on the user's machine to access Memory Guard. UOMP defines security requirements but does not mandate a specific connection mode.
 
-### 14.2 Security Requirements
+### 15.2 Security Requirements
 
 Remote Profile implementations MUST satisfy:
 
@@ -586,7 +712,7 @@ Remote Profile implementations MUST satisfy:
 5. Token lifetime SHOULD not exceed 10 minutes.
 6. The user MUST explicitly enable Remote Profile.
 
-### 14.3 Connection Modes
+### 15.3 Connection Modes
 
 Remote Profile supports but is not limited to the following modes:
 
@@ -596,13 +722,13 @@ Remote Profile supports but is not limited to the following modes:
 
 Specific modes are chosen by the implementation; the protocol does not mandate them.
 
-## 15. Agent Identity Verification
+## 16. Agent Identity Verification
 
-### 15.1 Overview
+### 16.1 Overview
 
 UOMP supports multiple Agent publisher identity verification mechanisms. Identity verification is performed by the **UI/CLI on the user's machine**; the Agent process itself does not perform identity verification and must not have access to user private keys or authorization decisions.
 
-### 15.2 Supported Methods
+### 16.2 Supported Methods
 
 | Method | Description |
 |--------|-------------|
@@ -611,26 +737,26 @@ UOMP supports multiple Agent publisher identity verification mechanisms. Identit
 | X.509 | Publisher signs with a CA-issued certificate. |
 | Registry | Verification status provided by registries such as ERC8004. |
 
-### 15.3 Verification Process
+### 16.3 Verification Process
 
 1. The UI/CLI on the user's machine reads the `identity` field in `uom.json`.
 2. Select the verification method according to `verification_methods`.
 3. Verify the signature or proof of `uom.json`.
 4. Present the result to the user; only after user confirmation may a Session be created and a Token issued.
 
-### 15.4 Trust Policy
+### 16.4 Trust Policy
 
 - Users MAY configure a trust list: trusted DIDs, GPG Key IDs, CAs, Registries.
 - Agents that fail identity verification MAY be allowed to run, but the authorization panel on the user's machine MUST prompt "unverified publisher".
 - Enterprise deployments MAY mandate specific verification methods; Agents that fail verification MUST NOT receive a Token.
 
-## 16. Agent Registry
+## 17. Agent Registry
 
-### 16.1 Overview
+### 17.1 Overview
 
 UOMP core protocol does not define an Agent Registry. Protocol reference implementations MAY support existing registry standards such as ERC8004.
 
-### 16.2 Registry Client
+### 17.2 Registry Client
 
 The MVP reference implementation SHOULD provide the following CLI commands:
 
@@ -641,14 +767,14 @@ uom registry install <agent_id>
 
 Registry clients MUST return Agent metadata and `uom.json` location but MUST NOT participate in authorization decisions.
 
-### 16.3 Registry Independence
+### 17.3 Registry Independence
 
 - Users MUST be able to install and run Agents without using a Registry.
 - Authorization decisions MUST always be made locally by the user.
 
-## 17. Audit and Logging
+## 18. Audit and Logging
 
-### 17.1 Audit Log Entry
+### 18.1 Audit Log Entry
 
 ```json
 {
@@ -667,7 +793,7 @@ Registry clients MUST return Agent metadata and `uom.json` location but MUST NOT
 }
 ```
 
-### 17.2 Required Fields
+### 18.2 Required Fields
 
 Each audit log MUST contain:
 
@@ -679,49 +805,49 @@ Each audit log MUST contain:
 - `allowed`
 - `reason`
 
-### 17.3 Storage
+### 18.3 Storage
 
 - Audit logs MUST be stored separately from the Memory Store.
 - Audit log retention MUST be configurable, default 90 days.
 - Audit logs SHOULD be encrypted to prevent Agent tampering.
 
-### 17.4 Blockchain Extension
+### 18.4 Blockchain Extension
 
 Future extensions MAY anchor authorization and access event summaries to a blockchain for immutable audit proof. The protocol itself does not mandate a specific chain.
 
-## 18. Security Considerations
+## 19. Security Considerations
 
-### 18.1 Token Security
+### 19.1 Token Security
 
 - Capability Tokens MUST be signed by the Auth Service's private key.
 - Tokens SHOULD use short lifetimes (default 30 minutes, 10 minutes for Remote Profile).
 - Tokens MUST NOT be persisted to locations freely accessible by the Agent.
 
-### 18.2 Memory Store Security
+### 19.2 Memory Store Security
 
 - Memory Store SHOULD be encrypted.
 - High-sensitivity data SHOULD be additionally encrypted.
 
-### 18.3 Communication Security
+### 19.3 Communication Security
 
 - Local Profile uses HTTP over localhost.
 - Remote Profile MUST use TLS 1.3 + mTLS.
 - SDKs MUST NOT log Tokens.
 
-### 18.4 Agent Write Restrictions
+### 19.4 Agent Write Restrictions
 
 - Agents MUST NOT write Memory during the MVP phase.
 - After Milestone 2 introduces Staging writes, Agent writes MUST be confirmed by the user before taking effect.
 - Agents MUST NOT write `sensitivity=high` Memory Items.
 
-## 19. Privacy Considerations
+## 20. Privacy Considerations
 
 - UOMP aims to minimize the scope of data accessed by Agents.
 - Users SHOULD be able to view and revoke any active Session.
 - Audit logs SHOULD help users understand what data Agents accessed.
 - Memory Guard SHOULD avoid returning any data outside the authorized scope, including existence information.
 
-## 20. Future Work
+## 21. Future Work
 
 - Agent write Staging mechanism.
 - Semantic retrieval (`query` endpoint).
@@ -730,7 +856,7 @@ Future extensions MAY anchor authorization and access event summaries to a block
 - Remote Profile reference implementation.
 - Blockchain audit anchoring.
 
-## 21. References
+## 22. References
 
 - [RFC 2119] Key words for use in RFCs to Indicate Requirement Levels
 - [RFC 7519] JSON Web Token (JWT)

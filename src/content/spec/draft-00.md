@@ -515,15 +515,141 @@ Memory Guard MUST 按以下顺序判定访问权限：
 - Agent 在 MVP 阶段 MUST NOT 写入任何 Memory Item。
 - Milestone 2 引入 Staging 写入后，Agent 写入高敏感项仍 MUST 被拒绝。
 
-## 12. Session
+## 12. Memory Import Format
 
-### 12.1 States
+### 12.1 Overview
+
+UOMP 不仅定义了 Agent 如何访问 Memory，也定义了用户如何把外部数据导入 Memory Store。统一的导入格式让不同数据源（CSV、JSON、数据库导出等）能够无歧义地映射为 Memory Item。
+
+### 12.2 Design Goals
+
+- **通用性**：不绑定任何具体应用场景。
+- **简单性**：普通用户可以用 CSV/JSON 直接导入。
+- **可扩展性**：允许实现者定义字段别名和映射规则。
+- **安全性**：导入时必须明确指定 tag 和 sensitivity。
+
+### 12.3 Supported Input Formats
+
+- **CSV**：UTF-8 编码，第一行为表头，逗号分隔。
+- **JSON**：单个对象或对象数组。
+
+### 12.4 CSV Format Requirements
+
+1. 文件编码 MUST be UTF-8。
+2. 第一行 MUST be 表头。
+3. 分隔符 SHOULD be 英文逗号；实现 MAY 支持其他分隔符。
+4. 字段值包含分隔符时 MUST 用双引号包裹。
+5. 空行 SHOULD be 忽略。
+6. 数值字段 SHOULD NOT 包含货币符号或千分位符号；实现 MAY 自动清洗。
+7. 日期字段 SHOULD be ISO8601；实现 MAY 识别常见格式并转换。
+
+### 12.5 JSON Format Requirements
+
+1. 根节点 MAY be 单个对象或对象数组。
+2. 每个对象 MAY contain：
+   - `key` (string)
+   - `value` (object)
+   - `tags` (string or string array)
+   - `sensitivity` (`low` | `medium` | `high`)
+   - `source` (string)
+   - `description` (string)
+   - `created_at` / `updated_at` (ISO8601)
+
+If `value` is omitted, all non-reserved top-level fields are treated as `value.*`.
+
+### 12.6 Reserved Fields
+
+The following top-level fields have protocol meaning and are NOT part of `value`：
+
+- `key`
+- `tags`
+- `sensitivity`
+- `source`
+- `description`
+- `created_at`
+- `updated_at`
+
+All other top-level fields belong to `value`.
+
+### 12.7 Field Mapping
+
+Implementations SHOULD support canonical field aliases：
+
+| Memory Item Field | Canonical Aliases |
+|-------------------|-------------------|
+| `key` | `key`, `id`, `item_id`, `record_id` |
+| `tags` | `tags`, `tag` |
+| `sensitivity` | `sensitivity`, `level` |
+| `source` | `source`, `origin` |
+| `description` | `description`, `desc` |
+| `created_at` | `created_at`, `created` |
+| `updated_at` | `updated_at`, `updated` |
+
+Implementations MAY support locale-specific aliases (e.g., Chinese names) and user-defined mappings via `--map` or equivalent configuration.
+
+### 12.8 Sensitivity
+
+Imported data MUST have an explicit sensitivity. If the input does not specify sensitivity, the import tool MUST either：
+
+1. Require the user to specify it via CLI/GUI, or
+2. Refuse the import.
+
+Implementations MAY provide application-specific default sensitivity based on tag, but such defaults MUST be clearly communicated to the user.
+
+### 12.9 Validation
+
+Before writing to Memory Store, the import tool MUST validate：
+
+1. `key` is present and non-empty for every record.
+2. `key` is unique within the target tag (unless `--replace` is specified).
+3. `sensitivity` is one of `low`, `medium`, `high`.
+4. `tags` is non-empty.
+5. `created_at` and `updated_at`, if present, are valid ISO8601 timestamps.
+
+### 12.10 Examples
+
+#### CSV Example
+
+```csv
+key,tags,sensitivity,value.title,value.content
+note-1,notes,low,Shopping list,Buy milk
+contact-1,contacts,medium,Alice,alice@example.com
+```
+
+#### JSON Example
+
+```json
+[
+  {
+    "key": "note-1",
+    "tags": ["notes"],
+    "sensitivity": "low",
+    "value": {
+      "title": "Shopping list",
+      "content": "Buy milk"
+    }
+  },
+  {
+    "key": "contact-1",
+    "tags": ["contacts"],
+    "sensitivity": "medium",
+    "value": {
+      "name": "Alice",
+      "email": "alice@example.com"
+    }
+  }
+]
+```
+
+## 13. Session
+
+### 13.1 States
 
 ```
 [created] --grant--> [active] --close/timeout/revoke--> [closed/expired/revoked]
 ```
 
-### 12.2 Fields
+### 13.2 Fields
 
 ```json
 {
@@ -538,23 +664,23 @@ Memory Guard MUST 按以下顺序判定访问权限：
 }
 ```
 
-### 12.3 Multi-Session Support
+### 13.3 Multi-Session Support
 
 UOMP MUST 支持多个独立 Session 同时存在。每个 Session 拥有独立的 Token 和生命周期。不同 Session 的访问 MUST 独立审计。
 
-### 12.4 Real-Time Revocation
+### 13.4 Real-Time Revocation
 
 Session 撤销后，对应 Token MUST 立即失效。Auth Service MUST 将 Token 加入持久化黑名单，Memory Guard 每次收到请求 MUST 先检查黑名单。
 
-## 13. Local Profile
+## 14. Local Profile
 
-### 13.1 Requirements
+### 14.1 Requirements
 
 - Memory Guard MUST 默认监听 `127.0.0.1:9374`。
 - Memory Guard MUST NOT 默认绑定到 `0.0.0.0` 或公网接口。
 - Local Profile 下的 Token `profile` claim MUST 为 `"local"`。
 
-### 13.2 Token Delivery
+### 14.2 Token Delivery
 
 在 Local Profile 中，Token 由用户本机的 Auth Service/CLI 签发，并通过环境变量注入 Agent 进程：
 
@@ -569,13 +695,13 @@ uom-calendar-agent
 
 用户 UI（如 CLI）运行在 Memory Store / Guard 所在主机上，负责完成身份验证、授权、Token 签发，再把 Token 交给 Agent。Agent 本身不参与授权决策。
 
-## 14. Remote Profile
+## 15. Remote Profile
 
-### 14.1 Overview
+### 15.1 Overview
 
 Remote Profile 允许 Agent 不在用户本机运行时访问 Memory Guard。UOMP 协议定义安全要求，但不强制具体连接模式。
 
-### 14.2 Security Requirements
+### 15.2 Security Requirements
 
 Remote Profile 实现 MUST 满足：
 
@@ -586,7 +712,7 @@ Remote Profile 实现 MUST 满足：
 5. Token 有效期 SHOULD 不超过 10 分钟。
 6. 用户必须显式开启 Remote Profile。
 
-### 14.3 Connection Modes
+### 15.3 Connection Modes
 
 Remote Profile 支持但不限于以下模式：
 
@@ -596,13 +722,13 @@ Remote Profile 支持但不限于以下模式：
 
 具体模式由实现选择，协议不做强制要求。
 
-## 15. Agent Identity Verification
+## 16. Agent Identity Verification
 
-### 15.1 Overview
+### 16.1 Overview
 
 UOMP 支持多种 Agent 发布者身份验证机制。身份验证由**用户本机上的 UI/CLI** 执行，Agent 进程本身不参与身份验证，也不应接触用户私钥或授权决策。
 
-### 15.2 Supported Methods
+### 16.2 Supported Methods
 
 | 方法 | 说明 |
 |------|------|
@@ -611,26 +737,26 @@ UOMP 支持多种 Agent 发布者身份验证机制。身份验证由**用户本
 | X.509 | 发布者使用 CA 签发的证书签名。 |
 | Registry | ERC8004 等 Registry 提供的验证状态。 |
 
-### 15.3 Verification Process
+### 16.3 Verification Process
 
 1. 用户本机的 UI/CLI 读取 `uom.json` 中的 `identity` 字段。
 2. 根据 `verification_methods` 选择验证方式。
 3. 验证 `uom.json` 的签名或证明。
 4. 验证结果展示给用户；只有用户确认后才允许创建 Session 并签发 Token。
 
-### 15.4 Trust Policy
+### 16.4 Trust Policy
 
 - 用户 MAY 配置信任列表：信任的 DID、GPG Key ID、CA、Registry。
 - 未通过身份验证的 Agent MAY 被允许运行，但用户本机的授权面板 MUST 提示"未验证发布者"。
 - 企业部署 MAY 强制要求特定验证方式，未通过验证的 Agent MUST NOT 获得 Token。
 
-## 16. Agent Registry
+## 17. Agent Registry
 
-### 16.1 Overview
+### 17.1 Overview
 
 UOMP 核心协议不定义 Agent Registry。协议参考实现 MAY 支持现有 Registry 标准，如 ERC8004。
 
-### 16.2 Registry Client
+### 17.2 Registry Client
 
 MVP 参考实现 SHOULD 提供以下 CLI 命令：
 
@@ -641,14 +767,14 @@ uom registry install <agent_id>
 
 Registry 客户端 MUST 返回 Agent 元数据和 `uom.json` 位置，但 MUST NOT 参与授权决策。
 
-### 16.3 Registry Independence
+### 17.3 Registry Independence
 
 - 用户 MUST 能够不通过 Registry 直接安装和运行 Agent。
 - 授权决策 MUST 始终在用户本地完成。
 
-## 17. Audit and Logging
+## 18. Audit and Logging
 
-### 17.1 Audit Log Entry
+### 18.1 Audit Log Entry
 
 ```json
 {
@@ -667,7 +793,7 @@ Registry 客户端 MUST 返回 Agent 元数据和 `uom.json` 位置，但 MUST N
 }
 ```
 
-### 17.2 Required Fields
+### 18.2 Required Fields
 
 每条审计日志 MUST 包含：
 
@@ -679,49 +805,49 @@ Registry 客户端 MUST 返回 Agent 元数据和 `uom.json` 位置，但 MUST N
 - `allowed`
 - `reason`
 
-### 17.3 Storage
+### 18.3 Storage
 
 - 审计日志 MUST 与 Memory Store 分开存储。
 - 审计日志保留时长 MUST 可配置，默认 90 天。
 - 审计日志 SHOULD 加密存储，防止 Agent 篡改。
 
-### 17.4 Blockchain Extension
+### 18.4 Blockchain Extension
 
 未来扩展 MAY 将授权事件和访问事件摘要锚定到区块链，实现不可篡改的审计证明。协议本身不强制特定链。
 
-## 18. Security Considerations
+## 19. Security Considerations
 
-### 18.1 Token Security
+### 19.1 Token Security
 
 - Capability Token MUST 由 Auth Service 私钥签名。
 - Token SHOULD 使用短有效期（默认 30 分钟，Remote Profile 10 分钟）。
 - Token MUST NOT 被持久化到 Agent 可任意读取的位置。
 
-### 18.2 Memory Store Security
+### 19.2 Memory Store Security
 
 - Memory Store SHOULD 加密存储。
 - 高敏感数据 SHOULD 额外加密。
 
-### 18.3 Communication Security
+### 19.3 Communication Security
 
 - Local Profile 使用 HTTP over localhost。
 - Remote Profile MUST 使用 TLS 1.3 + mTLS。
 - SDK MUST NOT 记录 Token。
 
-### 18.4 Agent Write Restrictions
+### 19.4 Agent Write Restrictions
 
 - MVP 阶段 Agent MUST NOT 写入 Memory。
 - Milestone 2 引入 Staging 写入后，Agent 写入 MUST 经用户确认才生效。
 - Agent MUST NOT 写入 `sensitivity=high` 的 Memory Item。
 
-## 19. Privacy Considerations
+## 20. Privacy Considerations
 
 - UOMP 设计目标是最小化 Agent 访问的数据范围。
 - 用户 SHOULD 能够查看并撤销任何活跃 Session。
 - 审计日志 SHOULD 帮助用户理解 Agent 访问了哪些数据。
 - Memory Guard SHOULD 避免返回授权范围外的任何数据，包括存在性信息。
 
-## 20. Future Work
+## 21. Future Work
 
 - Agent 写入 Staging 机制。
 - 语义检索（`query` 接口）。
@@ -730,7 +856,7 @@ Registry 客户端 MUST 返回 Agent 元数据和 `uom.json` 位置，但 MUST N
 - Remote Profile 参考实现。
 - 区块链审计锚定。
 
-## 21. References
+## 22. References
 
 - [RFC 2119] Key words for use in RFCs to Indicate Requirement Levels
 - [RFC 7519] JSON Web Token (JWT)

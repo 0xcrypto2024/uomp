@@ -699,28 +699,124 @@ The user UI (e.g. CLI) runs on the same host as the Memory Store / Guard, perfor
 
 ### 15.1 Overview
 
-Remote Profile allows Agents not running on the user's machine to access Memory Guard. UOMP defines security requirements but does not mandate a specific connection mode.
+Remote Profile allows Agents not running on the user's machine to access user memory. To protect the local Memory Guard, UOMP introduces the **UOMP Gateway** as the controlled entry point: the Memory Guard MUST NOT be directly exposed to the public internet, and all remote access MUST go through a user-deployed or user-trusted Gateway.
 
 ### 15.2 Security Requirements
 
 Remote Profile implementations MUST satisfy:
 
-1. Use TLS 1.3.
-2. Use mTLS, with the remote Agent holding a client certificate issued by the user.
-3. The Capability Token's `profile` claim is `"remote"`.
-4. The Token includes an `audience` claim bound to the specific Memory Guard endpoint.
-5. Token lifetime SHOULD not exceed 10 minutes.
-6. The user MUST explicitly enable Remote Profile.
+1. Gateway and remote Agent MUST use **TLS 1.3**.
+2. Gateway SHOULD use **mTLS**, with the remote Agent holding a client certificate issued by the user or Registry.
+3. Capability Tokens issued by the local Auth Service:
+   - `profile` claim MUST be `"remote"`;
+   - `audience` claim MUST be bound to the Gateway endpoint, not to local `127.0.0.1`;
+   - `allowed_endpoints` claim SHOULD restrict allowed Gateway network locations.
+4. Gateway MUST validate Token signature, lifetime, `audience`, Session revocation status, and request path.
+5. Token lifetime SHOULD not exceed 10 minutes; Agents that need long-running access SHOULD use refresh tokens (see 15.5).
+6. The user MUST explicitly enable Remote Profile and confirm the Gateway configuration.
+7. Communication between Gateway and local Memory Guard SHOULD use mTLS or a local Unix socket.
 
-### 15.3 Connection Modes
+### 15.3 Deployment Models
 
-Remote Profile supports but is not limited to the following modes:
+Remote Profile defaults to **user self-hosted Gateway**:
 
-- User self-hosted gateway
-- Reverse tunnel
-- P2P encrypted connection
+- Users run Gateway on their own VPS, NAS, cloud server, or home server;
+- Users MAY expose Gateway via reverse tunnel (e.g., Cloudflare Tunnel, ngrok) without a public IP;
+- A third-party MAY offer managed Gateway services, but open-source core implementations MUST retain self-hosting as the default and trust root.
 
-Specific modes are chosen by the implementation; the protocol does not mandate them.
+### 15.4 UOMP Gateway
+
+Gateway acts as a proxy for Memory Guard with the following responsibilities:
+
+| Responsibility | Description |
+|----------------|-------------|
+| TLS/mTLS termination | Verify the transport-layer identity of the remote Agent |
+| Token validation | Validate Capability Token signature, scope, lifetime, revocation status |
+| Request forwarding | Forward validated requests to the local Memory Guard |
+| Quota enforcement | Enforce request limits according to Token `limits` |
+| Audit logging | Record `gateway_access` events |
+| Payload caching | Temporarily store encrypted Agent output (optional) |
+
+Gateway HTTP API SHOULD at least include:
+
+```http
+GET  /v1/health
+POST /v1/sessions/{session_id}/refresh
+GET  /v1/memory/{key}
+GET  /v1/memory?tag={tag}
+POST /v1/payload/upload
+GET  /v1/payload/{payload_id}
+```
+
+All requests MUST carry:
+
+```http
+Authorization: Bearer <gateway-token>
+X-UOMP-Agent-Id: <agent_id>
+```
+
+### 15.5 Token Refresh
+
+Remote Agents may need to refresh Tokens due to long-running tasks or SaaS restarts:
+
+1. During initial authorization, the Auth Service issues both a short-lived `access_token` and a `refresh_token`:
+   - The refresh_token can only be used to obtain a new access_token, not to read Memory;
+   - The refresh_token's `scopes` claim MUST be empty or contain only `refresh`;
+   - Lifetime is configurable, default 7 days.
+2. Before the access_token expires, the Agent calls the Gateway:
+   ```http
+   POST /v1/sessions/{session_id}/refresh
+   Authorization: Bearer <refresh_token>
+   ```
+3. Gateway validates the refresh_token and Session status, then requests a new access_token from the local Auth Service and returns it.
+4. When the user revokes the Session, the refresh_token MUST become invalid simultaneously.
+
+### 15.6 Payload Delivery
+
+Agent-generated reports and analysis results MUST NOT remain as plaintext on remote servers. Remote Profile requires:
+
+1. **End-to-end encryption**: The Agent encrypts the Payload using the public key provided in the Remote Profile (RECOMMENDED: ECDH-X25519 + AES-256-GCM).
+2. **Payload Envelope**: Uploaded Payloads MUST use the following format:
+   ```json
+   {
+     "payload_id": "pay_xxx",
+     "session_id": "sess_xxx",
+     "agent_id": "stock-analyst",
+     "timestamp": "2026-07-14T10:15:00Z",
+     "encryption": {
+       "algorithm": "ECDH-X25519-AES256GCM",
+       "sender_public_key": "...",
+       "nonce": "..."
+     },
+     "ciphertext": "base64...",
+     "format": "text/markdown",
+     "size": 2048,
+     "hash": "sha256:..."
+   }
+   ```
+3. **Relay modes** for encrypted Payload:
+   - `gateway-cache`: Agent POSTs to Gateway; user pulls from Gateway;
+   - `presigned-url`: Gateway gives Agent a one-time upload URL; Agent uploads and returns the reference;
+   - `ipfs-cid`: Ciphertext on IPFS; CID + hash anchored on-chain.
+
+The user's local private key SHOULD be protected by a keystore or system keychain.
+
+### 15.7 Migration to DIDComm
+
+UOMP plans to migrate from mTLS HTTPS to **DIDComm v2** for authorization negotiation and Token delivery in the long term. In MVP, mTLS HTTPS is the default channel, and DIDComm is an optional extension.
+
+Migration strategy:
+
+1. Phase 1: Agents declare an mTLS endpoint; DIDComm is optional.
+2. Phase 2: Agents declare both mTLS and DIDComm service endpoints; user clients prefer DIDComm.
+3. Phase 3: New Agents MAY support only DIDComm; legacy Agents continue to work through an mTLS adapter.
+
+Reserved DIDComm message types:
+
+- `uomp/authorize-request`
+- `uomp/authorize-response`
+- `uomp/payload-ready`
+- `uomp/session-revoked`
 
 ## 16. Agent Identity Verification
 
@@ -813,7 +909,56 @@ Each audit log MUST contain:
 
 ### 18.4 Blockchain Extension
 
-Future extensions MAY anchor authorization and access event summaries to a blockchain for immutable audit proof. The protocol itself does not mandate a specific chain.
+UOMP MAY anchor summaries of key audit events to a blockchain for immutable audit proof. The protocol itself does not mandate a specific chain, but Starknet is RECOMMENDED as the default (low cost, high-frequency events), with EVM-compatible chains as an option.
+
+#### 18.4.1 Event Types
+
+```solidity
+event SessionGranted(
+  bytes32 indexed sessionHash,
+  bytes32 indexed agentHash,
+  uint256 expiresAt
+);
+
+event SessionRevoked(
+  bytes32 indexed sessionHash,
+  bytes32 indexed agentHash
+);
+
+event GatewayAccess(
+  bytes32 indexed sessionHash,
+  bytes32 indexed agentHash,
+  bytes32 endpointHash,
+  bool allowed
+);
+
+event PayloadAnchored(
+  bytes32 indexed payloadHash,
+  bytes32 indexed sessionHash,
+  bytes32 agentHash
+);
+```
+
+Hash computation:
+
+- `sessionHash` = `keccak256(session_id || agent_id || granted_tags_json)`
+- `agentHash` = `keccak256(agent_id)`
+- `endpointHash` = `keccak256(request_path)`
+- `payloadHash` = `sha256(ciphertext)`
+
+On-chain events MUST NOT contain specific Memory keys/values or Payload plaintext.
+
+#### 18.4.2 Batching Strategy
+
+- **Authorization events** (`SessionGranted`, `SessionRevoked`): low volume and high criticality, SHOULD be anchored near real-time.
+- **Access events** (`GatewayAccess`): high volume, SHOULD be batched. Gateway aggregates events into a Merkle tree every N minutes or every M events, anchors the `merkleRoot` on-chain, and keeps the full log locally for later verification.
+- **Payload anchoring**: each Payload SHOULD have its hash anchored individually after generation.
+
+```
+Local events ──► Batch aggregation ──► Merkle root ──► On-chain event
+                          │
+                          └── Full log retained at Gateway for audit verification
+```
 
 ## 19. Security Considerations
 
@@ -849,12 +994,12 @@ Future extensions MAY anchor authorization and access event summaries to a block
 
 ## 21. Future Work
 
-- Agent write Staging mechanism.
+- Agent write staging.
 - Semantic retrieval (`query` endpoint).
 - Write version history and rollback.
 - Policy templates.
-- Remote Profile reference implementation.
-- Blockchain audit anchoring.
+- DIDComm v2 authorization channel.
+- Decentralized Payload Relay (IPFS, etc.).
 
 ## 22. References
 

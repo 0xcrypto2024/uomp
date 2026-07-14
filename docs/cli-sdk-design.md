@@ -507,7 +507,64 @@ Agent 自行通过 SDK `market.*` 调用外部 API：
 
 ---
 
-## 10. 实现阶段
+## 10. 未来扩展：远程 Agent 与链上审计
+
+当前 Phase 1 只考虑本机 Agent。但长期来看，UOMP 必须支持远程 Agent 部署和链上审计锚定。
+
+### 10.1 远程 Agent 部署
+
+大多数 Agent 最终会以**服务**形式运行在远程服务器上，而不是跟用户在同一台设备上：
+
+- 用户通过手机、浏览器或轻量 CLI 授权。
+- Agent 运行在云端或第三方服务器。
+- Agent 不跟用户设备处于同一本地网络。
+
+这要求 UOMP 支持 Remote Profile：
+
+1. Memory Guard 通过 TLS 1.3 + mTLS 暴露。
+2. Capability Token 的 `profile` claim 为 `"remote"`，`audience` 绑定到远程 Guard 端点。
+3. 远程 Agent 持有用户签发的客户端证书。
+4. 用户必须显式开启 Remote Profile，默认关闭。
+5. 远程 Guard SHOULD 部署在用户自托管的网关、反向隧道或可信服务上。
+
+### 10.2 远程 Agent 的 Payload 交付
+
+当 Agent 运行在远程时，它生成的分析报告、通知、建议等 Payload 需要安全地交付给用户。可选方案：
+
+| 方案 | 说明 | 优点 | 缺点 |
+|------|------|------|------|
+| 端到端加密 | 用用户公钥加密 Payload，只有用户私钥能解密 | 最安全 | 需要用户端密钥管理 |
+| 安全回调 URL | 用户提供一个 HTTPS 回调端点，Agent POST Payload | 简单 | 回调端点可能被攻击或泄露 |
+| 链下存储 + 链上 hash | Payload 存在 IPFS/加密云存储，链上只存 hash 和授权 | 可验证、可审计 | 需要链下存储可用性 |
+| 本地中转网关 | 用户自托管网关，Agent POST 到网关，用户主动拉取 | 用户可控 | 需要用户有公网入口 |
+
+建议长期方案：
+
+- 默认使用**端到端加密 + 本地中转网关**。
+- 报告类 Payload 存到用户指定的本地或加密云存储，链上只存 hash 用于审计。
+- 即时通知类 Payload 使用加密回调或推送通道。
+
+### 10.3 审计日志上链
+
+MVP 审计日志存在本地 SQLite。未来需要把审计事件锚定到区块链，实现不可篡改的审计证明。
+
+支持两条链：
+
+- **EVM**：以太坊及兼容链（Polygon、Base、Arbitrum 等）。
+- **Starknet**：适合高频、低成本的审计摘要上链。
+
+上链内容：
+
+- 不上传完整日志，而是审计摘要的 hash：session_id、agent_id、访问 tag、时间戳、action。
+- 使用 Merkle tree 或 rollup 批量提交，降低链上成本。
+- 用户可以用链上 hash 校验本地日志是否被篡改。
+
+上链时机：
+
+- Session 创建、授权、撤销时实时锚定。
+- 访问事件每 N 次或每 T 秒批量锚定一次。
+
+## 11. 实现阶段
 
 ### Phase 1：通用 CLI/SDK + 股票示例（2-3 周）
 
@@ -534,9 +591,17 @@ Agent 自行通过 SDK `market.*` 调用外部 API：
 - 本地 LLM 支持
 - GUI 应用
 
+### Phase 4：远程 Agent 与链上审计（长期）
+
+- Remote Profile 参考实现（TLS 1.3 + mTLS）
+- 远程 Agent Payload 交付方案（端到端加密 + 本地中转网关）
+- 审计日志锚定到 EVM 链
+- 审计日志锚定到 Starknet
+- 链上审计摘要的验证工具
+
 ---
 
-## 11. 待决策问题
+## 12. 待决策问题
 
 1. **字段级摘要是否必须？**
    - 建议：高敏感 tag 必须展示字段和用途。
@@ -548,10 +613,14 @@ Agent 自行通过 SDK `market.*` 调用外部 API：
    - MVP 禁止 Agent 写入；报告保存到本地文件。
 5. **是否需要 Python SDK？**
    - 建议：先做好 TypeScript SDK，Python SDK 后续跟进。
+6. **远程 Agent Payload 交付的默认方案？**
+   - 候选：端到端加密、本地中转网关、链下存储 + 链上 hash。
+7. **审计日志上链频率？**
+   - 需要平衡实时性、成本和隐私。建议 Session 级事件实时锚定，访问事件批量锚定。
 
 ---
 
-## 12. 下一步行动
+## 13. 下一步行动
 
 1. 确认通用 CLI 命令集是否完整。
 2. 确认 Agent Developer SDK 的最小 API 集合。

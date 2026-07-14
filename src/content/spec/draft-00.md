@@ -699,28 +699,124 @@ uom-calendar-agent
 
 ### 15.1 Overview
 
-Remote Profile 允许 Agent 不在用户本机运行时访问 Memory Guard。UOMP 协议定义安全要求，但不强制具体连接模式。
+Remote Profile 允许 Agent 不在用户本机运行时访问用户记忆。为了保护本地 Memory Guard，UOMP 引入 **UOMP Gateway** 作为受控入口：Memory Guard 不直接暴露到公网，所有远程访问 MUST 经过用户部署或信任的 Gateway。
 
 ### 15.2 Security Requirements
 
 Remote Profile 实现 MUST 满足：
 
-1. 使用 TLS 1.3。
-2. 使用 mTLS，远程 Agent 持有用户签发的客户端证书。
-3. Capability Token 的 `profile` claim 为 `"remote"`。
-4. Token 包含 `audience` claim，绑定到具体 Memory Guard 端点。
-5. Token 有效期 SHOULD 不超过 10 分钟。
-6. 用户必须显式开启 Remote Profile。
+1. Gateway 与远程 Agent 之间使用 **TLS 1.3**。
+2. Gateway SHOULD 使用 **mTLS**，远程 Agent 持有用户或 Registry 签发的客户端证书。
+3. 用户本地 Auth Service 签发的 Capability Token：
+   - `profile` claim MUST 为 `"remote"`；
+   - `audience` claim MUST 绑定到 Gateway 端点，而不是本地 `127.0.0.1`；
+   - `allowed_endpoints` claim SHOULD 限制允许访问的 Gateway 网络位置。
+4. Gateway MUST 校验 Token 签名、有效期、`audience`、Session 撤销状态以及请求路径。
+5. Token 有效期 SHOULD 不超过 10 分钟；需要长期运行的 Agent SHOULD 使用 refresh_token 机制（见 15.5）。
+6. 用户 MUST 显式开启 Remote Profile 并确认 Gateway 配置。
+7. Gateway 与本地 Memory Guard 之间 SHOULD 通过 mTLS 或本地 Unix socket 通信。
 
-### 15.3 Connection Modes
+### 15.3 Deployment Models
 
-Remote Profile 支持但不限于以下模式：
+Remote Profile 默认采用 **用户自托管 Gateway**：
 
-- 用户自托管网关
-- 反向隧道（Tunnel）
-- P2P 加密连接
+- 用户在自己的 VPS、NAS、云服务器或家庭服务器上运行 Gateway；
+- 也可以使用反向隧道（如 Cloudflare Tunnel、ngrok）暴露 Gateway，而无需公网 IP；
+- Gateway 服务 MAY 由第三方商业化托管，但开源 core 实现 MUST 保留自托管路径作为默认选项。
 
-具体模式由实现选择，协议不做强制要求。
+### 15.4 UOMP Gateway
+
+Gateway 是 Memory Guard 的代理，承担以下职责：
+
+| 职责 | 说明 |
+|------|------|
+| TLS/mTLS 终止 | 校验远程 Agent 的传输层身份 |
+| Token 校验 | 验证 Capability Token 的签名、作用域、有效期、撤销状态 |
+| 请求转发 | 把已校验的请求转发给本地 Memory Guard |
+| 配额执行 | 根据 Token 的 `limits` 限制请求次数 |
+| 审计记录 | 记录 `gateway_access` 事件 |
+| Payload 缓存 | 临时存储加密的 Agent 输出（可选） |
+
+Gateway 暴露的 HTTP API SHOULD 至少包含：
+
+```http
+GET  /v1/health
+POST /v1/sessions/{session_id}/refresh
+GET  /v1/memory/{key}
+GET  /v1/memory?tag={tag}
+POST /v1/payload/upload
+GET  /v1/payload/{payload_id}
+```
+
+所有请求 MUST 携带：
+
+```http
+Authorization: Bearer <gateway-token>
+X-UOMP-Agent-Id: <agent_id>
+```
+
+### 15.5 Token Refresh
+
+远程 Agent 可能因长时间运行或 SaaS 重启而需要刷新 Token：
+
+1. 初始授权时，Auth Service 除了签发短期 `access_token`，还签发 `refresh_token`：
+   - refresh_token 只能用于换取新的 access_token，不能用于读取 Memory；
+   - refresh_token 的 `scopes` claim MUST 为空或仅含 `refresh`；
+   - 有效期可配置，默认 7 天。
+2. Agent 在 access_token 过期前调用 Gateway：
+   ```http
+   POST /v1/sessions/{session_id}/refresh
+   Authorization: Bearer <refresh_token>
+   ```
+3. Gateway 验证 refresh_token 和 Session 状态后，向本地 Auth Service 申请新的 access_token 并返回。
+4. 用户撤销 Session 时，refresh_token MUST 同步失效。
+
+### 15.6 Payload Delivery
+
+Agent 生成的报告、分析结果等 Payload 不应以明文形式留在远程服务器。Remote Profile 要求：
+
+1. **端到端加密**：Agent 使用 Remote Profile 中用户提供的公钥加密 Payload（推荐 ECDH-X25519 + AES-256-GCM）。
+2. **Payload Envelope**：上传的 Payload MUST 使用以下格式：
+   ```json
+   {
+     "payload_id": "pay_xxx",
+     "session_id": "sess_xxx",
+     "agent_id": "stock-analyst",
+     "timestamp": "2026-07-14T10:15:00Z",
+     "encryption": {
+       "algorithm": "ECDH-X25519-AES256GCM",
+       "sender_public_key": "...",
+       "nonce": "..."
+     },
+     "ciphertext": "base64...",
+     "format": "text/markdown",
+     "size": 2048,
+     "hash": "sha256:..."
+   }
+   ```
+3. **Relay 模式**：加密后的 Payload 可通过以下方式交付：
+   - `gateway-cache`：Agent POST 到 Gateway，用户从 Gateway 拉取；
+   - `presigned-url`：Gateway 提供一次性上传 URL，Agent 上传后返回引用；
+   - `ipfs-cid`：密文上 IPFS，链上存 CID + hash。
+
+用户本地私钥 SHOULD 受 keystore 或系统 keychain 保护。
+
+### 15.7 Migration to DIDComm
+
+UOMP 长期计划从 mTLS HTTPS 迁移到 **DIDComm v2** 作为授权协商与 Token 交付通道。MVP 阶段 mTLS HTTPS 为默认通道，DIDComm 作为可选扩展。
+
+迁移策略：
+
+1. Phase 1：Agent 同时声明 mTLS endpoint；DIDComm 为可选。
+2. Phase 2：Agent 同时声明 mTLS endpoint 与 DIDComm service endpoint；用户端优先尝试 DIDComm。
+3. Phase 3：新 Agent 可仅支持 DIDComm；旧 Agent 通过适配层继续支持 mTLS。
+
+预留 DIDComm 消息类型：
+
+- `uomp/authorize-request`
+- `uomp/authorize-response`
+- `uomp/payload-ready`
+- `uomp/session-revoked`
 
 ## 16. Agent Identity Verification
 
@@ -813,7 +909,56 @@ Registry 客户端 MUST 返回 Agent 元数据和 `uom.json` 位置，但 MUST N
 
 ### 18.4 Blockchain Extension
 
-未来扩展 MAY 将授权事件和访问事件摘要锚定到区块链，实现不可篡改的审计证明。协议本身不强制特定链。
+UOMP MAY 将关键审计事件摘要锚定到区块链，实现不可篡改的审计证明。协议本身不强制特定链，但 RECOMMENDED 默认支持 Starknet（低成本、高频事件），可选 EVM 兼容链。
+
+#### 18.4.1 Event Types
+
+```solidity
+event SessionGranted(
+  bytes32 indexed sessionHash,
+  bytes32 indexed agentHash,
+  uint256 expiresAt
+);
+
+event SessionRevoked(
+  bytes32 indexed sessionHash,
+  bytes32 indexed agentHash
+);
+
+event GatewayAccess(
+  bytes32 indexed sessionHash,
+  bytes32 indexed agentHash,
+  bytes32 endpointHash,
+  bool allowed
+);
+
+event PayloadAnchored(
+  bytes32 indexed payloadHash,
+  bytes32 indexed sessionHash,
+  bytes32 agentHash
+);
+```
+
+哈希计算：
+
+- `sessionHash` = `keccak256(session_id || agent_id || granted_tags_json)`
+- `agentHash` = `keccak256(agent_id)`
+- `endpointHash` = `keccak256(request_path)`
+- `payloadHash` = `sha256(ciphertext)`
+
+链上 event MUST NOT 包含具体 Memory key/value 或 Payload 明文。
+
+#### 18.4.2 Batching Strategy
+
+- **授权事件**（`SessionGranted`、`SessionRevoked`）：数量少、关键性高，SHOULD 近实时上链。
+- **访问事件**（`GatewayAccess`）：高频，SHOULD 批量上链。Gateway 每 N 分钟或每 M 条事件聚合为 Merkle tree，把 `merkleRoot` 上链，完整日志保留在本地供事后验证。
+- **Payload 锚定**：每个 Payload 生成后 SHOULD 单独锚定其 hash。
+
+```
+本地事件 ──► 批量聚合 ──► Merkle root ──► 链上 event
+                    │
+                    └── 完整日志保留在 Gateway，供审计验证
+```
 
 ## 19. Security Considerations
 
@@ -853,8 +998,8 @@ Registry 客户端 MUST 返回 Agent 元数据和 `uom.json` 位置，但 MUST N
 - 语义检索（`query` 接口）。
 - 写入版本历史与回滚。
 - 策略模板。
-- Remote Profile 参考实现。
-- 区块链审计锚定。
+- DIDComm v2 授权通道。
+- 去中心化 Payload Relay（IPFS 等）。
 
 ## 22. References
 

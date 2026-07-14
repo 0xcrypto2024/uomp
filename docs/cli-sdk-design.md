@@ -546,23 +546,47 @@ Agent 自行通过 SDK `market.*` 调用外部 API：
 
 ### 10.3 审计日志上链
 
-MVP 审计日志存在本地 SQLite。未来需要把审计事件锚定到区块链，实现不可篡改的审计证明。
+MVP 审计日志存在本地 SQLite。未来需要把审计事件直接记录到区块链上，实现不可篡改的审计证明。
 
 支持两条链：
 
 - **EVM**：以太坊及兼容链（Polygon、Base、Arbitrum 等）。
-- **Starknet**：适合高频、低成本的审计摘要上链。
+- **Starknet**：适合高频、低成本的审计事件上链。
 
 上链内容：
 
-- 不上传完整日志，而是审计摘要的 hash：session_id、agent_id、访问 tag、时间戳、action。
-- 使用 Merkle tree 或 rollup 批量提交，降低链上成本。
-- 用户可以用链上 hash 校验本地日志是否被篡改。
+审计事件以链上 event 的形式写入，主要包含两类事件：
 
-上链时机：
+1. **授权事件**：Session 创建、授权、撤销。
+   - `session_id`
+   - `agent_id`
+   - `action`（created / granted / revoked / expired）
+   - `granted_tags`
+   - `granted_keys`
+   - `expires_at`
+   - `timestamp`
 
-- Session 创建、授权、撤销时实时锚定。
-- 访问事件每 N 次或每 T 秒批量锚定一次。
+2. **访问事件**：Agent 对 Memory Guard 的读取记录。
+   - `session_id`
+   - `agent_id`
+   - `action`（read）
+   - `tags`
+   - `keys`
+   - `allowed`
+   - `timestamp`
+
+注意事项：
+
+- 完整访问日志仍保留在本地，链上记录的是关键事件的不可篡改证明。
+- 对于隐私敏感字段（如具体 key），可选择在链上使用不可逆标识符或 commitment，但事件本身必须能证明授权和访问行为发生过。
+- 使用 L2 或 Starknet 降低单次 event 成本。
+- 访问事件可以批量提交，授权事件建议实时提交。
+
+用户和监管方可以通过链上 event 验证：
+
+- 某个 Agent 是否获得过授权。
+- 授权范围和有效期。
+- Agent 是否实际执行过读取操作。
 
 ## 11. 实现阶段
 
@@ -595,9 +619,9 @@ MVP 审计日志存在本地 SQLite。未来需要把审计事件锚定到区块
 
 - Remote Profile 参考实现（TLS 1.3 + mTLS）
 - 远程 Agent Payload 交付方案（端到端加密 + 本地中转网关）
-- 审计日志锚定到 EVM 链
-- 审计日志锚定到 Starknet
-- 链上审计摘要的验证工具
+- 审计事件（授权 + 读取）记录到 EVM 链
+- 审计事件记录到 Starknet
+- 链上审计 event 的查询与验证工具
 
 ---
 
@@ -615,8 +639,10 @@ MVP 审计日志存在本地 SQLite。未来需要把审计事件锚定到区块
    - 建议：先做好 TypeScript SDK，Python SDK 后续跟进。
 6. **远程 Agent Payload 交付的默认方案？**
    - 候选：端到端加密、本地中转网关、链下存储 + 链上 hash。
-7. **审计日志上链频率？**
-   - 需要平衡实时性、成本和隐私。建议 Session 级事件实时锚定，访问事件批量锚定。
+7. **审计事件上链频率？**
+   - 授权事件（created/granted/revoked）建议实时上链。
+   - 读取访问事件可以批量上链，以降低成本。
+   - 需要平衡实时性、成本和隐私。
 
 ---
 

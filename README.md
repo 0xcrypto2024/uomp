@@ -55,8 +55,6 @@ uomp/
 │   ├── layouts/            # 页面布局
 │   └── styles/             # 样式文件
 ├── public/                 # 静态资源（SVG 图表、演示视频等）
-├── docs/                   # 产品设计文档
-│   └── cli-sdk-design.md   # CLI/SDK 设计文档（以股票分析 Agent 为例）
 ├── outreach/               # 社区推广材料
 ├── LICENSE                 # Apache-2.0
 └── README.md               # 本文件
@@ -102,7 +100,7 @@ pnpm preview
 
 | 仓库 | 说明 |
 |------|------|
-| [0xaicrypto/uomp-core](https://github.com/0xaicrypto/uomp-core) | UOMP 参考实现（TypeScript CLI + SDK + HTTP 服务） |
+| [0xaicrypto/uomp-core](https://github.com/0xaicrypto/uomp-core) | UOMP 参考实现（TypeScript CLI + SDK + HTTP 服务），含 [CLI/SDK 设计文档](https://github.com/0xaicrypto/uomp-core/tree/main/docs) 与 [远程授权设计文档](https://github.com/0xaicrypto/uomp-core/tree/main/docs) |
 | [0xaicrypto/uomp](https://github.com/0xaicrypto/uomp) | 本仓库：官方网站与协议规范 |
 
 ---

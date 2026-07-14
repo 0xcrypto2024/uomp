@@ -17,6 +17,7 @@ import { baseUrl } from '../utils/base.ts';
     </p>
     <div class="hero-btns">
       <a href={`${baseUrl}spec/`} class="btn-h1">阅读规范 →</a>
+      <a href={`${baseUrl}example/`} class="btn-h1">股票分析示例 →</a>
       <a href="https://github.com/0xaicrypto/uomp-core" target="_blank" rel="noopener" class="btn-h2">GitHub</a>
     </div>
 
@@ -33,7 +34,7 @@ import { baseUrl } from '../utils/base.ts';
               <rect x="5" y="11" width="14" height="10" rx="2"/>
               <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
             </svg>
-            uomp run ./examples/calendar-agent
+            uomp authorize ./my-agent
           </div>
         </div>
         <div class="window-body">
@@ -143,11 +144,11 @@ import { baseUrl } from '../utils/base.ts';
       <h2>五步完成，<br/><em>一次授权。</em></h2>
       <img src="/diagrams/home-workflow-zh.svg" alt="UOMP 工作流程图" class="diagram" />
       <ol>
-        <li><strong>发现 Agent</strong>：用户在 Agent 市场（如基于 ERC8004 的 Registry）发现合适的 Agent。</li>
-        <li><strong>查看声明</strong>：Agent 通过 <code>uom.json</code> 声明身份和请求的记忆范围。</li>
-        <li><strong>连接并授权</strong>：用户确认授权范围，Auth Service 签发短期 Capability Token。</li>
-        <li><strong>访问数据</strong>：Agent 通过 Memory Guard API 在授权范围内访问数据。</li>
-        <li><strong>断开连接</strong>：会话结束或用户撤销后，Token 立即失效。</li>
+        <li><strong>发现 Agent</strong>：用户在 Agent 市场（如基于 ERC8004 的 Registry）或本地目录发现合适的 Agent。</li>
+        <li><strong>查看声明</strong>：Agent 通过 <code>uom.json</code> 声明身份、请求的记忆范围及字段用途。</li>
+        <li><strong>连接并授权</strong>：用户通过 <code>uomp connect</code> 验证 Agent，再用 <code>uomp authorize</code> 确认范围并获取 <code>UOM_TOKEN</code>。</li>
+        <li><strong>独立运行 Agent</strong>：用户把 Token 交给 Agent 进程，Agent 通过 Memory Guard API 在授权范围内读取数据。</li>
+        <li><strong>断开连接</strong>：会话过期或用户通过 <code>uomp revoke</code> 撤销后，Token 立即失效。</li>
       </ol>
     </div>
   </section>
@@ -204,6 +205,7 @@ import { baseUrl } from '../utils/base.ts';
       <p>阅读协议草案，查看参考实现，或加入 GitHub 讨论，一起构建用户主权的 Agent 记忆授权标准。</p>
       <div class="hero-btns">
         <a href={`${baseUrl}spec/`} class="btn-h1">阅读规范 →</a>
+        <a href={`${baseUrl}example/`} class="btn-h1">股票分析示例 →</a>
         <a href="https://github.com/0xaicrypto/uomp-core" target="_blank" rel="noopener" class="btn-h2">查看实现</a>
       </div>
     </div>

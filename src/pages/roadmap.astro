@@ -9,22 +9,26 @@ import { baseUrl } from '../utils/base.ts';
       <h1>路线图</h1>
       <p>UOMP 从协议草案到完整生态的发展规划。</p>
 
-      <h2>Milestone 1：核心协议与参考实现（当前）</h2>
+      <h2>Milestone 1：核心协议与参考实现（已完成）</h2>
       <ul class="roadmap-list">
-        <li><span class="status status-current">进行中</span>发布 UOMP-Draft-00 规范草案</li>
-        <li><span class="status status-current">进行中</span>基于 SQLite 的 Memory Store</li>
-        <li><span class="status status-current">进行中</span>Auth Service HTTP API：Session 创建/授权/关闭/撤销</li>
-        <li><span class="status status-current">进行中</span>Memory Guard HTTP API：只读访问，按 tag/key 过滤</li>
-        <li><span class="status status-current">进行中</span>JWT Capability Token 签发与校验</li>
-        <li><span class="status status-current">进行中</span>Token 黑名单持久化到 SQLite</li>
-        <li><span class="status status-current">进行中</span><code>uom.json</code> Agent Manifest 解析</li>
-        <li><span class="status status-current">进行中</span>DID / GPG / X.509 身份验证支持</li>
-        <li><span class="status status-current">进行中</span>ERC8004 兼容 Registry 客户端</li>
-        <li><span class="status status-current">进行中</span>Agent HTTP 调用示例（参考实现内置）</li>
+        <li><span class="status status-done">已完成</span>发布 UOMP-Draft-00 规范草案</li>
+        <li><span class="status status-done">已完成</span>基于 SQLite 的 Memory Store</li>
+        <li><span class="status status-done">已完成</span>Auth Service HTTP API：Session 创建/授权/关闭/撤销</li>
+        <li><span class="status status-done">已完成</span>Memory Guard HTTP API：只读访问，按 tag/key 过滤</li>
+        <li><span class="status status-done">已完成</span>JWT Capability Token 签发与校验</li>
+        <li><span class="status status-done">已完成</span>Token 黑名单持久化到 SQLite</li>
+        <li><span class="status status-done">已完成</span><code>uom.json</code> Agent Manifest 解析</li>
+        <li><span class="status status-done">已完成</span>ERC-8004 兼容 Registry 本地索引</li>
+        <li><span class="status status-done">已完成</span>通用 CLI：`discover`/`connect`/`authorize`/`import`/`sessions`/`revoke`/`audit`</li>
+        <li><span class="status status-done">已完成</span>股票分析 Agent 完整示例</li>
+        <li><span class="status status-current">进行中</span>DID / GPG / X.509 身份验证支持（框架存在，验证强度待增强）</li>
       </ul>
 
-      <h2>Milestone 2：写入、GUI 集成与体验增强</h2>
+      <h2>Milestone 2：体验增强、写入与 GUI 集成</h2>
       <ul class="roadmap-list">
+        <li><span class="status status-next">计划</span><code>uomp import</code> 字段映射、格式识别、预览</li>
+        <li><span class="status status-next">计划</span><code>uomp dry-run</code> 模拟授权</li>
+        <li><span class="status status-next">计划</span><code>uomp config</code> 用户配置</li>
         <li><span class="status status-next">计划</span>Agent 写入暂存区（Staging）机制</li>
         <li><span class="status status-next">计划</span><code>uom memory review</code> 用户审核命令</li>
         <li><span class="status status-next">计划</span>图形化授权面板</li>

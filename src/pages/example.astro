@@ -1,0 +1,79 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { baseUrl } from '../utils/base.ts';
+---
+
+<Layout title="股票分析示例 - UOMP" switchHref={`${baseUrl}en/example/`}>
+  <section>
+    <div class="container">
+      <div class="sec-eyebrow">
+        <div class="sec-num">示例</div>
+        <span class="sec-tag">从导入到审计的完整流程</span>
+      </div>
+      <h1>股票分析 Agent</h1>
+      <p>
+        通过这个示例，你可以体验 UOMP 的完整用户流程：把持仓 CSV 和风险偏好导入本地 Memory Store，授权一个外部股票分析 Agent 读取必要数据，Agent 结合公开行情生成本地投资分析报告。
+      </p>
+      <p>
+        完整代码与数据文件在参考实现的 <a href="https://github.com/0xaicrypto/uomp-core/tree/main/examples/stock-analyst" target="_blank" rel="noopener">examples/stock-analyst</a> 目录。
+      </p>
+
+      <h2>前置条件</h2>
+      <ul>
+        <li>Node.js >= 20</li>
+        <li>pnpm 9（<code>corepack enable</code> 或 <code>npm install -g pnpm@9</code>）</li>
+        <li>已克隆 <a href="https://github.com/0xaicrypto/uomp-core" target="_blank" rel="noopener">uomp-core</a> 仓库</li>
+      </ul>
+
+      <h2>1. 构建并初始化</h2>
+      <pre><code>pnpm install
+pnpm build
+pnpm cli init</code></pre>
+
+      <h2>2. 启动 Auth + Guard 服务</h2>
+      <p>在<strong>终端 1</strong>启动本地服务：</p>
+      <pre><code>pnpm --filter @uomp/server start</code></pre>
+      <p>保持该终端运行。</p>
+
+      <h2>3. 导入私有数据</h2>
+      <p>在<strong>终端 2</strong>导入风险偏好：</p>
+      <pre><code>pnpm cli import ./examples/stock-analyst/sample-risk.json</code></pre>
+      <p>导入持仓 CSV（高敏感）：</p>
+      <pre><code>pnpm cli import ./examples/stock-analyst/sample-holdings.csv \
+  --tag portfolio:holdings \
+  --sensitivity high</code></pre>
+
+      <h2>4. 发现并连接 Agent</h2>
+      <pre><code>pnpm cli discover ./examples/stock-analyst
+pnpm cli connect ./examples/stock-analyst</code></pre>
+
+      <h2>5. 授权 Agent</h2>
+      <p>交互式授权（推荐）：</p>
+      <pre><code>pnpm cli authorize ./examples/stock-analyst</code></pre>
+      <p>按提示选择标签后，CLI 会输出：</p>
+      <pre><code>export UOM_TOKEN="&lt;token&gt;"
+export UOMP_BASE_URL="http://127.0.0.1:9374"</code></pre>
+      <p>脚本化授权：</p>
+      <pre><code>pnpm cli authorize ./examples/stock-analyst \
+  --scope portfolio:holdings profile:risk \
+  --output /tmp/uomp.env</code></pre>
+
+      <h2>6. 运行 Agent</h2>
+      <pre><code>source /tmp/uomp.env
+node ./examples/stock-analyst/index.js</code></pre>
+      <p>Agent 会读取授权数据、获取行情、生成 Markdown 报告到 <code>output/</code>。</p>
+
+      <h2>7. 查看会话与审计</h2>
+      <pre><code>pnpm cli sessions -a
+pnpm cli audit --limit 20</code></pre>
+
+      <h2>8. 撤销授权</h2>
+      <pre><code>pnpm cli revoke &lt;session-id&gt;</code></pre>
+
+      <div class="hero-btns" style="margin-top: 2.5rem;">
+        <a href="https://github.com/0xaicrypto/uomp-core/tree/main/examples/stock-analyst/README.md" target="_blank" rel="noopener" class="btn-h1">查看完整 README →</a>
+        <a href={`${baseUrl}design/`} class="btn-h2">实现设计</a>
+      </div>
+    </div>
+  </section>
+</Layout>

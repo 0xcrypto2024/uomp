@@ -1,0 +1,84 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { baseUrl } from '../../utils/base.ts';
+---
+
+<Layout
+  title="Stock Analyst Example - UOMP"
+  description="A complete UOMP walkthrough: import holdings and risk profile, authorize a stock analyst Agent, and generate a local investment report."
+  lang="en"
+  switchHref={baseUrl}
+>
+  <section>
+    <div class="container">
+      <div class="sec-eyebrow">
+        <div class="sec-num">Example</div>
+        <span class="sec-tag">Full flow from import to audit</span>
+      </div>
+      <h1>Stock Analyst Agent</h1>
+      <p>
+        This example walks through the complete UOMP user flow: import a holdings CSV and risk profile into the local Memory Store, authorize an external stock analyst Agent to read only what it needs, and let it generate a local investment analysis report using public market data.
+      </p>
+      <p>
+        Full code and sample data are in the reference implementation under <a href="https://github.com/0xaicrypto/uomp-core/tree/main/examples/stock-analyst" target="_blank" rel="noopener">examples/stock-analyst</a>.
+      </p>
+
+      <h2>Prerequisites</h2>
+      <ul>
+        <li>Node.js >= 20</li>
+        <li>pnpm 9 (<code>corepack enable</code> or <code>npm install -g pnpm@9</code>)</li>
+        <li>Clone <a href="https://github.com/0xaicrypto/uomp-core" target="_blank" rel="noopener">uomp-core</a></li>
+      </ul>
+
+      <h2>1. Build and initialize</h2>
+      <pre><code>pnpm install
+pnpm build
+pnpm cli init</code></pre>
+
+      <h2>2. Start the Auth + Guard service</h2>
+      <p>In <strong>Terminal 1</strong>, start the local service:</p>
+      <pre><code>pnpm --filter @uomp/server start</code></pre>
+      <p>Keep this terminal running.</p>
+
+      <h2>3. Import private data</h2>
+      <p>In <strong>Terminal 2</strong>, import the risk profile:</p>
+      <pre><code>pnpm cli import ./examples/stock-analyst/sample-risk.json</code></pre>
+      <p>Import the holdings CSV (high sensitivity):</p>
+      <pre><code>pnpm cli import ./examples/stock-analyst/sample-holdings.csv \
+  --tag portfolio:holdings \
+  --sensitivity high</code></pre>
+
+      <h2>4. Discover and connect the Agent</h2>
+      <pre><code>pnpm cli discover ./examples/stock-analyst
+pnpm cli connect ./examples/stock-analyst</code></pre>
+
+      <h2>5. Authorize the Agent</h2>
+      <p>Interactive authorization (recommended):</p>
+      <pre><code>pnpm cli authorize ./examples/stock-analyst</code></pre>
+      <p>After selecting tags, the CLI prints:</p>
+      <pre><code>export UOM_TOKEN="&lt;token&gt;"
+export UOMP_BASE_URL="http://127.0.0.1:9374"</code></pre>
+      <p>Scripted authorization:</p>
+      <pre><code>pnpm cli authorize ./examples/stock-analyst \
+  --scope portfolio:holdings profile:risk \
+  --output /tmp/uomp.env</code></pre>
+
+      <h2>6. Run the Agent</h2>
+      <pre><code>source /tmp/uomp.env
+node ./examples/stock-analyst/index.js</code></pre>
+      <p>The Agent reads authorized data, fetches market quotes, and writes a Markdown report to <code>output/</code>.</p>
+
+      <h2>7. Review sessions and audit logs</h2>
+      <pre><code>pnpm cli sessions -a
+pnpm cli audit --limit 20</code></pre>
+
+      <h2>8. Revoke authorization</h2>
+      <pre><code>pnpm cli revoke &lt;session-id&gt;</code></pre>
+
+      <div class="hero-btns" style="margin-top: 2.5rem;">
+        <a href="https://github.com/0xaicrypto/uomp-core/tree/main/examples/stock-analyst/README.md" target="_blank" rel="noopener" class="btn-h1">Full README →</a>
+        <a href={`${baseUrl}en/design/`} class="btn-h2">Implementation Design</a>
+      </div>
+    </div>
+  </section>
+</Layout>

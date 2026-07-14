@@ -956,6 +956,12 @@ footer {
   border: 1px solid #fde68a;
 }
 
+.status-done {
+  background: var(--green-bg);
+  color: var(--green);
+  border: 1px solid #bbf7d0;
+}
+
 /* ── MOBILE ── */
 @media (max-width: 900px) {
   .stats-bar {

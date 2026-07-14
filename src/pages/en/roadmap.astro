@@ -16,20 +16,24 @@ import { baseUrl } from '../../utils/base.ts';
 
       <h2>Milestone 1: Core Protocol & Reference Implementation</h2>
       <ul class="roadmap-list">
-        <li><span class="status status-current">In Progress</span>Publish UOMP-Draft-00 specification</li>
-        <li><span class="status status-current">In Progress</span>SQLite-based Memory Store</li>
-        <li><span class="status status-current">In Progress</span>Auth Service HTTP API: create/grant/close/revoke sessions</li>
-        <li><span class="status status-current">In Progress</span>Memory Guard HTTP API: read-only access filtered by tag/key</li>
-        <li><span class="status status-current">In Progress</span>JWT Capability Token issuance and validation</li>
-        <li><span class="status status-current">In Progress</span>Token blacklist persistence in SQLite</li>
-        <li><span class="status status-current">In Progress</span><code>uom.json</code> Agent Manifest parsing</li>
-        <li><span class="status status-current">In Progress</span>DID / GPG / X.509 identity verification</li>
-        <li><span class="status status-current">In Progress</span>ERC8004-compatible Registry client</li>
-        <li><span class="status status-current">In Progress</span>Agent HTTP client example (built into reference implementation)</li>
+        <li><span class="status status-done">Done</span>Publish UOMP-Draft-00 specification</li>
+        <li><span class="status status-done">Done</span>SQLite-based Memory Store</li>
+        <li><span class="status status-done">Done</span>Auth Service HTTP API: create/grant/close/revoke sessions</li>
+        <li><span class="status status-done">Done</span>Memory Guard HTTP API: read-only access filtered by tag/key</li>
+        <li><span class="status status-done">Done</span>JWT Capability Token issuance and validation</li>
+        <li><span class="status status-done">Done</span>Token blacklist persistence in SQLite</li>
+        <li><span class="status status-done">Done</span><code>uom.json</code> Agent Manifest parsing</li>
+        <li><span class="status status-done">Done</span>ERC-8004 compatible local Registry index</li>
+        <li><span class="status status-done">Done</span>Generic CLI: <code>discover</code>/<code>connect</code>/<code>authorize</code>/<code>import</code>/<code>sessions</code>/<code>revoke</code>/<code>audit</code></li>
+        <li><span class="status status-done">Done</span>Stock analyst Agent end-to-end example</li>
+        <li><span class="status status-current">In Progress</span>DID / GPG / X.509 identity verification (framework present, verification strength to be enhanced)</li>
       </ul>
 
-      <h2>Milestone 2: Writes, GUI Integration & UX</h2>
+      <h2>Milestone 2: UX, Writes & GUI Integration</h2>
       <ul class="roadmap-list">
+        <li><span class="status status-next">Planned</span><code>uomp import</code> field mapping, format detection, preview</li>
+        <li><span class="status status-next">Planned</span><code>uomp dry-run</code> simulated authorization</li>
+        <li><span class="status status-next">Planned</span><code>uomp config</code> user preferences</li>
         <li><span class="status status-next">Planned</span>Agent write staging: writes enter <code>pending</code> until user approval</li>
         <li><span class="status status-next">Planned</span><code>uom memory review</code> approval command</li>
         <li><span class="status status-next">Planned</span>Graphical authorization panel</li>

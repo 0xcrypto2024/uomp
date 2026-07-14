@@ -22,7 +22,7 @@ This document explains how the UOMP **reference implementation** [`uomp-mvp`](ht
 | `packages/guard` | Memory Guard | Token validation, scope filtering, audit logging |
 | `packages/identity` | Identity Verification | DID / GPG verification entry point |
 | `packages/sdk` | Agent SDK (example-level) | A simple HTTP client wrapper for example Agents; full TypeScript SDK for GUI app integration is planned in [Roadmap](/en/roadmap/) Milestone 2 |
-| `packages/cli` | User UI | Interactive authorization, Agent launcher |
+| `packages/cli` | User UI | User CLI: `discover`/`connect`/`authorize`/`import`/`sessions`/`revoke`/`audit`/`registry`; developer shortcut `uomp agent run` |
 | `apps/server` | — | Combined Auth + Guard HTTP service |
 
 ---
@@ -42,18 +42,43 @@ Key points:
 
 ### 2.1 Local Development Convenience Mode
 
-The MVP's `pnpm cli run ./examples/calendar-agent` is a shortcut to lower the barrier to entry:
+The MVP's `pnpm cli agent run ./examples/calendar-agent` is a shortcut to lower the barrier to entry:
 
 <img src="/diagrams/design-shortcut-en.svg" alt="UOMP local development shortcut sequence diagram" class="diagram" />
 
-This mode merges the "authorization proxy" and "Agent launcher" roles and is only suitable for local development and testing, not production architecture.
+This mode merges the "authorization proxy" and "Agent launcher" roles and is only suitable for local development and testing, not production architecture. In the standard user flow, the CLI only runs `authorize` and prints the Token; the Agent is started independently by the user.
 
 Key code entry points:
 
-- `packages/cli/src/commands/run.ts`: orchestrates the local development mode
+- `packages/cli/src/commands/authorize.ts`: standard authorization flow
+- `packages/cli/src/commands/run.ts`: local development shortcut orchestration
+- `packages/cli/src/utils/manifest.ts`: `loadManifest()` and `normalizeManifest()`
 - `packages/auth/src/index.ts`: `AuthService`
 - `packages/guard/src/index.ts`: `MemoryGuard`
 - `packages/token/src/index.ts`: `JWTTokenIssuer`
+
+### 2.2 CLI Command Structure
+
+To clearly separate the "end user" and "Agent developer" paths, CLI commands are split into two groups:
+
+**End-user commands**
+
+| Command | Purpose |
+|---------|---------|
+| `uomp import <file>` | Import private data from CSV/JSON into the Memory Store |
+| `uomp discover <agent>` | Discover an Agent and display its `uom.json` manifest |
+| `uomp connect <agent>` | Verify identity, checksum, and cache the manifest |
+| `uomp authorize <agent>` | Interactively or scriptably authorize and output `UOM_TOKEN` |
+| `uomp sessions` | List active sessions |
+| `uomp revoke <session-id>` | Revoke a session |
+| `uomp audit` | View access audit logs |
+| `uomp registry <sub>` | Manage the local Registry index |
+
+**Developer commands**
+
+| Command | Purpose |
+|---------|---------|
+| `uomp agent run <agent>` | Local debug shortcut: authorize, start Guard, and launch the Agent in one command |
 
 ---
 
@@ -61,12 +86,12 @@ Key code entry points:
 
 ### 3.1 Agent Declaration
 
-`uom.json` uses `snake_case` for `requested_scopes`, while the internal `AgentManifest` type uses `camelCase`. The CLI converts between them in `loadManifest()` via `normalizeManifest()`:
+`uom.json` uses `snake_case` for `requested_scopes`, while the internal `AgentManifest` type uses `camelCase`. The CLI converts between them in `packages/cli/src/utils/manifest.ts` via `loadManifest()` / `normalizeManifest()`:
 
 ```ts
-// packages/cli/src/commands/run.ts
+// packages/cli/src/utils/manifest.ts
 const raw = JSON.parse(content);
-return this.normalizeManifest(raw);
+return normalizeManifest(raw);
 ```
 
 ### 3.2 Session Creation & Granting
@@ -144,6 +169,8 @@ Then it dispatches by request type:
 4. If any item tag is in `tags` and not in `denyTags` → allow
 5. Otherwise deny
 
+Therefore, high-sensitivity data (e.g., `portfolio:holdings`) **cannot be authorized by tag alone**. During interactive or scripted authorization, `uomp authorize` automatically adds the keys of all items under the selected high-sensitivity tag to `scope.keys`. This satisfies Guard's requirement while still presenting the user with a tag-level summary in the authorization panel.
+
 ### 3.5 Identity Verification (Optional)
 
 Identity verification is performed by the **CLI on the user's machine**, not inside the Agent process. `IdentityVerifier` current implementation:
@@ -182,7 +209,24 @@ WHERE EXISTS (SELECT 1 FROM json_each(tags) WHERE value = ?)
 
 ---
 
-## 6. Local Configuration Files
+## 6. Stock Analyst Example
+
+`examples/stock-analyst/` is the Phase 1 end-to-end acceptance example, covering the full flow from data import to audit and revocation:
+
+1. `uomp import ./examples/stock-analyst/sample-risk.json` imports the risk profile (self-describing JSON record).
+2. `uomp import ./examples/stock-analyst/sample-holdings.csv --tag portfolio:holdings --sensitivity high` imports the holdings CSV.
+3. `uomp discover ./examples/stock-analyst` and `uomp connect ./examples/stock-analyst` verify the Agent.
+4. `uomp authorize ./examples/stock-analyst` authorizes interactively, showing a field-level summary.
+5. The user passes the printed `UOM_TOKEN` to the Agent process and runs `node ./examples/stock-analyst/index.js` independently.
+6. The Agent reads authorized data, fetches public market quotes, and generates a local Markdown report.
+7. `uomp sessions -a` and `uomp audit --limit 20` review access records.
+8. `uomp revoke <session-id>` revokes the session.
+
+Full steps are in the repository at [`examples/stock-analyst/README.md`](https://github.com/0xaicrypto/uomp-core/tree/main/examples/stock-analyst/README.md).
+
+---
+
+## 8. Local Configuration Files
 
 After `uomp init`, the following are generated in `~/.uomp`:
 
@@ -194,7 +238,7 @@ After `uomp init`, the following are generated in `~/.uomp`:
 
 ---
 
-## 7. MVP Limitations & Future Extensions
+## 9. MVP Limitations & Future Extensions
 
 | Capability | MVP Status | Notes |
 |------------|------------|-------|
@@ -207,8 +251,9 @@ After `uomp init`, the following are generated in `~/.uomp`:
 
 ---
 
-## 8. Related Links
+## 10. Related Links
 
 - [Protocol Specification](/en/spec/)
 - [Reference Implementation Repository](https://github.com/0xaicrypto/uomp-core)
-- [Example Agent](https://github.com/0xaicrypto/uomp-core/tree/main/examples/calendar-agent)
+- [Calendar Example Agent](https://github.com/0xaicrypto/uomp-core/tree/main/examples/calendar-agent)
+- [Stock Analyst Example Agent](https://github.com/0xaicrypto/uomp-core/tree/main/examples/stock-analyst)

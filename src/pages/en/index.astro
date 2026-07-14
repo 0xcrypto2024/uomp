@@ -22,6 +22,7 @@ import { baseUrl } from '../../utils/base.ts';
     </p>
     <div class="hero-btns">
       <a href={`${baseUrl}en/spec/`} class="btn-h1">Read the Spec →</a>
+      <a href={`${baseUrl}en/example/`} class="btn-h1">Stock Analyst Example →</a>
       <a href="https://github.com/0xaicrypto/uomp-core" target="_blank" rel="noopener" class="btn-h2">GitHub</a>
     </div>
 
@@ -38,7 +39,7 @@ import { baseUrl } from '../../utils/base.ts';
               <rect x="5" y="11" width="14" height="10" rx="2"/>
               <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
             </svg>
-            uomp run ./examples/calendar-agent
+            uomp authorize ./my-agent
           </div>
         </div>
         <div class="window-body">
@@ -148,11 +149,11 @@ import { baseUrl } from '../../utils/base.ts';
       <h2>Five steps,<br/><em>one authorization.</em></h2>
       <img src="/diagrams/home-workflow-en.svg" alt="UOMP workflow diagram" class="diagram" />
       <ol>
-        <li><strong>Discover an Agent</strong>: Browse an Agent marketplace (e.g., an ERC8004-based registry).</li>
-        <li><strong>Review the Manifest</strong>: The Agent declares its identity and requested memory scope in <code>uom.json</code>.</li>
-        <li><strong>Connect & Authorize</strong>: You confirm the scope, and the Auth Service issues a short-lived Capability Token.</li>
-        <li><strong>Access Data</strong>: The Agent accesses Memory Guard within the authorized scope.</li>
-        <li><strong>Disconnect</strong>: The session ends or you revoke it, and the token becomes invalid immediately.</li>
+        <li><strong>Discover an Agent</strong>: Browse an Agent marketplace (e.g., an ERC8004-based registry) or a local directory.</li>
+        <li><strong>Review the Manifest</strong>: The Agent declares its identity, requested memory scope, and field-level purpose in <code>uom.json</code>.</li>
+        <li><strong>Connect & Authorize</strong>: You verify the Agent with <code>uomp connect</code>, then confirm the scope with <code>uomp authorize</code> to obtain a <code>UOM_TOKEN</code>.</li>
+        <li><strong>Run the Agent Independently</strong>: You provide the Token to the Agent process, which reads data through Memory Guard within the authorized scope.</li>
+        <li><strong>Disconnect</strong>: The session expires or you revoke it with <code>uomp revoke</code>, and the token becomes invalid immediately.</li>
       </ol>
     </div>
   </section>
@@ -209,7 +210,8 @@ import { baseUrl } from '../../utils/base.ts';
       <p>Read the protocol draft, check out the reference implementation, or join the GitHub discussion to build a user-sovereign Agent memory authorization standard together.</p>
       <div class="hero-btns">
         <a href={`${baseUrl}en/spec/`} class="btn-h1">Read the Spec →</a>
-        <a href="https://github.com/0xaicrypto/uomp-core" target="_blank" rel="noopener" class="btn-h2">View Implementation</a>
+        <a href={`${baseUrl}en/example/`} class="btn-h1">Stock Analyst Example →</a>
+        <a href="https://github.com/0xaicrypto/uomp-core" target="_blank" rel="noopener" class="btn-h2">Reference Implementation</a>
       </div>
     </div>
   </section>

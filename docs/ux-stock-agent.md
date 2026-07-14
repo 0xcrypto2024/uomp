@@ -276,6 +276,190 @@ $ uomp import mydata.csv \
     --map "value.cost_basis=成本价"
 ```
 
+#### 5.2.1a 导入数据格式规范
+
+为了让 `uomp import` 既能处理股票场景，也能处理未来各种私有数据，需要定义一套通用的导入格式规范。
+
+##### 通用原则
+
+1. **每一行 / 每一个对象 = 一个 Memory Item**。
+2. **CSV 必须包含表头**，编码为 UTF-8。
+3. **JSON 支持两种形式**：
+   - 单个对象：导入为 1 条 Memory Item。
+   - 对象数组：每条导入为 1 条 Memory Item。
+4. **字段名不区分大小写**，支持中英文别名。
+5. **缺失值允许为空**，但 key 字段不能为空。
+6. **日期统一为 ISO8601**，如 `2026-07-14` 或 `2026-07-14T10:00:00Z`。
+7. **数值字段统一为数字类型**，货币符号和千分位逗号应被自动去除。
+
+##### CSV 规范
+
+- 分隔符：默认英文逗号 `,`，可识别中文逗号并提示。
+- 字符串引号：支持双引号包裹含逗号的内容。
+- 表头行：第一行必须是字段名。
+- 空行：自动跳过。
+- 编码：UTF-8；如遇 GBK/GB2312，尝试自动转换并提示。
+
+##### JSON 规范
+
+```json
+{
+  "key": "AAPL",
+  "value": {
+    "symbol": "AAPL",
+    "quantity": 100,
+    "cost_basis": 150.0
+  },
+  "tags": ["portfolio:holdings"],
+  "sensitivity": "high",
+  "source": "user",
+  "description": "苹果持仓"
+}
+```
+
+或数组：
+
+```json
+[
+  { "key": "AAPL", "value": { ... } },
+  { "key": "TSLA", "value": { ... } }
+]
+```
+
+如果 JSON 中没有显式提供 `key`、`tags`、`sensitivity`，CLI 会尝试从 `--key-field`、`--tag`、`--sensitivity` 参数推断。
+
+##### 自动字段映射表
+
+CLI 内置常见字段别名映射：
+
+| 含义 | 英文字段名 | 中文字段名 | 映射目标 |
+|------|-----------|-----------|---------|
+| 唯一标识 / 股票代码 | `key`, `symbol`, `code`, `ticker` | `代码`, `股票代码`, `Symbol` | `key` 或 `value.symbol` |
+| 数量 | `quantity`, `shares`, `amount` | `数量`, `股数`, `持仓数量` | `value.quantity` |
+| 成本价 | `cost`, `cost_basis`, `avg_cost` | `成本价`, `成本`, `平均成本` | `value.cost_basis` |
+| 市值 | `market_value`, `value` | `市值`, `当前市值` | `value.market_value` |
+| 当前价 | `price`, `current_price` | `当前价`, `现价` | `value.current_price` |
+| 货币 | `currency` | `货币`, `币种` | `value.currency` |
+| 买入日期 | `acquired_at`, `purchase_date` | `买入日期`, `购入日期` | `value.acquired_at` |
+| 备注 | `notes`, `note`, `comment` | `备注`, `注释` | `value.notes` |
+| 交易类型 | `type`, `transaction_type` | `类型`, `交易类型` | `value.type` |
+| 交易价格 | `price`, `transaction_price` | `价格`, `成交价` | `value.price` |
+| 手续费 | `fee`, `commission` | `手续费`, `佣金` | `value.fee` |
+| 风险等级 | `risk_level`, `risk_profile` | `风险等级`, `风险偏好` | `value.risk_level` |
+| 最大可承受回撤 | `max_drawdown` | `最大回撤` | `value.max_drawdown` |
+| 投资期限 | `investment_horizon` | `投资期限` | `value.investment_horizon` |
+
+##### 推荐数据格式示例
+
+###### portfolio:holdings（持仓）
+
+CSV：
+
+```csv
+symbol,quantity,cost_basis,market_value,currency,acquired_at,notes
+AAPL,100,150.00,17500.00,USD,2024-01-15,长期持有
+TSLA,50,200.00,9500.00,USD,2024-03-10,
+NVDA,30,300.00,12000.00,USD,2024-06-01,科技股
+```
+
+JSON：
+
+```json
+[
+  {
+    "key": "AAPL",
+    "value": {
+      "symbol": "AAPL",
+      "quantity": 100,
+      "cost_basis": 150.0,
+      "market_value": 17500.0,
+      "currency": "USD",
+      "acquired_at": "2024-01-15",
+      "notes": "长期持有"
+    }
+  }
+]
+```
+
+建议敏感度：**high**
+
+###### portfolio:watchlist（自选股）
+
+CSV：
+
+```csv
+symbol,notes
+AAPL,关注财报
+TSLA,电动车龙头
+```
+
+建议敏感度：**medium**
+
+###### profile:risk（风险偏好）
+
+JSON（单条记录）：
+
+```json
+{
+  "key": "user-risk-profile",
+  "value": {
+    "risk_level": "moderate",
+    "max_drawdown": 0.2,
+    "investment_horizon": "5_years",
+    "preferred_sectors": ["technology", "healthcare"],
+    "avoid_sectors": ["tobacco", "gambling"],
+    "notes": "稳健型投资者"
+  }
+}
+```
+
+建议敏感度：**medium**
+
+###### portfolio:transactions（交易记录）
+
+CSV：
+
+```csv
+id,symbol,type,quantity,price,fee,currency,executed_at,notes
+1,AAPL,buy,100,150.00,5.00,USD,2024-01-15T10:00:00Z,首次买入
+2,TSLA,sell,50,210.00,5.00,USD,2024-05-20T14:30:00Z,止盈
+```
+
+建议敏感度：**high**
+
+##### 敏感度默认值
+
+| 数据类型 | 默认敏感度 | 说明 |
+|----------|-----------|------|
+| `portfolio:holdings` | high | 含金额和成本 |
+| `portfolio:transactions` | high | 含完整交易记录 |
+| `portfolio:watchlist` | medium | 只含代码和备注 |
+| `profile:risk` | medium | 用户偏好 |
+| `profile:goal` | medium | 用户目标 |
+| `profile:constraints` | medium | 投资约束 |
+| `analysis:history` | low | 历史报告摘要 |
+
+如果用户显式指定 `--sensitivity`，以用户输入为准。
+
+##### 数据校验规则
+
+导入时 CLI 必须进行以下校验：
+
+1. **key 不能为空**：每条记录必须有 key 或由 `--key-field` 指定字段生成 key。
+2. **key 唯一性**：同一 tag 下 key 不能重复。重复时提示用户选择：跳过 / 覆盖 / 全部覆盖。
+3. **数值字段合法性**：`quantity`、`cost_basis`、`market_value` 等必须是数字。
+4. **日期字段合法性**：`acquired_at`、`executed_at` 必须是合法日期。
+5. **tag 和 sensitivity 必须存在**：如果无法推断，必须提示用户输入。
+
+##### 错误信息示例
+
+| 错误 | 输出 |
+|------|------|
+| 表头缺少 key 字段 | `无法识别唯一标识字段。请使用 --key-field 指定，例如：--key-field symbol` |
+| 数值字段包含货币符号 | `第 3 行 cost_basis 包含 "$" 符号，已自动去除。建议原始数据使用纯数字。` |
+| key 重复 | `发现重复 key "AAPL"。是否覆盖已有记录？[y/n/a]（a=全部覆盖）` |
+| 日期格式错误 | `第 5 行 acquired_at "2024/01/15" 格式不识别，已尝试转换。建议统一使用 ISO8601 格式。` |
+
 #### 5.2.2 发现 Agent
 
 ```bash

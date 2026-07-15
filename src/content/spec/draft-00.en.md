@@ -124,6 +124,12 @@ The Agent MUST provide a `uom.json` in the same directory as the executable or i
   "required_capabilities": ["memory.read"],
   "optional_capabilities": ["memory.query"],
   "requires_remote": false,
+  "data_retention_policy": {
+    "max_retention_seconds": 300,
+    "deletion_method": "process_termination",
+    "proof_required": false,
+    "description": "Agent clears all user data within 5 minutes after task completion"
+  },
   "identity": {
     "did": "did:ethr:0xabc123...",
     "verification_methods": ["did", "gpg", "x509"],
@@ -150,6 +156,7 @@ The Agent MUST provide a `uom.json` in the same directory as the executable or i
 | `required_capabilities` | string[] | OPTIONAL | List of required capabilities. |
 | `optional_capabilities` | string[] | OPTIONAL | List of optional capabilities. |
 | `requires_remote` | boolean | OPTIONAL | Whether remote connection is required, default `false`. |
+| `data_retention_policy` | object | RECOMMENDED | Agent declares its data retention policy, see §6.5. |
 | `identity` | object | OPTIONAL | Publisher identity verification information. |
 
 ### 6.4 Scope Object
@@ -162,6 +169,7 @@ The Scope Object is used in `requested_scopes.read` and `requested_scopes.write`
   "keys": ["user.display_name"],
   "deny_tags": ["financial"],
   "deny_keys": ["user.password"],
+  "allowed_fields": ["key", "value", "tags", "sensitivity"],
   "description": "Why this scope is needed"
 }
 ```
@@ -172,7 +180,43 @@ The Scope Object is used in `requested_scopes.read` and `requested_scopes.write`
 | `keys` | string[] | MUST | List of specific keys requested for authorization. |
 | `deny_tags` | string[] | OPTIONAL | Explicitly denied tags. |
 | `deny_keys` | string[] | OPTIONAL | Explicitly denied keys. |
+| `allowed_fields` | string[] | OPTIONAL | Fields allowed to return per Memory Item. If absent, return the full item. |
 | `description` | string | RECOMMENDED | Purpose description for the authorization panel. |
+
+### 6.5 Data Retention Policy
+
+The Agent SHOULD declare a data retention policy in `uom.json` to be transparent to users about its data handling practices. UOMP does not technologically enforce this policy, but surfaces it to users for informed authorization decisions.
+
+```json
+{
+  "data_retention_policy": {
+    "max_retention_seconds": 300,
+    "deletion_method": "process_termination",
+    "proof_required": false,
+    "description": "Agent clears all user data within 5 minutes after task completion",
+    "third_party_sharing": false,
+    "encryption_at_rest": true
+  }
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `max_retention_seconds` | number | MUST | Maximum seconds the Agent promises to retain data after task completion. `0` means no persistence — discarded immediately. |
+| `deletion_method` | string | MUST | How data is deleted: `process_termination` (OS reclaims after process exit), `secure_wipe` (active overwrite), `ephemeral_storage` (no persistent disk). |
+| `proof_required` | boolean | OPTIONAL | Default `false`. If `true`, the Agent MUST submit a deletion proof before the Session closes (see §19). |
+| `description` | string | RECOMMENDED | Human-readable retention policy description. |
+| `third_party_sharing` | boolean | OPTIONAL | Default `false`. Whether the Agent shares user data with third parties (e.g., external APIs). |
+| `encryption_at_rest` | boolean | OPTIONAL | Default `false`. Whether the Agent encrypts temporarily stored user data at rest. |
+
+**Retention levels**:
+
+| Level | `max_retention_seconds` | `deletion_method` | Use case |
+|-------|------------------------|-------------------|----------|
+| Zero retention | `0` | `process_termination` | Stateless function/container; data never touches disk |
+| Short retention | 300–600 | `process_termination` | Discard after each task |
+| Session retention | matches Token expiry | `secure_wipe` | Cached until Session ends |
+| No guarantee | large value | any | User sees red warning in authorization panel |
 
 ## 7. Capability Token
 
@@ -207,7 +251,10 @@ The Capability Token uses JWT format and is signed by the Auth Service's private
   },
   "profile": "local",
   "audience": "http://127.0.0.1:9374",
-  "allowed_endpoints": ["127.0.0.1"]
+  "allowed_endpoints": ["127.0.0.1"],
+  "allowed_fields": ["key", "value", "tags", "sensitivity"],
+  "aggregation_only": false,
+  "task_bound": false
 }
 ```
 
@@ -227,6 +274,9 @@ The UOMP Capability Token JWT payload uses the following custom claims (snake_ca
 | `profile` | string | OPTIONAL | `local` or `remote`, default `local`. |
 | `audience` | string | OPTIONAL | Memory Guard endpoint bound to the Token. REQUIRED for Remote Profile. |
 | `allowed_endpoints` | string[] | OPTIONAL | Network location whitelist for Token use. |
+| `allowed_fields` | string[] | OPTIONAL | Fields allowed to return per Memory Item. Memory Guard MUST filter results to include only these fields. |
+| `aggregation_only` | boolean | OPTIONAL | Default `false`. If `true`, only aggregation queries are permitted; returning individual Memory Item raw data is forbidden. |
+| `task_bound` | boolean | OPTIONAL | Default `false`. If `true`, the Token is bound to a single task; the Agent MUST submit a deletion proof after completion and destroy the Token. |
 
 The JWT Header SHOULD include `alg` and `kid` to support key rotation and verification.
 
@@ -939,6 +989,12 @@ event PayloadAnchored(
   bytes32 indexed sessionHash,
   bytes32 agentHash
 );
+
+event DataDeletionProofSubmitted(
+  bytes32 indexed sessionHash,
+  bytes32 indexed agentHash,
+  bytes32 deletionProofHash
+);
 ```
 
 Hash computation:
@@ -947,6 +1003,7 @@ Hash computation:
 - `agentHash` = `keccak256(agent_id)`
 - `endpointHash` = `keccak256(request_path)`
 - `payloadHash` = `sha256(ciphertext)`
+- `deletionProofHash` = `keccak256(deletion_proof_id || session_id || memory_hash)`
 
 On-chain events MUST NOT contain specific Memory keys/values or Payload plaintext.
 
@@ -955,6 +1012,7 @@ On-chain events MUST NOT contain specific Memory keys/values or Payload plaintex
 - **Authorization events** (`SessionGranted`, `SessionRevoked`): low volume and high criticality, SHOULD be anchored near real-time.
 - **Access events** (`GatewayAccess`): high volume, SHOULD be batched. Gateway aggregates events into a Merkle tree every N minutes or every M events, anchors the `merkleRoot` on-chain, and keeps the full log locally for later verification.
 - **Payload anchoring**: each Payload SHOULD have its hash anchored individually after generation.
+- **Deletion proofs** (`DataDeletionProofSubmitted`): deletion proofs for each Session SHOULD be anchored near real-time after submission.
 
 ```
 Local events ──► Batch aggregation ──► Merkle root ──► On-chain event
@@ -962,39 +1020,148 @@ Local events ──► Batch aggregation ──► Merkle root ──► On-chai
                           └── Full log retained at Gateway for audit verification
 ```
 
-## 19. Security Considerations
+## 19. Data Retention & Deletion Proof
 
-### 19.1 Token Security
+### 19.1 Overview
+
+UOMP can control what data an Agent reads **at the point of access** via the Memory Guard, but cannot technologically guarantee the Agent deletes the data afterwards. This section defines:
+
+1. How Agents declare retention policies in `uom.json` (§6.5).
+2. How users constrain data exposure via the Capability Token (`allowed_fields`, `aggregation_only`, `task_bound`).
+3. How Agents can voluntarily submit verifiable deletion proofs.
+4. How deletion proofs integrate with the audit trail and optional blockchain anchoring.
+
+### 19.2 Data Exposure Controls
+
+#### allowed_fields
+
+By specifying `allowed_fields` in the Capability Token, the user (or CLI rules) constrains which fields of each Memory Item are returned. The Memory Guard MUST filter every returned item to include only the specified fields:
+
+```json
+{
+  "allowed_fields": ["key", "value"]
+}
+```
+
+If `allowed_fields` is absent, all fields are returned. For high-sensitivity data (`sensitivity=high`), `allowed_fields` SHOULD default to exclude metadata such as `sensitivity` and `source`.
+
+#### aggregation_only
+
+When `aggregation_only: true`, the Agent is only permitted to call aggregation endpoints that return computed results (sum, average, count, etc.), not individual Memory Items:
+
+```http
+GET /v1/memory/aggregate?tag=portfolio:holdings&op=sum&field=value.market_value
+```
+
+Aggregation queries MUST NOT return any individual key or value. The Guard MUST reject non-aggregation requests (`/v1/memory/:key`, `/v1/memory?tag=`) from `aggregation_only` Tokens.
+
+#### task_bound
+
+When `task_bound: true`, the Token is valid for a single task. After the task completes, the Agent MUST call the deletion proof endpoint and the Session is automatically closed. The Token cannot be used for subsequent reads.
+
+### 19.3 Deletion Proof
+
+If the Agent declares `proof_required: true` in its retention policy, it MUST submit a deletion proof before the Session is closed. The proof is a structured statement signed by the Agent's identity key:
+
+```json
+{
+  "deletion_proof_id": "del_xxx",
+  "session_id": "sess_abc123",
+  "agent_id": "calendar_agent",
+  "deleted_at": "2026-07-12T10:35:00Z",
+  "memory_hash": "sha256:abc123...",
+  "fields_accessed": ["key", "value"],
+  "method": "process_termination",
+  "proof_value": "base64-encoded-agent-signature..."
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `deletion_proof_id` | string | MUST | Unique identifier for this proof. |
+| `session_id` | string | MUST | The Session under which data was accessed. |
+| `agent_id` | string | MUST | Agent identifier. |
+| `deleted_at` | ISO8601 | MUST | Timestamp when deletion was completed. |
+| `memory_hash` | string | MUST | SHA-256 hash of all accessed memory item keys concatenated with their values (used for post-hoc verification of which data the Agent held). |
+| `fields_accessed` | string[] | RECOMMENDED | Fields the Agent actually read. |
+| `method` | string | MUST | Deletion method; must match `data_retention_policy.deletion_method`. |
+| `proof_value` | string | MUST | Agent's cryptographic signature over the proof structure using its identity key. |
+
+### 19.4 Submission & Audit Integration
+
+The Agent submits the deletion proof via:
+
+```http
+POST /v1/sessions/{session_id}/deletion-proof
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+Upon receipt, the Auth Service or Gateway:
+
+1. Verifies the `proof_value` signature against the Agent's registered identity public key.
+2. Validates that `deleted_at` ≤ Token `expires_at`.
+3. Records the proof in the audit log with `action: deletion_proof`.
+4. If `task_bound: true`, automatically closes the Session.
+5. Optionally anchors the proof hash on-chain (§18.4.3).
+
+If the Agent fails to submit a deletion proof before Session expiration (and `proof_required` was true), the audit log records a `deletion_proof_missing` event. This may trigger reputation penalties or bond forfeiture in any reputation system.
+
+### 19.5 Atomic Guarantee
+
+When both `task_bound: true` and `proof_required: true` are set, deletion proof submission is a prerequisite for normal Session closure. Sessions lacking a proof are marked as abnormal, and the Agent's Registry reputation score degrades. This provides an **economic/reputation-level atomicity guarantee** as compensation for the technological infeasibility.
+
+> **Future extension**: TEE (Trusted Execution Environment) enables hardware-level atomicity — the Agent code runs inside an enclave, memory is automatically zeroed on exit, and hardware attestation is provided.
+
+### 18.4.3 Deletion Proof Anchoring
+
+In addition to the blockchain events in 18.4.1:
+
+```solidity
+event DataDeletionProofSubmitted(
+  bytes32 indexed sessionHash,
+  bytes32 indexed agentHash,
+  bytes32 deletionProofHash
+);
+```
+
+- `deletionProofHash` = `keccak256(deletion_proof_id || session_id || memory_hash)`
+
+This event SHOULD be anchored near real-time after the Agent submits the deletion proof.
+
+## 20. Security Considerations
+
+### 20.1 Token Security
 
 - Capability Tokens MUST be signed by the Auth Service's private key.
 - Tokens SHOULD use short lifetimes (default 30 minutes, 10 minutes for Remote Profile).
 - Tokens MUST NOT be persisted to locations freely accessible by the Agent.
 
-### 19.2 Memory Store Security
+### 20.2 Memory Store Security
 
 - Memory Store SHOULD be encrypted.
 - High-sensitivity data SHOULD be additionally encrypted.
 
-### 19.3 Communication Security
+### 20.3 Communication Security
 
 - Local Profile uses HTTP over localhost.
 - Remote Profile MUST use TLS 1.3 + mTLS.
 - SDKs MUST NOT log Tokens.
 
-### 19.4 Agent Write Restrictions
+### 20.4 Agent Write Restrictions
 
 - Agents MUST NOT write Memory during the MVP phase.
 - After Milestone 2 introduces Staging writes, Agent writes MUST be confirmed by the user before taking effect.
 - Agents MUST NOT write `sensitivity=high` Memory Items.
 
-## 20. Privacy Considerations
+## 21. Privacy Considerations
 
 - UOMP aims to minimize the scope of data accessed by Agents.
 - Users SHOULD be able to view and revoke any active Session.
 - Audit logs SHOULD help users understand what data Agents accessed.
 - Memory Guard SHOULD avoid returning any data outside the authorized scope, including existence information.
 
-## 21. Future Work
+## 22. Future Work
 
 - Agent write staging.
 - Semantic retrieval (`query` endpoint).
@@ -1002,8 +1169,11 @@ Local events ──► Batch aggregation ──► Merkle root ──► On-chai
 - Policy templates.
 - DIDComm v2 authorization channel.
 - Decentralized Payload Relay (IPFS, etc.).
+- TEE (Trusted Execution Environment) Agent execution for hardware-level data retention guarantees.
+- Stateless Agent execution model with per-task isolation.
+- Agent reputation system integrated with Registry.
 
-## 22. References
+## 23. References
 
 - [RFC 2119] Key words for use in RFCs to Indicate Requirement Levels
 - [RFC 7519] JSON Web Token (JWT)
@@ -1083,6 +1253,12 @@ curl -X POST http://127.0.0.1:9374/v1/sessions/sess_abc123/close
   "required_capabilities": ["memory.read"],
   "optional_capabilities": ["memory.query"],
   "requires_remote": false,
+  "data_retention_policy": {
+    "max_retention_seconds": 300,
+    "deletion_method": "process_termination",
+    "proof_required": false,
+    "description": "Agent clears all user data within 5 minutes after task completion"
+  },
   "identity": {
     "did": "did:ethr:0xabc123...",
     "verification_methods": ["did", "gpg"],

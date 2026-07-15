@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import { baseUrl } from '../utils/base.ts';
 ---
 
-<Layout title="路线图 - UOMP" switchHref={`${baseUrl}en/roadmap/`}>
+<Layout title="路线图 - UOMP" description="UOMP 从协议草案到完整生态的发展规划与实现进度" switchHref={`${baseUrl}en/roadmap/`}>
   <section>
     <div class="container">
       <h1>路线图</h1>
@@ -52,6 +52,10 @@ import { baseUrl } from '../utils/base.ts';
         <li><span class="status status-future">未来</span>策略模板（如"仅偏好"、"偏好+公开身份"）</li>
         <li><span class="status status-future">未来</span>授权与访问事件区块链锚定</li>
       </ul>
+    </div>
+    <div class="hero-btns" style="margin-top:2.5rem;">
+      <a href={`${baseUrl}spec/`} class="btn-h1">阅读规范 →</a>
+      <a href={`${baseUrl}tutorial/`} class="btn-h1">SDK 教程 →</a>
     </div>
   </section>
 </Layout>

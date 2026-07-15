@@ -1,68 +1,61 @@
+---
+export interface Props { lang?: 'zh' | 'en' }
+const { lang = 'zh' } = Astro.props;
+const stats = lang === 'zh'
+  ? [{ v: '本地优先', l: '数据保留在用户设备' },{ v: '最小授权', l: '按 tag / key / field 控制' },{ v: '远程安全', l: 'mTLS Gateway + 聚合查询' },{ v: '透明保留', l: 'Agent 声明数据删除策略' },{ v: '可审计', l: '每次访问记录日志' }]
+  : [{ v: 'Local-first', l: 'Data stays on user device' },{ v: 'Least privilege', l: 'Scoped by tag/key/field' },{ v: 'Remote safe', l: 'mTLS Gateway + aggregation' },{ v: 'Transparent', l: 'Agent declares deletion policy' },{ v: 'Auditable', l: 'Every access logged' }];
+---
 <div class="window-wrap">
   <div class="window">
     <div class="window-bar">
-      <div class="window-dots">
-        <div class="window-dot r"></div>
-        <div class="window-dot y"></div>
-        <div class="window-dot g"></div>
-      </div>
+      <div class="window-dots"><div class="window-dot r"></div><div class="window-dot y"></div><div class="window-dot g"></div></div>
     </div>
-    <div class="window-body" id="terminal-demo" style="padding:20px; font-family:monospace; font-size:0.82rem; color:#D1D5DB; text-align:left; min-height:160px; max-height:200px; overflow-y:auto; line-height:1.7;">
+    <div class="window-body" id="terminal-demo" style="padding:20px;font-family:monospace;font-size:0.82rem;color:#D1D5DB;text-align:left;min-height:160px;max-height:200px;overflow-y:auto;line-height:1.7;">
     </div>
   </div>
   <div class="stats-bar">
-    <div class="stat-item"><span class="stat-val">本地优先</span><span class="stat-lbl">数据保留在用户设备</span></div>
-    <div class="stat-item"><span class="stat-val">最小授权</span><span class="stat-lbl">按 tag / key / field 控制</span></div>
-    <div class="stat-item"><span class="stat-val">远程安全</span><span class="stat-lbl">mTLS Gateway + 聚合查询</span></div>
-    <div class="stat-item"><span class="stat-val">透明保留</span><span class="stat-lbl">Agent 声明数据删除策略</span></div>
-    <div class="stat-item"><span class="stat-val">可审计</span><span class="stat-lbl">每次访问记录日志</span></div>
+    {stats.map(s => <div class="stat-item"><span class="stat-val">{s.v}</span><span class="stat-lbl">{s.l}</span></div>)}
   </div>
 </div>
 
 <script>
 (function() {
   const el = document.getElementById('terminal-demo');
-  const C = { g: '#9CA3AF', b: '#60A5FA', w: '#F9FAFB', gn: '#34D399', dim: '#6B7280' };
-  const cursor = '<span style="animation:blink 1s step-end infinite">▌</span>';
-
+  if (!el) return;
+  const C = { g: '#9CA3AF', w: '#F9FAFB', gn: '#34D399', dim: '#6B7280' };
   const frames = [
-    `<span style="color:${C.g}">$</span> <span style="color:${C.w}">uomp import holdings.csv</span><br><span style="color:${C.gn}">✓ 10 items</span><br>`,
-    `<span style="color:${C.g}">$</span> <span style="color:${C.w}">uomp authorize stock-analyst</span><br><span style="color:${C.gn}">✓ token</span><br>`,
-    `<span style="color:${C.g}">$</span> <span style="color:${C.w}">node index.js</span><br><span style="color:${C.g}">P&amp;L: +72% &nbsp;Sharpe: 1.24 &nbsp;Signals: 8</span><br><span style="color:${C.gn}">✓ report.html</span><br>`,
+    `<span style="color:${C.g}">$</span> <span style="color:${C.w}">uomp import holdings.csv</span><br><span style="color:${C.gn}">\u2713 10 items</span><br>`,
+    `<span style="color:${C.g}">$</span> <span style="color:${C.w}">uomp authorize stock-analyst</span><br><span style="color:${C.gn}">\u2713 token</span><br>`,
+    `<span style="color:${C.g}">$</span> <span style="color:${C.w}">node index.js</span><br><span style="color:${C.g}">P&amp;L: +72% &nbsp;Sharpe: 1.24 &nbsp;Signals: 8</span><br><span style="color:${C.gn}">\u2713 report.html</span><br>`,
     `<span style="color:${C.g}">$</span> <span style="color:${C.w}">uomp gateway start</span><br><span style="color:${C.dim}">https://xxx.trycloudflare.com</span><br>`,
   ];
-
-  let i = 0;
-  let cycle = 0;
+  let i = 0, cycle = 0, timer;
   const maxCycles = 3;
 
   function scroll() { el.scrollTop = el.scrollHeight; }
 
-  async function next() {
-    el.innerHTML += frames[i];
-    scroll();
-    await new Promise(r => setTimeout(r, 1800));
-    i++;
-    if (i >= frames.length) {
-      i = 0;
-      cycle++;
-      if (cycle >= maxCycles) {
-        await new Promise(r => setTimeout(r, 2000));
-        el.innerHTML = '';
-        cycle = 0;
-        await new Promise(r => setTimeout(r, 400));
-      }
+  function next() {
+    if (document.hidden) { timer = setTimeout(next, 1000); return; }
+    el.innerHTML += frames[i]; scroll(); i++;
+    if (i >= frames.length) { i = 0; cycle++; }
+    if (cycle >= maxCycles) {
+      el.innerHTML = ''; cycle = 0;
+      timer = setTimeout(next, 2000); return;
     }
-    next();
+    timer = setTimeout(next, 1800);
   }
 
   el.innerHTML = `<span style="color:${C.dim}">UOMP v1.0</span><br><br>`;
-  next();
+  timer = setTimeout(next, 800);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) scroll(); });
+  window.addEventListener('beforeunload', () => clearTimeout(timer));
 })();
 </script>
 <style>
-  @keyframes blink { 50% { opacity: 0; } }
   #terminal-demo::-webkit-scrollbar { width: 4px; }
   #terminal-demo::-webkit-scrollbar-track { background: #111; }
   #terminal-demo::-webkit-scrollbar-thumb { background: #333; }
+  @media (prefers-reduced-motion: reduce) {
+    .window-body * { animation: none !important; }
+  }
 </style>

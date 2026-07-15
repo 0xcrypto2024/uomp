@@ -24,7 +24,7 @@ const nav = {
     brandTagline: '用户主权型 Agent 记忆授权协议',
     footerCols: {
       protocol: { title: '协议', links: [{ t: '规范', h: `${baseUrl}spec/` }, { t: '实现设计', h: `${baseUrl}design/` }, { t: '教程', h: `${baseUrl}tutorial/` }, { t: '示例', h: `${baseUrl}example/` }, { t: '路线图', h: `${baseUrl}roadmap/` }] },
-      community: { title: '社区', links: [{ t: 'GitHub', h: 'https://github.com/0xaicrypto/uomp-core' }, { t: '参考实现', h: 'https://github.com/0xaicrypto/uomp-core' }] },
+      community: { title: '社区', links: [{ t: 'GitHub', h: 'https://github.com/0xaicrypto/uomp-core' }, { t: 'Discussions', h: 'https://github.com/0xaicrypto/uomp/discussions' }] },
     },
     footerBtm: '© UOMP 贡献者 · 开放协议草案',
   },
@@ -41,7 +41,7 @@ const nav = {
     brandTagline: 'User-sovereign Agent memory authorization protocol',
     footerCols: {
       protocol: { title: 'Protocol', links: [{ t: 'Spec', h: `${baseUrl}en/spec/` }, { t: 'Implementation', h: `${baseUrl}en/design/` }, { t: 'Tutorial', h: `${baseUrl}en/tutorial/` }, { t: 'Example', h: `${baseUrl}en/example/` }, { t: 'Roadmap', h: `${baseUrl}en/roadmap/` }] },
-      community: { title: 'Community', links: [{ t: 'GitHub', h: 'https://github.com/0xaicrypto/uomp-core' }, { t: 'Reference Implementation', h: 'https://github.com/0xaicrypto/uomp-core' }] },
+      community: { title: 'Community', links: [{ t: 'GitHub', h: 'https://github.com/0xaicrypto/uomp-core' }, { t: 'Discussions', h: 'https://github.com/0xaicrypto/uomp/discussions' }] },
     },
     footerBtm: '© UOMP contributors · Open protocol draft',
   },
@@ -72,6 +72,28 @@ const isRoadmap = pathname.startsWith(`${baseUrl}roadmap/`) || pathname.startsWi
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <title>{title}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={Astro.url.href} />
+    <meta property="og:site_name" content="UOMP" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
+    <!-- hreflang -->
+    <link rel="canonical" href={Astro.url.href.replace(/\/$/, '') + '/'} />
+    {lang === 'zh' ? (
+      <link rel="alternate" hreflang="en" href={switchHref || `${baseUrl}en/`} />
+    ) : (
+      <link rel="alternate" hreflang="zh-CN" href={switchHref || baseUrl} />
+    )}
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
@@ -99,6 +121,9 @@ const isRoadmap = pathname.startsWith(`${baseUrl}roadmap/`) || pathname.startsWi
           <li><a href={roadmapHref} class={isRoadmap ? 'active' : ''}>{t.roadmap}</a></li>
         </ul>
         <div class="nav-r">
+          <button class="nav-hamburger" id="hamburger" aria-label="Menu" style="display:none">
+            <span></span>
+          </button>
           <a href={resolvedSwitchHref} class="btn-ng">{t.switch}</a>
           <a href="https://github.com/0xaicrypto/uomp-core" target="_blank" rel="noopener" class="btn-np">{t.github}</a>
         </div>
@@ -143,5 +168,17 @@ const isRoadmap = pathname.startsWith(`${baseUrl}roadmap/`) || pathname.startsWi
         <span>{t.footerBtm}</span>
       </div>
     </footer>
+    <script>
+      const btn = document.getElementById('hamburger');
+      const links = document.querySelector('.nav-links');
+      if (btn && links) {
+        if (window.innerWidth <= 768) btn.style.display = 'flex';
+        window.addEventListener('resize', () => {
+          btn.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+          if (window.innerWidth > 768) links.classList.remove('open');
+        });
+        btn.addEventListener('click', () => links.classList.toggle('open'));
+      }
+    </script>
   </body>
 </html>

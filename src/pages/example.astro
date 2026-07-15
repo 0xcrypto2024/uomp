@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import { baseUrl } from '../utils/base.ts';
 ---
 
-<Layout title="股票分析示例 - UOMP" switchHref={`${baseUrl}en/example/`}>
+<Layout title="股票分析示例 - UOMP" description="从导入到审计的完整 UOMP 操作流程：import、authorize、SDK分析、Gateway远程模式" switchHref={`${baseUrl}en/example/`}>
   <section>
     <div class="container">
       <div class="sec-eyebrow">
@@ -79,7 +79,7 @@ pnpm cli audit --limit 20</code></pre>
 # 或通过 API 调用：
 curl -X POST http://localhost:3080/analyze \
   -H 'Content-Type: application/json' \
-  -d '{`{`}"token":"...","gateway_url":"..."{`}`}'</code></pre>
+  -d '&#123;"token":"...","gateway_url":"..."&#125;'</code></pre>
       <p>部署到 Digital Ocean 后即为公共服务，任何人连接即可使用。见 <a href="https://github.com/0xaicrypto/uomp-core/tree/main/examples/stock-analyst/README.md" target="_blank" rel="noopener">完整 README</a>。</p>
 
       <h2>10. 远程模式：通过 Gateway 访问</h2>

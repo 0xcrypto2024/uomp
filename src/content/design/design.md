@@ -262,7 +262,34 @@ WHERE EXISTS (SELECT 1 FROM json_each(tags) WHERE value = ?)
 
 ---
 
-## 7. 本地配置文件
+## 7. SDK
+
+`packages/sdk` 提供 `UompClient` 类，Agent 开发者一行初始化即可使用 UOMP 全部能力：
+
+```ts
+import { UompClient } from '@uomp/sdk';
+
+const uomp = UompClient.fromEnv(); // 自动读取 UOM_TOKEN + UOMP_BASE_URL
+
+// 子客户端
+await uomp.memory.getByTag('portfolio:holdings');
+await uomp.aggregate.sum('portfolio:holdings', 'value.market_value');
+await uomp.payload.upload(report);
+await uomp.session.submitDeletionProof();
+await uomp.audit.query({ limit: 20 });
+```
+
+Transport 层自动处理：
+- `http://` → 直连 Memory Guard
+- `https://` → Gateway mTLS（自动加载 `~/.uomp/.gateway-certs/`）
+- 重试 + 退避 + 超时控制
+- 结构化错误码（`UompError`）
+
+向后兼容：原 `UserMemory` 类保留可用。完整 API 参考见 [`docs/sdk-design.md`](https://github.com/0xaicrypto/uomp-core/tree/main/docs/sdk-design.md)。
+
+---
+
+## 8. 本地配置文件
 
 CLI 初始化后生成：
 
@@ -274,7 +301,7 @@ CLI 初始化后生成：
 
 ---
 
-## 8. MVP 限制与未来扩展
+## 9. MVP 限制与未来扩展
 
 | 能力 | MVP 状态 | 说明 |
 |------|---------|------|
@@ -291,7 +318,7 @@ CLI 初始化后生成：
 
 ---
 
-## 9. 相关链接
+## 10. 相关链接
 
 - [协议规范](/spec/)
 - [参考实现仓库](https://github.com/0xaicrypto/uomp-core)

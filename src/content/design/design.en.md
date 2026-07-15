@@ -262,7 +262,33 @@ Full steps are in the repository at [`examples/stock-analyst/README.md`](https:/
 
 ---
 
-## 7. Local Configuration Files
+## 7. SDK
+
+`packages/sdk` provides the `UompClient` class — one-line init, full UOMP capability:
+
+```ts
+import { UompClient } from '@uomp/sdk';
+
+const uomp = UompClient.fromEnv(); // auto-reads UOM_TOKEN + UOMP_BASE_URL
+
+await uomp.memory.getByTag('portfolio:holdings');
+await uomp.aggregate.sum('portfolio:holdings', 'value.market_value');
+await uomp.payload.upload(report);
+await uomp.session.submitDeletionProof();
+await uomp.audit.query({ limit: 20 });
+```
+
+Transport layer handles:
+- `http://` → direct to Memory Guard
+- `https://` → Gateway mTLS (auto-loads `~/.uomp/.gateway-certs/`)
+- Retry + backoff + timeout
+- Structured errors (`UompError`)
+
+Backward compatible: `UserMemory` class retained. Full API reference: [`docs/sdk-design.en.md`](https://github.com/0xaicrypto/uomp-core/tree/main/docs/sdk-design.en.md).
+
+---
+
+## 8. Local Configuration Files
 
 After `uomp init`, the following are generated in `~/.uomp`:
 
@@ -274,7 +300,7 @@ After `uomp init`, the following are generated in `~/.uomp`:
 
 ---
 
-## 8. MVP Limitations & Future Extensions
+## 9. MVP Limitations & Future Extensions
 
 | Capability | MVP Status | Notes |
 |------------|------------|-------|
@@ -291,7 +317,7 @@ After `uomp init`, the following are generated in `~/.uomp`:
 
 ---
 
-## 9. Related Links
+## 10. Related Links
 
 - [Protocol Specification](/en/spec/)
 - [Reference Implementation Repository](https://github.com/0xaicrypto/uomp-core)

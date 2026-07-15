@@ -17,7 +17,7 @@ import { baseUrl } from '../../utils/base.ts';
       </div>
       <h1>Stock Analyst Agent</h1>
       <p>
-        This example walks through the complete UOMP user flow: import a holdings CSV and risk profile into the local Memory Store, authorize an external stock analyst Agent to read only what it needs, and let it generate a multi-dimensional investment analysis report (v0.2 adds sector allocation, concentration, volatility, Beta, stop-loss/take-profit signals).
+        UOMP flagship example Agent (v1.0). Upgraded to a <strong>self-serve HTTP API</strong> deployable to Digital Ocean — anyone can connect, authorize, and analyze. Analysis dimensions: P&L, sector allocation, concentration, volatility, Sharpe, VaR, Beta, Alpha, correlation matrix, RSI/MACD indicators, rebalance suggestions, scenario analysis.
       </p>
       <p>
         Full code and sample data are in the reference implementation under <a href="https://github.com/0xaicrypto/uomp-core/tree/main/examples/stock-analyst" target="_blank" rel="noopener">examples/stock-analyst</a>.
@@ -75,7 +75,19 @@ pnpm cli audit --limit 20</code></pre>
       <h2>8. Revoke authorization</h2>
       <pre><code>pnpm cli revoke &lt;session-id&gt;</code></pre>
 
-      <h2>9. Remote mode: access via Gateway</h2>
+      <h2>9. Self-serve mode (HTTP API)</h2>
+      <p>
+        v1.0 adds an HTTP server mode: the Agent runs as a standalone service with a Web UI and REST API. Users paste their Token in a browser — no CLI needed.
+      </p>
+      <pre><code>node examples/stock-analyst/server.js
+# Visit http://localhost:3080/ and paste your token
+# Or use the API:
+curl -X POST http://localhost:3080/analyze \
+  -H 'Content-Type: application/json' \
+  -d '{`{`}"token":"...","gateway_url":"..."{`}`}'</code></pre>
+      <p>Deploy to Digital Ocean to make it a public service. See the <a href="https://github.com/0xaicrypto/uomp-core/tree/main/examples/stock-analyst/README.md" target="_blank" rel="noopener">full README</a>.</p>
+
+      <h2>10. Remote mode: access via Gateway</h2>
       <p>
         If the Agent runs on a different machine or container, use <code>apps/gateway</code> to expose the local Memory Guard as an HTTPS + mTLS entry point. The Agent connects via mTLS, runs aggregate queries first, reads authorized data, and generates reports — then uploads the encrypted Payload and submits a deletion proof.
       </p>

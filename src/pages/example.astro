@@ -12,7 +12,7 @@ import { baseUrl } from '../utils/base.ts';
       </div>
       <h1>股票分析 Agent</h1>
       <p>
-        通过这个示例，你可以体验 UOMP 的完整用户流程：把持仓 CSV 和风险偏好导入本地 Memory Store，授权一个外部股票分析 Agent 读取必要数据，Agent 结合公开行情生成多维投资分析报告（v0.2 新增行业分布、集中度、波动率、Beta、止损止盈信号）。
+        UOMP 旗舰示例 Agent（v1.0）。升级为<strong>自服务 HTTP API</strong>，可部署到 Digital Ocean，任何人都可以连接并授权分析。分析维度覆盖：盈亏、行业分布、集中度、波动率、Sharpe、VaR、Beta、Alpha、相关矩阵、RSI/MACD 技术指标、再平衡建议、情景分析。
       </p>
       <p>
         完整代码与数据文件在参考实现的 <a href="https://github.com/0xaicrypto/uomp-core/tree/main/examples/stock-analyst" target="_blank" rel="noopener">examples/stock-analyst</a> 目录。
@@ -70,7 +70,19 @@ pnpm cli audit --limit 20</code></pre>
       <h2>8. 撤销授权</h2>
       <pre><code>pnpm cli revoke &lt;session-id&gt;</code></pre>
 
-      <h2>9. 远程模式：通过 Gateway 访问</h2>
+      <h2>9. 自服务模式（HTTP API）</h2>
+      <p>
+        v1.0 新增 HTTP 服务器模式：Agent 作为独立服务运行，提供 Web UI 和 REST API。用户可以直接在浏览器中粘贴 Token 进行分析，无需运行 CLI。
+      </p>
+      <pre><code>node examples/stock-analyst/server.js
+# 访问 http://localhost:3080/ 粘贴 Token 即可
+# 或通过 API 调用：
+curl -X POST http://localhost:3080/analyze \
+  -H 'Content-Type: application/json' \
+  -d '{`{`}"token":"...","gateway_url":"..."{`}`}'</code></pre>
+      <p>部署到 Digital Ocean 后即为公共服务，任何人连接即可使用。见 <a href="https://github.com/0xaicrypto/uomp-core/tree/main/examples/stock-analyst/README.md" target="_blank" rel="noopener">完整 README</a>。</p>
+
+      <h2>10. 远程模式：通过 Gateway 访问</h2>
       <p>
         如果 Agent 运行在另一台机器或容器里，可以用 <code>apps/gateway</code> 把本地 Memory Guard 暴露为 HTTPS + mTLS 入口。Agent 会通过 mTLS 连接 Gateway，先做聚合查询，再读取授权数据，最后生成报告、上传 Payload、提交删除证明。
       </p>

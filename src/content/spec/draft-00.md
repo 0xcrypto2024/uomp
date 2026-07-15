@@ -847,7 +847,8 @@ Remote Profile 实现 MUST 满足：
 Remote Profile 默认采用 **用户自托管 Gateway**：
 
 - 用户在自己的 VPS、NAS、云服务器或家庭服务器上运行 Gateway；
-- 也可以使用反向隧道（如 Cloudflare Tunnel、ngrok）暴露 Gateway，而无需公网 IP；
+- **推荐：`uomp gateway start` 一键启动 Cloudflare Tunnel**，自动获取 `https://xxx.trycloudflare.com` 公网地址，无需公网 IP 或端口转发；
+- 也可以手动使用反向隧道（如 Cloudflare Tunnel、ngrok）暴露 Gateway；
 - Gateway 服务 MAY 由第三方商业化托管，但开源 core 实现 MUST 保留自托管路径作为默认选项。
 
 ### 15.4 UOMP Gateway

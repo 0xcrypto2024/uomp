@@ -836,7 +836,8 @@ Remote Profile implementations MUST satisfy:
 Remote Profile defaults to **user self-hosted Gateway**:
 
 - Users run Gateway on their own VPS, NAS, cloud server, or home server;
-- Users MAY expose Gateway via reverse tunnel (e.g., Cloudflare Tunnel, ngrok) without a public IP;
+- **Recommended: `uomp gateway start` launches with Cloudflare Tunnel**, automatically obtaining a `https://xxx.trycloudflare.com` public URL — no public IP or port forwarding needed;
+- A reverse tunnel (Cloudflare Tunnel, ngrok) may also be used manually to expose the Gateway;
 - A third-party MAY offer managed Gateway services, but open-source core implementations MUST retain self-hosting as the default and trust root.
 
 ### 15.4 UOMP Gateway

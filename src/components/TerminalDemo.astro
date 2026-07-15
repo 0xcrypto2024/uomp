@@ -6,101 +6,44 @@
         <div class="window-dot y"></div>
         <div class="window-dot g"></div>
       </div>
-      <div class="window-url">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect x="5" y="11" width="14" height="10" rx="2"/>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-        </svg>
-        <span id="demo-title">terminal</span>
-      </div>
     </div>
-    <div class="window-body" id="terminal-demo">
-      <div id="terminal-output" class="terminal-content" style="padding: 16px; font-family: monospace; font-size: 0.82rem; line-height: 1.6; color: #D1D5DB; min-height: 200px;"></div>
+    <div class="window-body" id="terminal-demo" style="padding:20px; font-family:monospace; font-size:0.82rem; color:#D1D5DB; text-align:left; min-height:160px; line-height:1.7;">
     </div>
   </div>
   <div class="stats-bar">
-    <div class="stat-item">
-      <span class="stat-val">本地优先</span>
-      <span class="stat-lbl">数据保留在用户设备</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-val">最小授权</span>
-      <span class="stat-lbl">按 tag / key / field 控制</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-val">远程安全</span>
-      <span class="stat-lbl">mTLS Gateway + 聚合查询</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-val">透明保留</span>
-      <span class="stat-lbl">Agent 声明数据删除策略</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-val">可审计</span>
-      <span class="stat-lbl">每次访问记录日志</span>
-    </div>
+    <div class="stat-item"><span class="stat-val">本地优先</span><span class="stat-lbl">数据保留在用户设备</span></div>
+    <div class="stat-item"><span class="stat-val">最小授权</span><span class="stat-lbl">按 tag / key / field 控制</span></div>
+    <div class="stat-item"><span class="stat-val">远程安全</span><span class="stat-lbl">mTLS Gateway + 聚合查询</span></div>
+    <div class="stat-item"><span class="stat-val">透明保留</span><span class="stat-lbl">Agent 声明数据删除策略</span></div>
+    <div class="stat-item"><span class="stat-val">可审计</span><span class="stat-lbl">每次访问记录日志</span></div>
   </div>
 </div>
 
 <script>
 (function() {
-  const C = { prompt: '#60A5FA', cmd: '#F9FAFB', out: '#9CA3AF', green: '#34D399', bold: '#E5E7EB', blue: '#3B82F6' };
+  const el = document.getElementById('terminal-demo');
+  const C = { g: '#9CA3AF', b: '#60A5FA', w: '#F9FAFB', gn: '#34D399', dim: '#6B7280' };
+  const cursor = '<span style="color:#F9FAFB;animation:blink 1s step-end infinite">▌</span>';
 
-  const scenes = [
-    { title: '1. import — 导入私有数据', delay: 1200, lines: [
-      `<span style="color:${C.prompt}">$ </span><span style="color:${C.cmd}">pnpm cli import holdings.csv --tag portfolio:holdings</span>`,
-      `<span style="color:${C.green}">Imported 10 items (sensitivity: high)</span>`,
-    ]},
-    { title: '2. authorize — 授权 Agent', delay: 1200, lines: [
-      ``,
-      `<span style="color:${C.prompt}">$ </span><span style="color:${C.cmd}">pnpm cli authorize ./stock-analyst --scope portfolio:holdings</span>`,
-      `<span style="color:${C.green}">Session granted: sess_xxx</span>`,
-      `<span style="color:${C.out}">export UOM_TOKEN="eyJhbG..."</span>`,
-    ]},
-    { title: '3. run — 运行 Agent', delay: 1500, lines: [
-      ``,
-      `<span style="color:${C.prompt}">$ </span><span style="color:${C.cmd}">source /tmp/uomp.env && node index.js</span>`,
-      `<span style="color:${C.out}">持仓: 10 | P&L: +72.9% | Sharpe: 1.24 | Signals: 8</span>`,
-      `<span style="color:${C.green}">Report: output/stock-analysis.html</span>`,
-    ]},
-    { title: '4. gateway — 远程模式', delay: 1200, lines: [
-      ``,
-      `<span style="color:${C.prompt}">$ </span><span style="color:${C.cmd}">uomp gateway start</span>`,
-      `<span style="color:${C.bold}">═══ Public URL ═══</span>`,
-      `<span style="color:${C.blue}">https://xxx.trycloudflare.com</span>`,
-    ]},
+  const frames = [
+    { t: 1800, html: `<span style="color:${C.g}">$</span> <span style="color:${C.w}">uomp import holdings.csv</span><br><span style="color:${C.gn}">✓ 10 items</span>` },
+    { t: 1500, html: `<span style="color:${C.g}">$</span> <span style="color:${C.w}">uomp authorize stock-analyst</span><br><span style="color:${C.gn}">✓ token</span>` },
+    { t: 1800, html: `<span style="color:${C.g}">$</span> <span style="color:${C.w}">node index.js</span><br><span style="color:${C.g}">P&amp;L: +72% &nbsp;Sharpe: 1.24 &nbsp;Signals: 8</span><br><span style="color:${C.gn}">✓ report.html</span>` },
+    { t: 1500, html: `<span style="color:${C.g}">$</span> <span style="color:${C.w}">uomp gateway start</span><br><span style="color:${C.dim}">https://xxx.trycloudflare.com</span>` },
   ];
 
-  const container = document.getElementById('terminal-output');
-  const titleEl = document.getElementById('demo-title');
-  let phase = 0;
-  let cycle = 0;
-
-  async function play(scene) {
-    titleEl.textContent = scene.title;
-    for (const line of scene.lines) {
-      container.innerHTML += '\n' + line;
-      container.scrollTop = container.scrollHeight;
-      await new Promise(r => setTimeout(r, 50));
-    }
-    await new Promise(r => setTimeout(r, scene.delay));
-  }
-
-  async function run() {
+  async function loop() {
+    let i = 0;
     while (true) {
-      await play(scenes[phase]);
-      phase++;
-      if (phase >= scenes.length) { phase = 0; cycle++; }
-      if (cycle >= 3) { container.innerHTML = ''; cycle = 0; await new Promise(r => setTimeout(r, 400)); }
+      el.innerHTML = frames[i].html + cursor;
+      await new Promise(r => setTimeout(r, frames[i].t));
+      i = (i + 1) % frames.length;
     }
   }
-
-  run();
+  loop();
 })();
 </script>
 <style>
-  .terminal-content { overflow-y: auto; max-height: 220px; }
-  .terminal-content::-webkit-scrollbar { width: 4px; }
-  .terminal-content::-webkit-scrollbar-track { background: #111; }
-  .terminal-content::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+  @keyframes blink { 50% { opacity: 0; } }
+  #terminal-demo { overflow: hidden; }
 </style>

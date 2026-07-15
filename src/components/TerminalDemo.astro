@@ -11,11 +11,11 @@
           <rect x="5" y="11" width="14" height="10" rx="2"/>
           <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
         </svg>
-        <span id="demo-title">UOMP SDK Demo</span>
+        <span id="demo-title">terminal</span>
       </div>
     </div>
     <div class="window-body" id="terminal-demo">
-      <div id="terminal-output" class="terminal-content" style="padding: 16px; font-family: monospace; font-size: 0.82rem; line-height: 1.6; color: #D1D5DB; min-height: 240px;"></div>
+      <div id="terminal-output" class="terminal-content" style="padding: 16px; font-family: monospace; font-size: 0.82rem; line-height: 1.6; color: #D1D5DB; min-height: 200px;"></div>
     </div>
   </div>
   <div class="stats-bar">
@@ -44,98 +44,54 @@
 
 <script>
 (function() {
-  const colors = {
-    prompt: '#60A5FA',
-    cmd: '#F9FAFB',
-    output: '#9CA3AF',
-    green: '#34D399',
-    yellow: '#FBBF24',
-    red: '#F87171',
-    dim: '#6B7280',
-    bold: '#E5E7EB',
-    highlight: '#3B82F6',
-  };
+  const C = { prompt: '#60A5FA', cmd: '#F9FAFB', out: '#9CA3AF', green: '#34D399', bold: '#E5E7EB', blue: '#3B82F6' };
 
-  function line(text, color = colors.output) {
-    return `<span style="color:${color}">${text}</span>`;
-  }
-
-  const steps = [
-    { title: 'pnpm cli import', delay: 300, lines: [
-      line('$ ', colors.prompt) + line('pnpm cli import ./examples/stock-analyst/sample-holdings.csv --tag portfolio:holdings --sensitivity high --replace', colors.cmd),
-      line('Imported 10 items into tag "portfolio:holdings" (sensitivity: high)', colors.green),
+  const scenes = [
+    { title: '1. import — 导入私有数据', delay: 1200, lines: [
+      `<span style="color:${C.prompt}">$ </span><span style="color:${C.cmd}">pnpm cli import holdings.csv --tag portfolio:holdings</span>`,
+      `<span style="color:${C.green}">Imported 10 items (sensitivity: high)</span>`,
     ]},
-    { delay: 800, lines: [
-      line(''),
-      line('$ ', colors.prompt) + line('pnpm cli import ./examples/stock-analyst/sample-risk.json --replace', colors.cmd),
-      line('Imported 1 item into tag "profile:risk" (sensitivity: medium)', colors.green),
+    { title: '2. authorize — 授权 Agent', delay: 1200, lines: [
+      ``,
+      `<span style="color:${C.prompt}">$ </span><span style="color:${C.cmd}">pnpm cli authorize ./stock-analyst --scope portfolio:holdings</span>`,
+      `<span style="color:${C.green}">Session granted: sess_xxx</span>`,
+      `<span style="color:${C.out}">export UOM_TOKEN="eyJhbG..."</span>`,
     ]},
-    { title: 'pnpm cli authorize', delay: 600, lines: [
-      line(''),
-      line('$ ', colors.prompt) + line('pnpm cli authorize ./examples/stock-analyst --scope portfolio:holdings profile:risk --output /tmp/uomp.env --no-server', colors.cmd),
-      line('Session granted: sess_xxx', colors.green),
-      line('Token saved to: /tmp/uomp.env', colors.green),
+    { title: '3. run — 运行 Agent', delay: 1500, lines: [
+      ``,
+      `<span style="color:${C.prompt}">$ </span><span style="color:${C.cmd}">source /tmp/uomp.env && node index.js</span>`,
+      `<span style="color:${C.out}">持仓: 10 | P&L: +72.9% | Sharpe: 1.24 | Signals: 8</span>`,
+      `<span style="color:${C.green}">Report: output/stock-analysis.html</span>`,
     ]},
-    { title: 'SDK agent', delay: 1000, lines: [
-      line(''),
-      line('$ ', colors.prompt) + line('source /tmp/uomp.env && node examples/stock-analyst/index.js', colors.cmd),
-      line(''),
-      line('Stock Analyst v1.0 启动', colors.bold),
-      line(''),
-      line('持仓: 10 个标的', colors.output),
-      line('风险偏好: moderate', colors.output),
-      line('获取行情: AAPL, MSFT, GOOGL, NVDA, TSLA, AMZN, JPM, BAC, JNJ, XOM', colors.dim),
-      line('收到 10/10 条行情', colors.green),
-      line(''),
-      line('═══ 分析完成 ═══', colors.bold),
-      line('P&L: +72.94% | HHI: 1307 | Sharpe: 1.24 | Signals: 8', colors.highlight),
-      line('报告: output/stock-analysis-xxx.(json|md|html)', colors.green),
-    ]},
-    { title: 'Gateway + Tunnel', delay: 800, lines: [
-      line(''),
-      line('$ ', colors.prompt) + line('uomp gateway start', colors.cmd),
-      line('正在启动 Cloudflare Tunnel...', colors.yellow),
-      line(''),
-      line('═══ Public Gateway URL ═══', colors.bold),
-      line('  https://xxx.trycloudflare.com', colors.highlight),
-      line(''),
-      line('Agent 现在可以从任何地方连接', colors.green),
-    ]},
-    { title: 'DO Cloud Agent', delay: 600, lines: [
-      line(''),
-      line('$ ', colors.prompt) + line('curl -X POST https://uomp-stock-analyst-mvblm.ondigitalocean.app/analyze \\', colors.cmd),
-      line('  ', colors.cmd) + line('-H \'Content-Type: application/json\' \\', colors.cmd),
-      line('  ', colors.cmd) + line('-d \'{"token":"...","gateway_url":"https://xxx.trycloudflare.com"}\'', colors.cmd),
-      line(''),
-      line('{"summary":{"holdings_count":10,"total_pnl":60063,"sharpe":1.24}}', colors.green),
+    { title: '4. gateway — 远程模式', delay: 1200, lines: [
+      ``,
+      `<span style="color:${C.prompt}">$ </span><span style="color:${C.cmd}">uomp gateway start</span>`,
+      `<span style="color:${C.bold}">═══ Public URL ═══</span>`,
+      `<span style="color:${C.blue}">https://xxx.trycloudflare.com</span>`,
     ]},
   ];
 
   const container = document.getElementById('terminal-output');
   const titleEl = document.getElementById('demo-title');
-  let currentStep = 0;
+  let phase = 0;
+  let cycle = 0;
 
-  async function typeStep(step) {
-    if (step.title) titleEl.textContent = step.title;
-    for (const l of step.lines) {
-      container.innerHTML += '\n' + l;
+  async function play(scene) {
+    titleEl.textContent = scene.title;
+    for (const line of scene.lines) {
+      container.innerHTML += '\n' + line;
       container.scrollTop = container.scrollHeight;
-      await new Promise(r => setTimeout(r, 60));
+      await new Promise(r => setTimeout(r, 50));
     }
+    await new Promise(r => setTimeout(r, scene.delay));
   }
 
   async function run() {
     while (true) {
-      const step = steps[currentStep % steps.length];
-      // Clear on loop
-      if (currentStep === steps.length) {
-        container.innerHTML = '';
-        await new Promise(r => setTimeout(r, 300));
-      }
-      await typeStep(step);
-      await new Promise(r => setTimeout(r, step.delay));
-      currentStep = (currentStep + 1) % (steps.length * 2); // loop twice then clear
-      if (currentStep >= steps.length * 2) currentStep = 0;
+      await play(scenes[phase]);
+      phase++;
+      if (phase >= scenes.length) { phase = 0; cycle++; }
+      if (cycle >= 3) { container.innerHTML = ''; cycle = 0; await new Promise(r => setTimeout(r, 400)); }
     }
   }
 
@@ -143,7 +99,7 @@
 })();
 </script>
 <style>
-  .terminal-content { overflow-y: auto; max-height: 320px; }
+  .terminal-content { overflow-y: auto; max-height: 220px; }
   .terminal-content::-webkit-scrollbar { width: 4px; }
   .terminal-content::-webkit-scrollbar-track { background: #111; }
   .terminal-content::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }

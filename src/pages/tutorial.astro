@@ -1,25 +1,11 @@
 ---
+import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
 import { baseUrl } from '../utils/base.ts';
 
-const tutorials = import.meta.glob('../content/tutorial/tutorial.md', { eager: true, query: '?raw' }) as Record<string, { default: string }>;
-const content = Object.values(tutorials)[0]?.default || '';
-const html = content
-  .replace(/^---[\s\S]*?---\n/, '')
-  .replace(/```(\w+)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
-  .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-  .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-  .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-  .replace(/^- (.+)$/gm, '<li>$1</li>')
-  .replace(/(<li>[\s\S]*?<\/li>\n?)+/g, '<ul>$&</ul>')
-  .replace(/`([^`]+)`/g, '<code>$1</code>')
-  .replace(/\n\n/g, '</p><p>')
-  .replace(/<p><h[1-6]/g, '<h$1')
-  .replace(/<\/h[1-6]><\/p>/g, '</h$1>')
-  .replace(/<p><pre>/g, '<pre>')
-  .replace(/<\/pre><\/p>/g, '</pre>')
-  .replace(/<p><ul>/g, '<ul>')
-  .replace(/<\/ul><\/p>/g, '</ul>');
+const tutorials = await getCollection('tutorial');
+const t = tutorials.find(t => t.slug === 'tutorial');
+const { Content } = t ? await t.render() : { Content: null };
 ---
 
 <Layout title="SDK/CLI 教程 - UOMP" switchHref={`${baseUrl}en/tutorial/`}>
@@ -29,7 +15,7 @@ const html = content
         <div class="sec-num">教程</div>
         <span class="sec-tag">从零到部署的完整指南</span>
       </div>
-      <Fragment set:html={html} />
+      {Content && <Content />}
       <div class="hero-btns" style="margin-top: 2.5rem;">
         <a href={`${baseUrl}spec/`} class="btn-h1">协议规范 →</a>
         <a href={`${baseUrl}design/`} class="btn-h1">实现设计 →</a>

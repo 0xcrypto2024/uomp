@@ -82,7 +82,7 @@ node apps/gateway/dist/index.js
 - `packages/cli/src/commands/authorize.ts`：标准授权流程
 - `packages/cli/src/commands/run.ts`：本地开发 shortcut 的编排
 - `packages/cli/src/utils/manifest.ts`：`loadManifest()` 与 `normalizeManifest()`
-- `packages/auth/src/index.ts`：`AuthService`（`grantSession()` 已支持 `profile`/`audience`）
+- `packages/auth/src/index.ts`：`AuthService`（`grantSession()` 已支持 `profile`/`audience`/`allowedFields`/`aggregationOnly`/`taskBound`）
 - `packages/guard/src/index.ts`：`MemoryGuard`（新增 `/v1/audit`）
 - `packages/token/src/index.ts`：`JWTTokenIssuer`
 - `apps/gateway/src/index.ts`：Gateway mTLS 服务器与转发逻辑
@@ -175,8 +175,11 @@ private payloadToJWT(payload) {
     limits: payload.limits,
     profile: payload.profile,
     audience: payload.audience,
-    allowed_endpoints: payload.allowedEndpoints,
-  };
+  allowed_endpoints: payload.allowedEndpoints,
+  allowed_fields: payload.allowedFields,
+  aggregation_only: payload.aggregationOnly ?? false,
+  task_bound: payload.taskBound ?? false,
+};
 }
 ```
 
@@ -259,7 +262,7 @@ WHERE EXISTS (SELECT 1 FROM json_each(tags) WHERE value = ?)
 
 ---
 
-## 8. 本地配置文件
+## 7. 本地配置文件
 
 CLI 初始化后生成：
 
@@ -271,7 +274,7 @@ CLI 初始化后生成：
 
 ---
 
-## 9. MVP 限制与未来扩展
+## 8. MVP 限制与未来扩展
 
 | 能力 | MVP 状态 | 说明 |
 |------|---------|------|
@@ -279,12 +282,16 @@ CLI 初始化后生成：
 | Agent 写入 | ❌ 未开放 | Guard 返回 `503 WRITE_NOT_AVAILABLE` |
 | Agent 删除 | ❌ 未开放 | 同上 |
 | 远程 Profile（Gateway + mTLS） | ✅ 已实现 | `apps/gateway` 提供参考实现；Payload 端到端加密仍待实现 |
+| 聚合查询（`/v1/memory/aggregate`） | ✅ 已实现 | 支持 sum/avg/count/min/max，配合 `aggregation_only` Token |
+| 删除证明（`/v1/sessions/{id}/deletion-proof`） | ✅ 已实现 | Agent 提交签名证明，Session 自动关闭 |
+| 审计查询（`/v1/audit`） | ✅ 已实现 | 支持按 session_id 过滤 |
+| 字段过滤（`allowed_fields`） | ✅ 已实现 | Token 指定返回字段，Guard 过滤 |
 | 身份验证 | ⚠️ 可选 | DID/GPG 框架存在，但验证强度较弱 |
 | 查询限额 | ⚠️ 预留 | `limits` 已写入 Token，但未强制执行 |
 
 ---
 
-## 10. 相关链接
+## 9. 相关链接
 
 - [协议规范](/spec/)
 - [参考实现仓库](https://github.com/0xaicrypto/uomp-core)

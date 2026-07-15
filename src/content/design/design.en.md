@@ -82,7 +82,7 @@ Key code entry points:
 - `packages/cli/src/commands/authorize.ts`: standard authorization flow
 - `packages/cli/src/commands/run.ts`: local development shortcut orchestration
 - `packages/cli/src/utils/manifest.ts`: `loadManifest()` and `normalizeManifest()`
-- `packages/auth/src/index.ts`: `AuthService` (`grantSession()` now supports `profile`/`audience`)
+- `packages/auth/src/index.ts`: `AuthService` (`grantSession()` now supports `profile`/`audience`/`allowedFields`/`aggregationOnly`/`taskBound`)
 - `packages/guard/src/index.ts`: `MemoryGuard` (new `/v1/audit` query endpoint)
 - `packages/token/src/index.ts`: `JWTTokenIssuer`
 - `apps/gateway/src/index.ts`: Gateway mTLS server and forwarding logic
@@ -175,8 +175,11 @@ private payloadToJWT(payload) {
     limits: payload.limits,
     profile: payload.profile,
     audience: payload.audience,
-    allowed_endpoints: payload.allowedEndpoints,
-  };
+  allowed_endpoints: payload.allowedEndpoints,
+  allowed_fields: payload.allowedFields,
+  aggregation_only: payload.aggregationOnly ?? false,
+  task_bound: payload.taskBound ?? false,
+};
 }
 ```
 
@@ -259,7 +262,7 @@ Full steps are in the repository at [`examples/stock-analyst/README.md`](https:/
 
 ---
 
-## 8. Local Configuration Files
+## 7. Local Configuration Files
 
 After `uomp init`, the following are generated in `~/.uomp`:
 
@@ -271,7 +274,7 @@ After `uomp init`, the following are generated in `~/.uomp`:
 
 ---
 
-## 9. MVP Limitations & Future Extensions
+## 8. MVP Limitations & Future Extensions
 
 | Capability | MVP Status | Notes |
 |------------|------------|-------|
@@ -279,12 +282,16 @@ After `uomp init`, the following are generated in `~/.uomp`:
 | Agent write | ❌ Not open | Guard returns `503 WRITE_NOT_AVAILABLE` |
 | Agent delete | ❌ Not open | Same as write |
 | Remote Profile (Gateway + mTLS) | ✅ Implemented | Reference implementation in `apps/gateway`; Payload E2E encryption still future work |
+| Aggregation query (`/v1/memory/aggregate`) | ✅ Implemented | sum/avg/count/min/max, paired with `aggregation_only` Token |
+| Deletion proof (`/v1/sessions/{id}/deletion-proof`) | ✅ Implemented | Agent submits signed proof, Session auto-closes |
+| Audit query (`/v1/audit`) | ✅ Implemented | Filterable by session_id |
+| Field filtering (`allowed_fields`) | ✅ Implemented | Token specifies return fields, Guard filters |
 | Identity verification | ⚠️ Optional | DID/GPG framework present, but verification is weak |
 | Query quotas | ⚠️ Reserved | `limits` written into token, but not enforced |
 
 ---
 
-## 10. Related Links
+## 9. Related Links
 
 - [Protocol Specification](/en/spec/)
 - [Reference Implementation Repository](https://github.com/0xaicrypto/uomp-core)

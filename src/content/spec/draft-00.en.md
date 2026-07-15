@@ -342,6 +342,8 @@ Common error codes:
 | `QUOTA_EXCEEDED` | Query quota exhausted. |
 | `WRITE_NOT_AVAILABLE` | Write interface not enabled in MVP. |
 | `STORE_UNAVAILABLE` | Memory Store unavailable. |
+| `SESSION_NOT_FOUND` | Session does not exist or has been deleted. |
+| `INVALID_REQUEST` | Request format or parameters are invalid. |
 
 ## 9. Auth Service API
 
@@ -458,6 +460,35 @@ Response:
 }
 ```
 
+### 9.6 Deletion Proof
+
+If the Agent declares `proof_required: true` in its `uom.json`, it MUST submit a deletion proof before the Session is closed. See §19 for the full structure and flow.
+
+```http
+POST /v1/sessions/{session_id}/deletion-proof
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "deletion_proof_id": "del_xxx",
+  "session_id": "sess_abc123",
+  "agent_id": "calendar_agent",
+  "deleted_at": "2026-07-12T10:35:00Z",
+  "memory_hash": "sha256:abc123...",
+  "fields_accessed": ["key", "value"],
+  "method": "process_termination",
+  "proof_value": "base64-encoded-agent-signature..."
+}
+```
+
+Response (accepted):
+
+```json
+{ "status": "accepted", "deletion_proof_id": "del_xxx" }
+```
+
+The Auth Service MUST verify `session_id` matches the path. If the Token has `task_bound: true`, the Session is automatically closed after the proof is accepted.
+
 ## 10. Memory Guard API
 
 ### 10.1 Endpoints
@@ -466,6 +497,8 @@ Response:
 |--------|------|-------------|
 | GET | `/v1/memory/:key` | Read by key |
 | GET | `/v1/memory?tag=:tag` | Read by tag |
+| GET | `/v1/memory/aggregate?tag=:tag&op=:op&field=:field` | Aggregation query (sum/avg/count/min/max), no raw data, see §10.5 |
+| GET | `/v1/audit` | Query audit logs, see §18 |
 | POST | `/v1/memory/query` | Semantic query (not in MVP) |
 | PUT | `/v1/memory/:key` | Write or update (MVP returns `WRITE_NOT_AVAILABLE`) |
 | DELETE | `/v1/memory/:key` | Delete (MVP returns `WRITE_NOT_AVAILABLE`) |
@@ -521,6 +554,7 @@ Memory Guard MUST determine access permissions in the following order:
 3. The Session bound to the Token has not been closed or revoked (MVP uses a blacklist table).
 4. Token is not in the blacklist.
 5. Query quota has not been exhausted (reserved in MVP, not enforced).
+5b. If Token `aggregation_only` is `true`, non-aggregation paths (`/v1/memory/:key` or `/v1/memory?tag=`) MUST be rejected.
 6. Target Key or Tag is within the authorized scope for the action.
 7. Target Key or Tag is not explicitly denied (`deny_keys` / `deny_tags` take precedence over allow lists).
 8. `sensitivity=high` Memory Items cannot be accessed via tag authorization and MUST match `keys`.
@@ -528,6 +562,37 @@ Memory Guard MUST determine access permissions in the following order:
 For `GET /v1/memory?tag=:tag`, Guard MUST first validate that the tag itself is allowed; each returned Memory Item MUST then be filtered again using key-level rules (applying deny, keys, and sensitivity rules).
 
 If any check fails, MUST return `ACCESS_DENIED` and record an audit log.
+
+### 10.5 Aggregation Query
+
+When the Token has `aggregation_only: true`, the Agent can only call aggregation endpoints — no individual Memory Item raw data is returned.
+
+```http
+GET /v1/memory/aggregate?tag=portfolio:holdings&op=sum&field=value.market_value
+Authorization: Bearer <token>
+```
+
+Query parameters:
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `tag` | MUST | Tag to aggregate. |
+| `op` | MUST | Operation: `sum`, `avg`, `count`, `min`, `max`. |
+| `field` | REQUIRED for numeric ops | Field path to aggregate (e.g. `value.market_value`). Not needed for `count`. |
+
+Response (`op=sum`):
+
+```json
+{ "op": "sum", "field": "value.market_value", "result": 39000 }
+```
+
+Response (`op=count`):
+
+```json
+{ "op": "count", "tag": "portfolio:holdings", "result": 10 }
+```
+
+The Guard MUST first validate tag access authorization (same as regular tag queries), then compute the aggregation over authorized items. Aggregation results MUST NOT leak any individual key or value.
 
 ## 11. Memory Item
 
@@ -696,7 +761,7 @@ contact-1,contacts,medium,Alice,alice@example.com
 ### 13.1 States
 
 ```
-[created] --grant--> [active] --close/timeout/revoke--> [closed/expired/revoked]
+[created] --grant--> [active] --close/timeout/revoke/deletion-proof--> [closed/expired/revoked]
 ```
 
 ### 13.2 Fields
@@ -794,8 +859,11 @@ GET  /v1/health
 POST /v1/sessions/{session_id}/refresh
 GET  /v1/memory/{key}
 GET  /v1/memory?tag={tag}
+GET  /v1/memory/aggregate?tag={tag}&op={op}
+GET  /v1/audit?session_id={session_id}
 POST /v1/payload/upload
 GET  /v1/payload/{payload_id}
+POST /v1/sessions/{session_id}/deletion-proof
 ```
 
 All requests MUST carry:
@@ -909,8 +977,8 @@ UOMP core protocol does not define an Agent Registry. Protocol reference impleme
 The MVP reference implementation SHOULD provide the following CLI commands:
 
 ```bash
-uom registry search <keyword>
-uom registry install <agent_id>
+uomp registry search <keyword>
+uomp registry install <agent_id>
 ```
 
 Registry clients MUST return Agent metadata and `uom.json` location but MUST NOT participate in authorization decisions.
@@ -1103,7 +1171,7 @@ Upon receipt, the Auth Service or Gateway:
 2. Validates that `deleted_at` ≤ Token `expires_at`.
 3. Records the proof in the audit log with `action: deletion_proof`.
 4. If `task_bound: true`, automatically closes the Session.
-5. Optionally anchors the proof hash on-chain (§18.4.3).
+5. Optionally anchors the proof hash on-chain (§19.6).
 
 If the Agent fails to submit a deletion proof before Session expiration (and `proof_required` was true), the audit log records a `deletion_proof_missing` event. This may trigger reputation penalties or bond forfeiture in any reputation system.
 
@@ -1113,9 +1181,9 @@ When both `task_bound: true` and `proof_required: true` are set, deletion proof 
 
 > **Future extension**: TEE (Trusted Execution Environment) enables hardware-level atomicity — the Agent code runs inside an enclave, memory is automatically zeroed on exit, and hardware attestation is provided.
 
-### 18.4.3 Deletion Proof Anchoring
+### 19.6 Deletion Proof Anchoring
 
-In addition to the blockchain events in 18.4.1:
+In addition to the blockchain events in §18.4.1:
 
 ```solidity
 event DataDeletionProofSubmitted(
@@ -1186,10 +1254,10 @@ This event SHOULD be anchored near real-time after the Agent submits the deletio
 
 ```bash
 # 1. Discover an Agent (via ERC8004 Registry or locally)
-uom registry search calendar
+uomp registry search calendar
 
 # 2. Install Agent
-uom registry install calendar_agent
+uomp registry install calendar_agent
 
 # 3. Create Session on the user side
 curl -X POST http://127.0.0.1:9374/v1/sessions \

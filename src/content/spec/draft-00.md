@@ -342,6 +342,8 @@ Authorization: Bearer <capability-token>
 | `QUOTA_EXCEEDED` | 查询次数已耗尽。 |
 | `WRITE_NOT_AVAILABLE` | MVP 阶段写入接口未启用。 |
 | `STORE_UNAVAILABLE` | Memory Store 不可用。 |
+| `SESSION_NOT_FOUND` | Session 不存在或已被删除。 |
+| `INVALID_REQUEST` | 请求格式或参数不正确。 |
 
 ## 9. Auth Service API
 
@@ -458,6 +460,38 @@ Response:
 }
 ```
 
+### 9.6 Deletion Proof
+
+若 Agent 的 `uom.json` 声明 `proof_required: true`，Agent MUST 在 Session 关闭前提交删除证明。具体格式和流程见 §19。
+
+```http
+POST /v1/sessions/{session_id}/deletion-proof
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "deletion_proof_id": "del_xxx",
+  "session_id": "sess_abc123",
+  "agent_id": "calendar_agent",
+  "deleted_at": "2026-07-12T10:35:00Z",
+  "memory_hash": "sha256:abc123...",
+  "fields_accessed": ["key", "value"],
+  "method": "process_termination",
+  "proof_value": "base64-encoded-agent-signature..."
+}
+```
+
+Response (accepted):
+
+```json
+{
+  "status": "accepted",
+  "deletion_proof_id": "del_xxx"
+}
+```
+
+Auth Service MUST 校验 `session_id` 与路径一致，并记录审计日志。若 Token 设置了 `task_bound: true`，提交删除证明后 Session 自动关闭。
+
 ## 10. Memory Guard API
 
 ### 10.1 Endpoints
@@ -466,7 +500,9 @@ Response:
 |------|------|------|
 | GET | `/v1/memory/:key` | 按 Key 读取 |
 | GET | `/v1/memory?tag=:tag` | 按 Tag 读取 |
-| POST | `/v1/memory/query` | 语义查询（MVP 不做） |
+| GET | `/v1/memory/aggregate?tag=:tag&op=:op&field=:field` | 聚合查询（sum/avg/count/min/max），不返回原始数据，见 §10.5 |
+| GET | `/v1/audit` | 查询审计日志，见 §18 |
+| POST | `/v1/memory/query` | 语义查询（未来扩展） |
 | PUT | `/v1/memory/:key` | 写入或更新（MVP 返回 `WRITE_NOT_AVAILABLE`） |
 | DELETE | `/v1/memory/:key` | 删除（MVP 返回 `WRITE_NOT_AVAILABLE`） |
 
@@ -521,6 +557,7 @@ Memory Guard MUST 按以下顺序判定访问权限：
 3. Token 对应的 Session 未被关闭或撤销（MVP 通过黑名单表实现）。
 4. Token 不在黑名单。
 5. 查询次数未耗尽（MVP 预留，暂不强制）。
+5b. 若 Token 的 `aggregation_only` 为 `true`，非聚合路径（`/v1/memory/:key` 或 `/v1/memory?tag=`）MUST 被拒绝。
 6. 目标 Key 或 Tag 在对应 action 的授权范围内。
 7. 目标 Key 或 Tag 未被显式拒绝（`deny_keys` / `deny_tags` 优先于允许列表）。
 8. `sensitivity=high` 的 Memory Item 不能通过 tag 授权访问，必须命中 `keys`。
@@ -528,6 +565,45 @@ Memory Guard MUST 按以下顺序判定访问权限：
 对于 `GET /v1/memory?tag=:tag`，Guard 首先校验该 tag 是否被允许；对于返回的每个 Memory Item，还须按 key 级规则再次过滤（应用 deny、keys、sensitivity 规则）。
 
 任一检查失败，MUST 返回 `ACCESS_DENIED` 并记录审计日志。
+
+### 10.5 Aggregation Query
+
+当 Token 设置 `aggregation_only: true` 时，Agent 只能调用聚合接口，无法获取单个 Memory Item 原始数据。聚合查询返回的是计算结果（求和、均值、计数、最小值、最大值），不返回任何个体 key 或 value。
+
+```http
+GET /v1/memory/aggregate?tag=portfolio:holdings&op=sum&field=value.market_value
+Authorization: Bearer <token>
+```
+
+Query Parameters:
+
+| 参数 | 必填 | 说明 |
+|------|------|------|
+| `tag` | MUST | 要聚合的标签。 |
+| `op` | MUST | 操作类型：`sum`、`avg`、`count`、`min`、`max`。 |
+| `field` | 数值聚合时 REQUIRED | 要聚合的字段路径（如 `value.market_value`）。`count` 操作不需要此参数。 |
+
+Response (`op=sum`):
+
+```json
+{
+  "op": "sum",
+  "field": "value.market_value",
+  "result": 39000
+}
+```
+
+Response (`op=count`):
+
+```json
+{
+  "op": "count",
+  "tag": "portfolio:holdings",
+  "result": 10
+}
+```
+
+Guard MUST 先校验该 tag 的访问授权（与普通 tag 查询一致），然后对授权范围内的 items 执行聚合计算。聚合结果 MUST NOT 泄漏任何单个 item 的 key 或 value。
 
 ## 11. Memory Item
 
@@ -696,7 +772,7 @@ contact-1,contacts,medium,Alice,alice@example.com
 ### 13.1 States
 
 ```
-[created] --grant--> [active] --close/timeout/revoke--> [closed/expired/revoked]
+[created] --grant--> [active] --close/timeout/revoke/deletion-proof--> [closed/expired/revoked]
 ```
 
 ### 13.2 Fields
@@ -794,8 +870,11 @@ GET  /v1/health
 POST /v1/sessions/{session_id}/refresh
 GET  /v1/memory/{key}
 GET  /v1/memory?tag={tag}
+GET  /v1/memory/aggregate?tag={tag}&op={op}
+GET  /v1/audit?session_id={session_id}
 POST /v1/payload/upload
 GET  /v1/payload/{payload_id}
+POST /v1/sessions/{session_id}/deletion-proof
 ```
 
 所有请求 MUST 携带：
@@ -909,8 +988,8 @@ UOMP 核心协议不定义 Agent Registry。协议参考实现 MAY 支持现有 
 MVP 参考实现 SHOULD 提供以下 CLI 命令：
 
 ```bash
-uom registry search <keyword>
-uom registry install <agent_id>
+uomp registry search <keyword>
+uomp registry install <agent_id>
 ```
 
 Registry 客户端 MUST 返回 Agent 元数据和 `uom.json` 位置，但 MUST NOT 参与授权决策。
@@ -1103,7 +1182,7 @@ Auth Service 或 Gateway 收到后：
 2. 校验 `deleted_at` ≤ Token 的 `expires_at`。
 3. 将证明写入审计日志，`action` 标记为 `deletion_proof`。
 4. 若 `task_bound: true`，自动关闭 Session。
-5. 可选：将证明哈希锚定到链上（见 §18.4.3）。
+5. 可选：将证明哈希锚定到链上（见 §19.6）。
 
 若 Agent 在 Session 过期前未提交删除证明（且 `proof_required: true`），审计日志记录一条 `deletion_proof_missing` 事件。该事件可触发声誉惩罚或保证金罚没。
 
@@ -1113,9 +1192,9 @@ Auth Service 或 Gateway 收到后：
 
 > **未来扩展**：TEE（可信执行环境）可实现技术级原子性——Agent 代码在 enclave 中运行，退出时内存自动清零，且提供硬件级 attestation 证明。
 
-### 18.4.3 Deletion Proof Anchoring
+### 19.6 Deletion Proof Anchoring
 
-在 18.4.1 的区块链事件基础上，增加：
+在 §18.4.1 的区块链事件基础上，增加：
 
 ```solidity
 event DataDeletionProofSubmitted(
@@ -1186,10 +1265,10 @@ event DataDeletionProofSubmitted(
 
 ```bash
 # 1. 用户发现 Agent（通过 ERC8004 Registry 或本地）
-uom registry search calendar
+uomp registry search calendar
 
 # 2. 安装 Agent
-uom registry install calendar_agent
+uomp registry install calendar_agent
 
 # 3. 用户侧创建 Session
 curl -X POST http://127.0.0.1:9374/v1/sessions \

@@ -48,10 +48,7 @@ uomp/
 │   │   ├── design/         # 实现设计文档（中英双语）
 │   │   │   ├── design.md
 │   │   │   └── design.en.md
-│   │   └── roadmap/        # 路线图（中英双语）
-│   │       ├── roadmap.md
-│   │       └── roadmap.en.md
-│   ├── pages/              # Astro 页面
+│   ├── pages/              # Astro 页面（含首页、示例、设计、路线图、规范）
 │   ├── layouts/            # 页面布局
 │   └── styles/             # 样式文件
 ├── public/                 # 静态资源（SVG 图表、演示视频等）

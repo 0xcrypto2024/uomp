@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { baseUrl } from '../utils/base.ts';
+import TerminalDemo from '../components/TerminalDemo.astro';
 ---
 
 <Layout title="UOMP - User-Owned Memory Protocol" switchHref={`${baseUrl}en/`}>
@@ -17,56 +18,12 @@ import { baseUrl } from '../utils/base.ts';
     </p>
     <div class="hero-btns">
       <a href={`${baseUrl}spec/`} class="btn-h1">阅读规范 →</a>
-      <a href={`${baseUrl}example/`} class="btn-h1">股票分析示例 →</a>
+      <a href={`${baseUrl}tutorial/`} class="btn-h1">SDK 教程 →</a>
       <a href="https://github.com/0xaicrypto/uomp-core" target="_blank" rel="noopener" class="btn-h2">GitHub</a>
     </div>
 
-    <div class="window-wrap">
-      <div class="window">
-        <div class="window-bar">
-          <div class="window-dots">
-            <div class="window-dot r"></div>
-            <div class="window-dot y"></div>
-            <div class="window-dot g"></div>
-          </div>
-          <div class="window-url">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <rect x="5" y="11" width="14" height="10" rx="2"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>
-            uomp authorize ./my-agent
-          </div>
-        </div>
-        <div class="window-body">
-          <video autoplay muted loop playsinline preload="metadata" width="100%">
-            <source src="/demo.mp4" type="video/mp4" />
-            你的浏览器不支持视频播放。
-          </video>
-        </div>
-      </div>
-      <div class="stats-bar">
-          <div class="stat-item">
-            <span class="stat-val">本地优先</span>
-            <span class="stat-lbl">数据保留在用户设备</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-val">最小授权</span>
-            <span class="stat-lbl">按 tag / key / field 控制</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-val">远程安全</span>
-            <span class="stat-lbl">mTLS Gateway + 聚合查询</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-val">透明保留</span>
-            <span class="stat-lbl">Agent 声明数据删除策略</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-val">可审计</span>
-            <span class="stat-lbl">每次访问记录日志</span>
-          </div>
-      </div>
-    </div>
+    <TerminalDemo />
+
   </section>
 
   <section class="alt">

@@ -1,0 +1,150 @@
+<div class="window-wrap">
+  <div class="window">
+    <div class="window-bar">
+      <div class="window-dots">
+        <div class="window-dot r"></div>
+        <div class="window-dot y"></div>
+        <div class="window-dot g"></div>
+      </div>
+      <div class="window-url">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="5" y="11" width="14" height="10" rx="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        <span id="demo-title">UOMP SDK Demo</span>
+      </div>
+    </div>
+    <div class="window-body" id="terminal-demo">
+      <div id="terminal-output" class="terminal-content" style="padding: 16px; font-family: monospace; font-size: 0.82rem; line-height: 1.6; color: #D1D5DB; min-height: 240px;"></div>
+    </div>
+  </div>
+  <div class="stats-bar">
+    <div class="stat-item">
+      <span class="stat-val">本地优先</span>
+      <span class="stat-lbl">数据保留在用户设备</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-val">最小授权</span>
+      <span class="stat-lbl">按 tag / key / field 控制</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-val">远程安全</span>
+      <span class="stat-lbl">mTLS Gateway + 聚合查询</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-val">透明保留</span>
+      <span class="stat-lbl">Agent 声明数据删除策略</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-val">可审计</span>
+      <span class="stat-lbl">每次访问记录日志</span>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const colors = {
+    prompt: '#60A5FA',
+    cmd: '#F9FAFB',
+    output: '#9CA3AF',
+    green: '#34D399',
+    yellow: '#FBBF24',
+    red: '#F87171',
+    dim: '#6B7280',
+    bold: '#E5E7EB',
+    highlight: '#3B82F6',
+  };
+
+  function line(text, color = colors.output) {
+    return `<span style="color:${color}">${text}</span>`;
+  }
+
+  const steps = [
+    { title: 'pnpm cli import', delay: 300, lines: [
+      line('$ ', colors.prompt) + line('pnpm cli import ./examples/stock-analyst/sample-holdings.csv --tag portfolio:holdings --sensitivity high --replace', colors.cmd),
+      line('Imported 10 items into tag "portfolio:holdings" (sensitivity: high)', colors.green),
+    ]},
+    { delay: 800, lines: [
+      line(''),
+      line('$ ', colors.prompt) + line('pnpm cli import ./examples/stock-analyst/sample-risk.json --replace', colors.cmd),
+      line('Imported 1 item into tag "profile:risk" (sensitivity: medium)', colors.green),
+    ]},
+    { title: 'pnpm cli authorize', delay: 600, lines: [
+      line(''),
+      line('$ ', colors.prompt) + line('pnpm cli authorize ./examples/stock-analyst --scope portfolio:holdings profile:risk --output /tmp/uomp.env --no-server', colors.cmd),
+      line('Session granted: sess_xxx', colors.green),
+      line('Token saved to: /tmp/uomp.env', colors.green),
+    ]},
+    { title: 'SDK agent', delay: 1000, lines: [
+      line(''),
+      line('$ ', colors.prompt) + line('source /tmp/uomp.env && node examples/stock-analyst/index.js', colors.cmd),
+      line(''),
+      line('Stock Analyst v1.0 启动', colors.bold),
+      line(''),
+      line('持仓: 10 个标的', colors.output),
+      line('风险偏好: moderate', colors.output),
+      line('获取行情: AAPL, MSFT, GOOGL, NVDA, TSLA, AMZN, JPM, BAC, JNJ, XOM', colors.dim),
+      line('收到 10/10 条行情', colors.green),
+      line(''),
+      line('═══ 分析完成 ═══', colors.bold),
+      line('P&L: +72.94% | HHI: 1307 | Sharpe: 1.24 | Signals: 8', colors.highlight),
+      line('报告: output/stock-analysis-xxx.(json|md|html)', colors.green),
+    ]},
+    { title: 'Gateway + Tunnel', delay: 800, lines: [
+      line(''),
+      line('$ ', colors.prompt) + line('uomp gateway start', colors.cmd),
+      line('正在启动 Cloudflare Tunnel...', colors.yellow),
+      line(''),
+      line('═══ Public Gateway URL ═══', colors.bold),
+      line('  https://xxx.trycloudflare.com', colors.highlight),
+      line(''),
+      line('Agent 现在可以从任何地方连接', colors.green),
+    ]},
+    { title: 'DO Cloud Agent', delay: 600, lines: [
+      line(''),
+      line('$ ', colors.prompt) + line('curl -X POST https://uomp-stock-analyst-mvblm.ondigitalocean.app/analyze \\', colors.cmd),
+      line('  ', colors.cmd) + line('-H \'Content-Type: application/json\' \\', colors.cmd),
+      line('  ', colors.cmd) + line('-d \'{"token":"...","gateway_url":"https://xxx.trycloudflare.com"}\'', colors.cmd),
+      line(''),
+      line('{"summary":{"holdings_count":10,"total_pnl":60063,"sharpe":1.24}}', colors.green),
+    ]},
+  ];
+
+  const container = document.getElementById('terminal-output');
+  const titleEl = document.getElementById('demo-title');
+  let currentStep = 0;
+
+  async function typeStep(step) {
+    if (step.title) titleEl.textContent = step.title;
+    for (const l of step.lines) {
+      container.innerHTML += '\n' + l;
+      container.scrollTop = container.scrollHeight;
+      await new Promise(r => setTimeout(r, 60));
+    }
+  }
+
+  async function run() {
+    while (true) {
+      const step = steps[currentStep % steps.length];
+      // Clear on loop
+      if (currentStep === steps.length) {
+        container.innerHTML = '';
+        await new Promise(r => setTimeout(r, 300));
+      }
+      await typeStep(step);
+      await new Promise(r => setTimeout(r, step.delay));
+      currentStep = (currentStep + 1) % (steps.length * 2); // loop twice then clear
+      if (currentStep >= steps.length * 2) currentStep = 0;
+    }
+  }
+
+  run();
+})();
+</script>
+<style>
+  .terminal-content { overflow-y: auto; max-height: 320px; }
+  .terminal-content::-webkit-scrollbar { width: 4px; }
+  .terminal-content::-webkit-scrollbar-track { background: #111; }
+  .terminal-content::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+</style>

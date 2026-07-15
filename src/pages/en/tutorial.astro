@@ -1,0 +1,45 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { baseUrl } from '../../utils/base.ts';
+
+const tutorials = import.meta.glob('../../content/tutorial/tutorial.en.md', { eager: true, query: '?raw' }) as Record<string, { default: string }>;
+const content = Object.values(tutorials)[0]?.default || '';
+const html = content
+  .replace(/^---[\s\S]*?---\n/, '')
+  .replace(/```(\w+)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+  .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+  .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+  .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+  .replace(/^- (.+)$/gm, '<li>$1</li>')
+  .replace(/(<li>[\s\S]*?<\/li>\n?)+/g, '<ul>$&</ul>')
+  .replace(/`([^`]+)`/g, '<code>$1</code>')
+  .replace(/\n\n/g, '</p><p>')
+  .replace(/<p><h[1-6]/g, '<h$1')
+  .replace(/<\/h[1-6]><\/p>/g, '</h$1>')
+  .replace(/<p><pre>/g, '<pre>')
+  .replace(/<\/pre><\/p>/g, '</pre>')
+  .replace(/<p><ul>/g, '<ul>')
+  .replace(/<\/ul><\/p>/g, '</ul>');
+---
+
+<Layout
+  title="SDK/CLI Tutorial - UOMP"
+  description="Complete guide from zero to deployed"
+  lang="en"
+  switchHref={`${baseUrl}tutorial/`}
+>
+  <section>
+    <div class="container">
+      <div class="sec-eyebrow">
+        <div class="sec-num">Tutorial</div>
+        <span class="sec-tag">From zero to deployed</span>
+      </div>
+      <Fragment set:html={html} />
+      <div class="hero-btns" style="margin-top: 2.5rem;">
+        <a href={`${baseUrl}en/spec/`} class="btn-h1">Specification →</a>
+        <a href={`${baseUrl}en/design/`} class="btn-h1">Implementation →</a>
+        <a href="https://github.com/0xaicrypto/uomp-core" target="_blank" rel="noopener" class="btn-h2">GitHub</a>
+      </div>
+    </div>
+  </section>
+</Layout>

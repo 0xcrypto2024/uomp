@@ -70,6 +70,17 @@ pnpm cli audit --limit 20</code></pre>
       <h2>8. 撤销授权</h2>
       <pre><code>pnpm cli revoke &lt;session-id&gt;</code></pre>
 
+      <h2>9. 远程模式：通过 Gateway 访问</h2>
+      <p>
+        如果 Agent 运行在另一台机器或容器里，可以用 <code>apps/gateway</code> 把本地 Memory Guard 暴露为 HTTPS + mTLS 入口。此时 Token 的 <code>audience</code> 指向 Gateway，而不是 <code>127.0.0.1:9374</code>。
+      </p>
+      <p>生成证书并启动 Gateway：</p>
+      <pre><code>./scripts/generate-gateway-certs.sh
+node apps/gateway/dist/index.js</code></pre>
+      <p>运行端到端烟雾测试（会创建 remote session、签发 remote token、通过 mTLS 查询持仓与审计）：</p>
+      <pre><code>./scripts/test-gateway-remote.sh</code></pre>
+      <p>完整配置见 <a href="https://github.com/0xaicrypto/uomp-core/tree/main/apps/gateway/README.md" target="_blank" rel="noopener">apps/gateway/README.md</a>。</p>
+
       <div class="hero-btns" style="margin-top: 2.5rem;">
         <a href="https://github.com/0xaicrypto/uomp-core/tree/main/examples/stock-analyst/README.md" target="_blank" rel="noopener" class="btn-h1">查看完整 README →</a>
         <a href={`${baseUrl}design/`} class="btn-h2">实现设计</a>

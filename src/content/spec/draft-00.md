@@ -755,6 +755,8 @@ Authorization: Bearer <gateway-token>
 X-UOMP-Agent-Id: <agent_id>
 ```
 
+> **实现参考**：`uomp-mvp` 在 `apps/gateway` 中提供了默认的 mTLS Gateway 参考实现，并附带 `scripts/generate-gateway-certs.sh` 与 `scripts/test-gateway-remote.sh` 用于本地验证。
+
 ### 15.5 Token Refresh
 
 远程 Agent 可能因长时间运行或 SaaS 重启而需要刷新 Token：

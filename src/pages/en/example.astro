@@ -75,6 +75,17 @@ pnpm cli audit --limit 20</code></pre>
       <h2>8. Revoke authorization</h2>
       <pre><code>pnpm cli revoke &lt;session-id&gt;</code></pre>
 
+      <h2>9. Remote mode: access via Gateway</h2>
+      <p>
+        If the Agent runs on a different machine or container, use <code>apps/gateway</code> to expose the local Memory Guard as an HTTPS + mTLS entry point. In this mode the Token's <code>audience</code> points to the Gateway, not <code>127.0.0.1:9374</code>.
+      </p>
+      <p>Generate certificates and start the Gateway:</p>
+      <pre><code>./scripts/generate-gateway-certs.sh
+node apps/gateway/dist/index.js</code></pre>
+      <p>Run the end-to-end smoke test (creates a remote session, issues a remote token, and queries holdings + audit logs over mTLS):</p>
+      <pre><code>./scripts/test-gateway-remote.sh</code></pre>
+      <p>See <a href="https://github.com/0xaicrypto/uomp-core/tree/main/apps/gateway/README.md" target="_blank" rel="noopener">apps/gateway/README.md</a> for full configuration.</p>
+
       <div class="hero-btns" style="margin-top: 2.5rem;">
         <a href="https://github.com/0xaicrypto/uomp-core/tree/main/examples/stock-analyst/README.md" target="_blank" rel="noopener" class="btn-h1">Full README →</a>
         <a href={`${baseUrl}en/design/`} class="btn-h2">Implementation Design</a>

@@ -24,6 +24,7 @@ This document explains how the UOMP **reference implementation** [`uomp-mvp`](ht
 | `packages/sdk` | Agent SDK (example-level) | A simple HTTP client wrapper for example Agents; full TypeScript SDK for GUI app integration is planned in [Roadmap](/en/roadmap/) Milestone 2 |
 | `packages/cli` | User UI | User CLI: `discover`/`connect`/`authorize`/`import`/`sessions`/`revoke`/`audit`/`registry`; developer shortcut `uomp agent run` |
 | `apps/server` | — | Combined Auth + Guard HTTP service |
+| `apps/gateway` | — | Remote Authorization Gateway: mTLS termination, remote token validation, forwarding memory/audit requests |
 
 ---
 
@@ -48,16 +49,46 @@ The MVP's `pnpm cli agent run ./examples/calendar-agent` is a shortcut to lower 
 
 This mode merges the "authorization proxy" and "Agent launcher" roles and is only suitable for local development and testing, not production architecture. In the standard user flow, the CLI only runs `authorize` and prints the Token; the Agent is started independently by the user.
 
+### 2.2 Remote Mode (Remote Profile + Gateway)
+
+When the Agent runs outside the user's local machine/container/cloud service, use `apps/gateway` to expose the Memory Guard:
+
+- The Gateway listens on HTTPS and requires a client mTLS certificate.
+- The user configures the Gateway endpoint and client-certificate fingerprint allowlist in `~/.uomp/remote-profile.json`.
+- The Capability Token issued by the Auth Service uses `profile: 'remote'` and its `audience` points to the Gateway endpoint (e.g. `https://localhost:9443`).
+- After validating the Token, the Gateway forwards `/v1/memory/*` and `/v1/audit/*` to the local Memory Guard.
+
+```text
+┌─────────────┐   mTLS + Bearer Token   ┌──────────────┐   local HTTP   ┌──────────────┐
+│ Remote Agent│ ───────────────────────►│ UOMP Gateway │ ──────────────►│ Memory Guard │
+└─────────────┘                         └──────────────┘                └──────────────┘
+```
+
+Quick validation commands:
+
+```bash
+# 1. Generate CA / Gateway server cert / client cert
+./scripts/generate-gateway-certs.sh
+
+# 2. Start the Gateway
+node apps/gateway/dist/index.js
+
+# 3. Create a remote session and run the end-to-end smoke test
+./scripts/test-gateway-remote.sh
+```
+
 Key code entry points:
 
 - `packages/cli/src/commands/authorize.ts`: standard authorization flow
 - `packages/cli/src/commands/run.ts`: local development shortcut orchestration
 - `packages/cli/src/utils/manifest.ts`: `loadManifest()` and `normalizeManifest()`
-- `packages/auth/src/index.ts`: `AuthService`
-- `packages/guard/src/index.ts`: `MemoryGuard`
+- `packages/auth/src/index.ts`: `AuthService` (`grantSession()` now supports `profile`/`audience`)
+- `packages/guard/src/index.ts`: `MemoryGuard` (new `/v1/audit` query endpoint)
 - `packages/token/src/index.ts`: `JWTTokenIssuer`
+- `apps/gateway/src/index.ts`: Gateway mTLS server and forwarding logic
+- `scripts/generate-gateway-certs.sh` and `scripts/test-gateway-remote.sh`
 
-### 2.2 CLI Command Structure
+### 2.3 CLI Command Structure
 
 To clearly separate the "end user" and "Agent developer" paths, CLI commands are split into two groups:
 
@@ -119,6 +150,8 @@ const payload: CapabilityTokenPayload = {
   limits: { maxReadQueries: 100, maxWriteQueries: 0 },
 };
 ```
+
+For remote mode, `grantSession()` accepts optional `{ profile, audience }` parameters; in that case `profile` is `'remote'` and `audience` points to the Gateway endpoint (e.g. `https://localhost:9443`). The Token is still signed by the local Auth Service private key; the Gateway only holds the public key for verification.
 
 ### 3.3 JWT Implementation Details
 
@@ -245,7 +278,7 @@ After `uomp init`, the following are generated in `~/.uomp`:
 | Agent read | ✅ Implemented | Authorized by tag/key |
 | Agent write | ❌ Not open | Guard returns `503 WRITE_NOT_AVAILABLE` |
 | Agent delete | ❌ Not open | Same as write |
-| Remote Profile | ⚠️ Partially reserved | `profile: 'remote'`, `audience`, `allowed_endpoints` defined, but TLS/mTLS not implemented |
+| Remote Profile (Gateway + mTLS) | ✅ Implemented | Reference implementation in `apps/gateway`; Payload E2E encryption still future work |
 | Identity verification | ⚠️ Optional | DID/GPG framework present, but verification is weak |
 | Query quotas | ⚠️ Reserved | `limits` written into token, but not enforced |
 

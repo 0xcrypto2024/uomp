@@ -110,10 +110,12 @@ window.linkDropbox=async function(){const s=document.getElementById('dbStatus');
 
 window.dismissDb=function(){document.getElementById('dbBanner').style.display='none';updateTopbar()}
 
+let _addr='';
 function updateTopbar(ch,addr){
-  const storage=dropbox?'📦 Dropbox /Apps/UOMP/':'💻 Browser localStorage';
+  if(addr)_addr=addr;
+  const a=_addr, storage=dropbox?'📦 Dropbox /Apps/UOMP/':'💻 Browser localStorage';
   document.getElementById('topbar').innerHTML=`
-    <span style="color:var(--mid)">Connected:</span><span class="addr">${addr.slice(0,12)}...${addr.slice(-4)}</span>
+    <span style="color:var(--mid)">Connected:</span><span class="addr">${a.slice(0,12)}...${a.slice(-4)}</span>
     <span class="spacer"></span>
     <span style="color:var(--dim);font-size:.8rem">${storage}</span>
     ${isSample?'<span class="status status-warn">Sample data</span>':''}

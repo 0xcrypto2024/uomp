@@ -27,10 +27,32 @@ import TerminalDemo from '../components/TerminalDemo.astro';
 
   </section>
 
+  <section>
+    <div class="container">
+      <div class="sec-eyebrow"><div class="sec-num">01</div><span class="sec-tag">两种使用方式</span></div>
+      <h2>同一个 SDK，<br/><em>两种部署模式。</em></h2>
+      <p style="color:var(--mid);margin-bottom:2rem;max-width:600px">UOMP 提供 CLI 和浏览器两种入口，底层共享同一套 SDK 和协议。选择适合你的方式。</p>
+      <div style="display:flex;gap:1.5rem;flex-wrap:wrap">
+        <div class="card" style="flex:1;min-width:280px;border-color:var(--purple);border-width:2px">
+          <div class="card-label" style="color:var(--purple);font-size:1rem">🖥️ 浏览器模式</div>
+          <div class="card-value" style="font-size:1rem;margin:.3rem 0">零安装 · 零配置</div>
+          <p style="color:var(--mid);font-size:.85rem">连接钱包 + Dropbox 即可管理你的投资组合。加密存储，无需服务器，无需 CLI。</p>
+          <a href="/dashboard/" class="btn btn-purple" style="display:inline-block;margin-top:.75rem;padding:.6rem 1.2rem;background:var(--purple);border-radius:6px;color:#fff;text-decoration:none;font-weight:600;font-size:.85rem">打开 Dashboard →</a>
+        </div>
+        <div class="card" style="flex:1;min-width:280px">
+          <div class="card-label" style="font-size:1rem">⌨️ CLI 模式</div>
+          <div class="card-value" style="font-size:1rem;margin:.3rem 0">开发者 · AI Agent</div>
+          <p style="color:var(--mid);font-size:.85rem">通过 <code>@uomp/sdk</code> 和 CLI 工具，Agent 可以在任意环境下通过 Capability Token 访问数据。</p>
+          <a href="/tutorial/" style="display:inline-block;margin-top:.75rem;padding:.6rem 1.2rem;background:var(--blu);border-radius:6px;color:#fff;text-decoration:none;font-weight:600;font-size:.85rem">SDK 教程 →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="alt">
     <div class="container">
       <div class="sec-eyebrow">
-        <div class="sec-num">01</div>
+        <div class="sec-num">02</div>
         <span class="sec-tag">为什么需要 UOMP</span>
       </div>
       <h2>数据留在本地，<br/><em>授权交给你。</em></h2>
@@ -46,7 +68,7 @@ import TerminalDemo from '../components/TerminalDemo.astro';
   <section>
     <div class="container">
       <div class="sec-eyebrow">
-        <div class="sec-num">02</div>
+        <div class="sec-num">03</div>
         <span class="sec-tag">核心原则</span>
       </div>
       <h2>四个原则，<br/><em>一个目标。</em></h2>

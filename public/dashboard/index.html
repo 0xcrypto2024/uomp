@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>UOMP Portfolio</title><link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<!-- v20260720-3f0de27 -->
+<!-- v20260720-181ead7 -->
 <style>
   :root{--bg:#0A0A0A;--card:#111;--border:#1F2937;--txt:#E5E7EB;--mid:#9CA3AF;--dim:#6B7280;--grn:#34D399;--red:#F87171;--blu:#3B82F6;--pur:#8B5CF6;--db:#0061FF}*{margin:0;padding:0;box-sizing:border-box}
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;line-height:1.5}
@@ -69,7 +69,7 @@
   <h2>📝 Reports</h2>
   <div id="reports"><div class="empty">No reports yet. Send your portfolio to the Agent above.</div></div>
 </div>
-<div class="footer">Powered by <a href="https://www.uomp.org" style="color:var(--mid)">UOMP</a> · Data encrypted. You hold the keys. <span style="color:var(--dim);font-size:.7rem">v20260720-3f0de27</span></div>
+<div class="footer">Powered by <a href="https://www.uomp.org" style="color:var(--mid)">UOMP</a> · Data encrypted. You hold the keys. <span style="color:var(--dim);font-size:.7rem">v20260720-181ead7</span></div>
 </div>
 
 <script>
@@ -79,19 +79,22 @@ function connect(chain){if(window._connect)window._connect(chain);else document.
 function linkDropbox(){if(window._linkDropbox)window._linkDropbox();else document.getElementById('connectStatus').innerHTML='<span class="status status-ok">Loading SDK...</span>'}
 </script>
 <script type="module">
-// Immediately set the connect function so buttons work even if SDK loads later
-window._connect = async function(chain){document.getElementById('connectStatus').innerHTML='<span class="status status-err">Module still loading...</span>'};
-window._linkDropbox = async function(){document.getElementById('connectStatus').innerHTML='<span class="status status-err">Module still loading...</span>'};
-
 import { BrowserSDK, DropboxStore, connectDropbox as dbConnect, encryptData, decryptData } from './sdk.js?v=2026-07-20.6';
+
+// Define connect/linkDropbox FIRST so window._connect is never null
+async function connect(chain){const s=document.getElementById('connectStatus');try{s.innerHTML='<span class="status status-ok">Requesting wallet...</span>';const r=await BrowserSDK.fromWallet(chain);cKey=r.key;uid=r.userId;s.innerHTML='<span class="status status-ok">✓ Wallet connected</span>';await load();showApp(r.chain,r.address)}catch(e){s.innerHTML=`<span class="status status-err">${e.message}</span>`}}
+async function linkDropbox(){const s=document.getElementById('dbStatus');s.innerHTML='<span class="status status-ok">Connecting Dropbox...</span>';try{dropbox=await dbConnect();s.innerHTML='<span class="status status-ok">✓ Dropbox connected</span>';document.getElementById('dbBanner').style.display='none';updateTopbar();await loadFromDb()}catch(e){if(e.message==='Redirecting to Dropbox')return;s.innerHTML=`<span class="status status-err">${e.message}</span>`}}
+window._connect = connect;
+window._linkDropbox = linkDropbox;
+
+// Rest of module code follows...
 
 let cKey=null,uid=null,dropbox=null,holdings=[],reports=[],changed=false,isSample=false;
 const SAMPLE=[{s:'AAPL',n:'Apple',q:'100',c:'150',sec:'Technology'},{s:'MSFT',n:'Microsoft',q:'40',c:'320',sec:'Technology'},{s:'GOOGL',n:'Alphabet',q:'30',c:'140',sec:'Technology'},{s:'NVDA',n:'NVIDIA',q:'30',c:'300',sec:'Technology'},{s:'TSLA',n:'Tesla',q:'50',c:'200',sec:'Consumer Cyclical'},{s:'AMZN',n:'Amazon',q:'25',c:'170',sec:'Consumer Cyclical'},{s:'JPM',n:'JPMorgan',q:'60',c:'155',sec:'Financial'},{s:'BAC',n:'BofA',q:'200',c:'32',sec:'Financial'},{s:'JNJ',n:'J&J',q:'40',c:'160',sec:'Healthcare'},{s:'XOM',n:'Exxon',q:'50',c:'100',sec:'Energy'}];
 const SECS=['Technology','Consumer Cyclical','Financial','Healthcare','Energy','Utilities','Real Estate','Materials','Industrials','Communication','Other'];
 const AGENTS=[{id:'stock-analyst',name:'Stock Analyst v3',desc:'P&L, Sharpe, Beta, RSI, MACD, signals, scenarios',url:'https://uomp-stock-analyst-mvblm.ondigitalocean.app'}];
 
-// ── Connect wallet ──────────────────────────────────
-window.connect=async function(chain){const s=document.getElementById('connectStatus');try{s.innerHTML='<span class="status status-ok">Requesting wallet...</span>';const r=await BrowserSDK.fromWallet(chain);cKey=r.key;uid=r.userId;s.innerHTML='<span class="status status-ok">✓ Wallet connected</span>';await load();showApp(r.chain,r.address)}catch(e){s.innerHTML=`<span class="status status-err">${e.message}</span>`}}
+// ── Load data ──────────────────────────────────────
 
 async function load(){const local=await BrowserSDK.loadEncrypted(cKey,uid);if(local){holdings=local.h||[];reports=local.r||[];isSample=false}else{holdings=SAMPLE.map(x=>({...x}));isSample=true}}
 
@@ -110,7 +113,7 @@ function showApp(ch,addr){
 }
 
 // ── Dropbox ──────────────────────────────────────────
-window.linkDropbox=async function(){const s=document.getElementById('dbStatus');s.innerHTML='<span class="status status-ok">Connecting...</span>';try{dropbox=await dbConnect();s.innerHTML='<span class="status status-ok">✓ Dropbox connected — data syncs to /Apps/UOMP/</span>';document.getElementById('dbBanner').style.display='none';updateTopbar();await loadFromDb()}catch(e){if(e.message==='Redirecting to Dropbox')return;s.innerHTML=`<span class="status status-err">${e.message}</span>`}}
+// ── Show app ──────────────────────────────────────
 
 window.dismissDb=function(){document.getElementById('dbBanner').style.display='none';updateTopbar()}
 
@@ -250,9 +253,7 @@ window.sendToAgent = async function(id) {
 
 function showReports(){const rd=document.getElementById('reports');rd.innerHTML=reports.map(r=>`<div class="report-card"><div class="date">${r.d||r.n}</div><pre>${(r.c||'').slice(0,2000)}</pre></div>`).join('')||'<div class="empty">No reports yet. Send your portfolio to the Agent above.</div>'}
 
-// Init
-window._connect = connect;
-window._linkDropbox = linkDropbox;
+// Init — handlers already set at top of module
 </script>
 </body>
 </html>

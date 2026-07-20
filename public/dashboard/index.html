@@ -200,6 +200,8 @@ window.sendToAgent = async function(id) {
 function showReports(){const rd=document.getElementById('reports');rd.innerHTML=reports.map(r=>`<div class="report-card"><div class="date">${r.d||r.n}</div><pre>${(r.c||'').slice(0,2000)}</pre></div>`).join('')||'<div class="empty">No reports yet. Send your portfolio to the Agent above.</div>'}
 
 // Init
+window._connect = connect;
+window._linkDropbox = linkDropbox;
 (function(){const qs=new URLSearchParams(location.search);if(qs.get('code')){linkDropbox();return}})();
 </script>
 </body>

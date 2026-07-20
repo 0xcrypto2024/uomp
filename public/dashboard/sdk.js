@@ -10,8 +10,12 @@ const UompErrorCode={ACCESS_DENIED:'ACCESS_DENIED',TOKEN_EXPIRED:'TOKEN_EXPIRED'
 
 // ── Crypto (Web Crypto API) ────────────────────────────────
 const CRYPTO_AVAILABLE=typeof crypto!=='undefined'&&crypto.subtle;
-async function hmacSign(key,data){const k=await crypto.subtle.importKey('raw',key,{name:'HMAC',hash:{name:'SHA-256'}},false,['sign']);return new Uint8Array(await crypto.subtle.sign('HMAC',k,data))}
-async function deriveMasterKey(signature,address,chain){const s=E.encode(signature).slice(0,64),a=E.encode(address.toLowerCase());const ikm=new Uint8Array([...s,...a]).slice(0,64);const prk=await hmacSign(E.encode('uomp-store-v1'),ikm);const info=E.encode(chain+':'+address);const t=new Uint8Array([...info,1]);const okm=await hmacSign(prk,t);return crypto.subtle.importKey('raw',okm.slice(0,32),{name:'AES-GCM',length:256},true,['encrypt','decrypt'])}
+async function deriveMasterKey(signature,address,chain){
+  // Use SHA-256 to hash the combined inputs for consistent key material
+  const input=E.encode(signature+'\n'+address.toLowerCase()+'\nuomp-store-v1\n'+chain);
+  const hash=await crypto.subtle.digest('SHA-256',input);
+  return crypto.subtle.importKey('raw',new Uint8Array(hash),{name:'AES-GCM',length:256},true,['encrypt','decrypt']);
+}
 async function encryptData(key,text){const iv=crypto.getRandomValues(new Uint8Array(12));const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,E.encode(text));return{iv:Array.from(iv),d:Array.from(new Uint8Array(ct))}}
 async function decryptData(key,obj){const iv=new Uint8Array(obj.iv),data=new Uint8Array(obj.d);const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,data);return D.decode(pt)}
 function createUserId(chain,address){return chain+':'+address.toLowerCase()}
@@ -71,7 +75,7 @@ const BrowserSDK={
   createFromStorage(){return this.fromEnv()},
   async fromWallet(chain='ethereum'){
     let addr,sig;
-    if(chain==='ethereum'){if(!window.ethereum)throw new Error('MetaMask not detected');const a=await window.ethereum.request({method:'eth_requestAccounts'});addr=a[0];sig=await window.ethereum.request({method:'personal_sign',params:['UOMP Store v1',addr]})}
+    if(chain==='ethereum'){if(!window.ethereum)throw new Error('MetaMask not detected');const a=await window.ethereum.request({method:'eth_requestAccounts'});addr=a[0];sig=await window.ethereum.request({method:'personal_sign',params:['Authorize UOMP to access your encrypted portfolio data.\n\nThis signature does not send a transaction. It only derives your encryption key.',addr]})}
     else{if(!window.starknet)throw new Error('Argent X not detected');await window.starknet.enable();addr=window.starknet.selectedAddress;if(!addr)throw new Error('No account');const td={domain:{name:'UOMP Store',version:'1',chainId:'SN_MAIN'},types:{StarkNetDomain:[{name:'name',type:'felt'},{name:'version',type:'felt'},{name:'chainId',type:'felt'}],Message:[{name:'message',type:'felt'}]},primaryType:'Message',message:{message:'UOMP Store v1'}};const r=await window.starknet.account.signMessage(td);sig=Array.isArray(r)?r.join(','):String(r)}
     const key=await deriveMasterKey(sig,addr,chain);
     const uid=createUserId(chain,addr);

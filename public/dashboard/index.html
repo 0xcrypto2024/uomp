@@ -94,9 +94,8 @@ async function load(){const local=await BrowserSDK.loadEncrypted(cKey,uid);if(lo
 // ── Show app + Dropbox prompt ────────────────────────
 function showApp(ch,addr){
   document.getElementById('connect').style.display='none';document.getElementById('app').style.display='block';
-  document.getElementById('topbar').innerHTML=`<span style="color:var(--mid)">Connected:</span><span class="addr">${addr.slice(0,12)}...${addr.slice(-4)}</span><span class="spacer"></span>${isSample?'<span class="status status-warn">Sample data</span>':''}<span class="status status-ok">Encrypted</span><button class="btn btn-out btn-sm" onclick="location.reload()">Lock</button>`;
+  updateTopbar(ch,addr);
   document.getElementById('dbBanner').style.display='block';
-  // Auto-check Dropbox from sessionStorage
   if(typeof sessionStorage!=='undefined'&&sessionStorage.getItem('uomp_db')){linkDropbox()}
   render();checkAgents();
 }
@@ -106,7 +105,16 @@ window.linkDropbox=async function(){const s=document.getElementById('dbStatus');
 
 window.dismissDb=function(){document.getElementById('dbBanner').style.display='none';updateTopbar()}
 
-function updateTopbar(){const storage=dropbox?'Dropbox':'Browser localStorage';document.getElementById('topbar').innerHTML=document.getElementById('topbar').innerHTML.replace(/<span class="spacer">/,`<span style="color:var(--mid)">Storage:</span><span class="addr" style="color:var(--db);font-size:.8rem">${storage}</span><span class="spacer">`)}
+function updateTopbar(ch,addr){
+  const storage=dropbox?'📦 Dropbox /Apps/UOMP/':'💻 Browser localStorage';
+  document.getElementById('topbar').innerHTML=`
+    <span style="color:var(--mid)">Connected:</span><span class="addr">${addr.slice(0,12)}...${addr.slice(-4)}</span>
+    <span class="spacer"></span>
+    <span style="color:var(--dim);font-size:.8rem">${storage}</span>
+    ${isSample?'<span class="status status-warn">Sample data</span>':''}
+    <span class="status status-ok">Encrypted</span>
+    <button class="btn btn-out btn-sm" onclick="location.reload()">Lock</button>`;
+}
 
 async function loadFromDb(){
   try {
@@ -136,7 +144,35 @@ async function loadFromDb(){
   } catch (err) {}
 }
 
-async function save(){const obj={h:holdings,r:reports.slice(0,50)};if(dropbox){const e=await encryptData(cKey,JSON.stringify(obj));await dropbox.upload('holdings.enc',JSON.stringify(e))}else{await BrowserSDK.saveEncrypted(cKey,uid,obj)}changed=false;document.getElementById('saveBtn').style.display='none';document.getElementById('saveStatus').innerHTML='<span class="status status-ok">✓ Saved</span>';setTimeout(()=>document.getElementById('saveStatus').innerHTML='',2000)}
+async function save(){
+  if(!holdings.length)return;
+  const obj={h:holdings,r:reports.slice(0,50)};
+  const status=document.getElementById('saveStatus');
+
+  if(dropbox){
+    status.innerHTML='<span class="status status-ok">Encrypting & uploading to Dropbox...</span>';
+    try{
+      const e=await encryptData(cKey,JSON.stringify(obj));
+      const ok=await dropbox.upload('holdings.enc',JSON.stringify(e));
+      if(ok){
+        status.innerHTML='<span class="status status-ok">✓ Saved to Dropbox /Apps/UOMP/</span>';
+      }else{
+        status.innerHTML='<span class="status status-err">✗ Dropbox upload failed — try reconnecting</span>';
+        return;
+      }
+    }catch(err){
+      status.innerHTML=`<span class="status status-err">✗ ${err.message}</span>`;
+      return;
+    }
+  }else{
+    status.innerHTML='<span class="status status-ok">Encrypting to browser...</span>';
+    await BrowserSDK.saveEncrypted(cKey,uid,obj);
+    status.innerHTML='<span class="status status-ok">✓ Saved (browser localStorage)</span>';
+  }
+  changed=false;
+  document.getElementById('saveBtn').style.display='none';
+  setTimeout(()=>status.innerHTML='',3000);
+}
 window.save=save;
 
 // ── CSV ──────────────────────────────────────────────

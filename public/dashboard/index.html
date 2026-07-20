@@ -10,8 +10,8 @@
   .btn{padding:.75rem 2rem;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;border:none;color:#fff}.btn:hover{opacity:.9}.btn-bl{background:var(--blu)}.btn-db{background:var(--db)}.btn-pur{background:var(--pur)}.btn-out{background:var(--card);border:1px solid var(--border);color:var(--mid)}
   .topbar{display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;padding:.75rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:.85rem;flex-wrap:wrap}.topbar .addr{color:var(--pur);font-family:monospace;font-size:.8rem}
   .status{font-size:.8rem;padding:.2rem .5rem;border-radius:4px;display:inline-block}.status-ok{background:#064E3B;color:var(--grn)}.status-warn{background:#78350F;color:#FBBF24}.status-err{background:#7F1D1D;color:var(--red)}
-  .toolbar{display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
-  h2{font-size:1.1rem;margin:2rem 0 1rem;color:#fff}.spacer{flex:1}
+  .toolbar{display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap;align-items:center}.spacer{flex:1}
+  h2{font-size:1.1rem;margin:2rem 0 1rem;color:#fff}
   table{width:100%;border-collapse:collapse;font-size:.83rem}th,td{padding:.45rem .5rem;text-align:right;border-bottom:1px solid var(--border)}th{background:var(--card);color:var(--mid);font-weight:600}td input,td select{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--txt);padding:.3rem;border-radius:4px;font-size:.83rem}td select{cursor:pointer}
   .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin:1.5rem 0}.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem}.card-label{font-size:.8rem;color:var(--mid);margin-bottom:.2rem}.card-value{font-size:1.2rem;font-weight:700}
   .report-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:.5rem;font-size:.83rem}.report-card .date{color:var(--dim);font-size:.75rem}.report-card pre{margin-top:.5rem;white-space:pre-wrap;color:var(--mid);max-height:200px;overflow:auto}
@@ -20,18 +20,16 @@
 </style></head>
 <body><div class="container">
 
-<!-- Landing -->
 <div id="landing">
   <div class="hero">
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
     <h1>Your Portfolio.<br>Your Data.</h1>
-    <p>Connect Dropbox and your wallet. Everything encrypted. No server, no signup.</p>
+    <p>Connect Dropbox and your wallet. Everything encrypted.</p>
     <button class="btn btn-bl" onclick="start()">Get Started</button>
     <div id="status" style="margin-top:.5rem"></div>
   </div>
 </div>
 
-<!-- App -->
 <div id="app" style="display:none">
   <div class="topbar" id="topbar"></div>
   <div class="toolbar">
@@ -43,19 +41,17 @@
     <button class="btn btn-bl" id="saveBtn" onclick="save()" style="display:none">💾 Save</button>
   </div>
 
-  <!-- Setup steps -->
-  <div id="steps" style="display:flex;gap:1rem;margin-bottom:1.5rem">
-    <div class="card" style="flex:1"><div class="card-label">Step 1</div><div class="card-value" style="font-size:1rem">📦 Dropbox</div><button class="btn btn-db btn-sm" id="dbBtn" onclick="linkDropbox()">Connect</button><span id="dbStep"></span></div>
-    <div class="card" style="flex:1"><div class="card-label">Step 2</div><div class="card-value" style="font-size:1rem">🔑 Wallet</div><button class="btn btn-pur btn-sm" id="walBtn" onclick="connect('ethereum')">Connect MetaMask</button><span id="walStep"></span></div>
-    <div class="card" style="flex:1"><div class="card-label">Step 3</div><div class="card-value" style="font-size:1rem">🤖 Agent</div><span id="agentStep"></span></div>
+  <div style="display:flex;gap:1rem;margin-bottom:1.5rem" id="steps">
+    <div class="card" style="flex:1"><div class="card-label">📦 Dropbox</div><button class="btn btn-db" id="dbBtn" onclick="linkDropbox()">Connect</button><span id="dbStep"></span></div>
+    <div class="card" style="flex:1"><div class="card-label">🔑 Wallet</div><button class="btn btn-pur" id="walBtn" onclick="connect('ethereum')">Connect MetaMask</button><span id="walStep"></span></div>
+    <div class="card" style="flex:1"><div class="card-label">🤖 Agent</div><span id="agentStep"></span></div>
   </div>
 
   <h2>📊 Holdings</h2>
   <div style="overflow-x:auto"><table><thead><tr><th>Sym</th><th>Name</th><th>Qty</th><th>Cost</th><th>Sector</th><th>Value</th><th></th></tr></thead><tbody id="tbody"></tbody></table></div>
   <div class="grid" id="summaryGrid"></div>
-
   <h2>📝 Reports</h2>
-  <div id="reports"><div class="empty">No reports yet. Complete all 3 steps above.</div></div>
+  <div id="reports"><div class="empty">Connect Dropbox + Wallet above, then edit and save.</div></div>
 </div>
 <div class="footer">Powered by <a href="https://www.uomp.org" style="color:var(--mid)">UOMP</a> · Encrypted · You hold the keys.</div>
 </div>
@@ -77,13 +73,12 @@ const SECS=['Technology','Consumer Cyclical','Financial','Healthcare','Energy','
 async function connectWallet(chain){
   const s=document.getElementById('walStep');
   try{
-    s.innerHTML='<span class="status status-ok">Requesting...</span>';
+    s.innerHTML='<span class="status status-ok">Signing...</span>';
     const r=await BrowserSDK.fromWallet(chain);
     cKey=r.key;uid=r.userId;_chain=chain;_addr=r.address;
-    sessionStorage.setItem('uomp_wallet',JSON.stringify({chain,address:r.address,uid:r.userId}));
     s.innerHTML='<span class="status status-ok">✓ Connected</span>';
     document.getElementById('walBtn').style.display='none';
-    updateTopbar(r.chain,r.address);
+    updateTopbar();
     await loadData();
     step3();
   }catch(e){s.innerHTML=`<span class="status status-err">${e.message}</span>`}
@@ -92,33 +87,26 @@ async function connectWallet(chain){
 async function connectDb(){
   const s=document.getElementById('dbStep');
   try{
-    s.innerHTML='<span class="status status-ok">Connecting...</span>';
+    s.innerHTML='<span class="status status-ok">Redirecting...</span>';
     dropbox=await dbConnect();
     s.innerHTML='<span class="status status-ok">✓ Connected</span>';
     document.getElementById('dbBtn').style.display='none';
     updateTopbar();
     if(cKey){await loadData();step3()}
-  }catch(e){if(e.message==='Redirecting to Dropbox'){s.innerHTML='<span class="status status-ok">Redirecting...</span>';return}s.innerHTML=`<span class="status status-err">${e.message}</span>`}
+  }catch(e){if(e.message==='Redirecting to Dropbox')return;s.innerHTML=`<span class="status status-err">${e.message}</span>`}
 }
 
 function autoStart(){
-  // Auto-restore Dropbox if OAuth redirect happened
   const qs=new URLSearchParams(location.search);
-  if(qs.get('code')){sessionStorage.setItem('uomp_db_redirect','1');history.replaceState({},'',location.pathname)}
+  if(qs.get('code')){sessionStorage.setItem('uomp_db_redirect','1');history.replaceState({},'',location.pathname);connectDb();return}
   if(sessionStorage.getItem('uomp_db_redirect')){sessionStorage.removeItem('uomp_db_redirect');connectDb()}
-  // Auto-restore wallet
-  const w=JSON.parse(sessionStorage.getItem('uomp_wallet')||'{}');
-  if(w.chain){connectWallet(w.chain)}
 }
 
 async function loadData(){
   try{
-    // Try Dropbox first
-    if(dropbox){const raw=await dropbox.download('holdings.enc');if(raw){const p=await decryptData(cKey,JSON.parse(raw));const d=JSON.parse(p);holdings=d.h||[];reports=d.r||[];render();return}}
-    // Fallback to localStorage
-    const local=await BrowserSDK.loadEncrypted(cKey,uid);
-    if(local){holdings=local.h||[];reports=local.r||[]}else{holdings=SAMPLE.map(x=>({...x}))}
-    render();
+    if(dropbox){const raw=await dropbox.download('holdings.enc');if(raw&&cKey){const p=await decryptData(cKey,JSON.parse(raw));const d=JSON.parse(p);holdings=d.h||[];reports=d.r||[];render();return}}
+    if(cKey){const local=await BrowserSDK.loadEncrypted(cKey,uid);if(local){holdings=local.h||[];reports=local.r||[];render();return}}
+    holdings=SAMPLE.map(x=>({...x}));render();
   }catch(e){holdings=SAMPLE.map(x=>({...x}));render()}
 }
 
@@ -127,8 +115,7 @@ async function save(){
   const obj={h:holdings,r:reports.slice(0,50)},s=document.getElementById('saveStatus');
   if(dropbox){
     s.innerHTML='<span class="status status-ok">Encrypting & uploading...</span>';
-    try{const e=await encryptData(cKey,JSON.stringify(obj));await dropbox.upload('holdings.enc',JSON.stringify(e));s.innerHTML='<span class="status status-ok">✓ Saved to Dropbox</span>'}
-    catch(e){s.innerHTML=`<span class="status status-err">${e.message}</span>`;return}
+    try{const e=await encryptData(cKey,JSON.stringify(obj));await dropbox.upload('holdings.enc',JSON.stringify(e));s.innerHTML='<span class="status status-ok">✓ Saved to Dropbox</span>'}catch(e){s.innerHTML=`<span class="status status-err">${e.message}</span>`;return}
   }else{
     s.innerHTML='<span class="status status-ok">Saving...</span>';
     await BrowserSDK.saveEncrypted(cKey,uid,obj);
@@ -139,10 +126,8 @@ async function save(){
 window.save=save;
 
 async function step3(){
-  // Check agent and show results
   const s=document.getElementById('agentStep');
-  try{const r=await fetch('https://uomp-stock-analyst-mvblm.ondigitalocean.app/health');if(r.ok){s.innerHTML='<span class="status status-ok">● Online</span><br><button class="btn btn-pur btn-sm" onclick="sendToAgent()" style="margin-top:.5rem">📤 Analyze Portfolio</button>'}else{s.innerHTML='<span class="status status-err">○ Offline</span>'}}
-  catch{s.innerHTML='<span class="status status-err">○ Offline</span>'}
+  try{const r=await fetch('https://uomp-stock-analyst-mvblm.ondigitalocean.app/health');if(r.ok){s.innerHTML='<span class="status status-ok">● Online</span><br><button class="btn btn-pur" onclick="sendToAgent()" style="margin-top:.5rem">📤 Analyze Portfolio</button>'}else{s.innerHTML='<span class="status status-err">○ Offline</span>'}}catch{s.innerHTML='<span class="status status-err">○ Offline</span>'}
 }
 
 window.sendToAgent=async function(){
@@ -160,11 +145,11 @@ window.sendToAgent=async function(){
   }catch(e){s.innerHTML=`<span class="status status-err">${e.message}</span>`}
 }
 
-function updateTopbar(ch,addr){
-  if(ch)_chain=ch;if(addr)_addr=addr;
+function updateTopbar(){
   const a=_addr,st=dropbox?'📦 Dropbox':'💻 Browser';
-  document.getElementById('topbar').innerHTML=`<span style="color:var(--mid)">${st}</span><span class="addr">${a.slice(0,12)}...${a.slice(-4)}</span><span class="spacer"></span><span class="status status-ok">Encrypted</span><button class="btn btn-out btn-sm" onclick="location.reload()">Lock</button>`;
+  document.getElementById('topbar').innerHTML=`<span style="color:var(--mid)">${st}</span><span class="addr">${a.slice(0,12)}...${a.slice(-4)}</span><span class="spacer"></span><span class="status status-ok">Encrypted</span><button class="btn btn-out btn-sm" onclick="disconnectDb()" style="${dropbox?'':'display:none'}">Disconnect DB</button><button class="btn btn-out btn-sm" onclick="location.reload()">Lock</button>`;
 }
+window.disconnectDb=function(){dropbox=null;if(typeof sessionStorage!=='undefined')sessionStorage.removeItem('uomp_db');updateTopbar();document.getElementById('saveStatus').innerHTML='<span class="status status-ok">Dropbox disconnected</span>'}
 
 function render(){
   const f=n=>{const v=parseFloat(n);return isNaN(v)?'0':v.toFixed(2)};
@@ -176,14 +161,14 @@ function render(){
 
 function showReports(){document.getElementById('reports').innerHTML=reports.map(r=>`<div class="report-card"><div class="date">${r.d||r.n}</div><pre>${(r.c||'').slice(0,2000)}</pre></div>`).join('')||'<div class="empty">No reports yet.</div>'}
 
-// Table editing  
 window.addRow=function(){holdings.push({s:'NEW',n:'New Stock',q:'0',c:'0',sec:'Other'});changed=true;document.getElementById('saveBtn').style.display='inline-block';render()}
 window.editCell=function(i,f,v){holdings[i][f]=v;changed=true;document.getElementById('saveBtn').style.display='inline-block';render()}
 window.delRow=function(i){holdings.splice(i,1);changed=true;document.getElementById('saveBtn').style.display='inline-block';render()}
 window.handleCSV=function(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{const lines=ev.target.result.split('\n').filter(l=>l.trim());if(lines.length<2)return;const h=lines[0].toLowerCase().split(',').map(x=>x.trim());const si=h.findIndex(x=>x==='symbol'||x==='sym'),ni=h.findIndex(x=>x==='name'),qi=h.findIndex(x=>x==='quantity'||x==='qty'),ci=h.findIndex(x=>x==='cost_basis'||x==='cost'),ei=h.findIndex(x=>x==='sector');if(si<0)return;const imp=[];for(let i=1;i<lines.length;i++){const c=lines[i].split(',').map(x=>x.trim());if(!c[si])continue;imp.push({s:c[si],n:ni>=0?c[ni]||c[si]:c[si],q:qi>=0?c[qi]||'0':'0',c:ci>=0?c[ci]||'0':'0',sec:ei>=0?c[ei]||'Other':'Other'})}holdings=imp;changed=true;document.getElementById('saveBtn').style.display='inline-block';render()};r.readAsText(f)}
 
 // Init
-window._connect=connectWallet;window._linkDropbox=connectDb;
-autoStart();
+window._connect=connectWallet;window._linkDropbox=connectDb;window._autoStart=autoStart;
+const _qs=new URLSearchParams(location.search);
+if(_qs.get('code')||sessionStorage.getItem('uomp_db_redirect'))autoStart();
 </script>
 </body></html>

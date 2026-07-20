@@ -6,488 +6,323 @@
 <title>UOMP Portfolio</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <style>
-  :root { --bg:#0A0A0A; --card:#111; --border:#1F2937; --text:#E5E7EB; --mid:#9CA3AF; --dim:#6B7280; --green:#34D399; --red:#F87171; --blue:#3B82F6; --purple:#8B5CF6; --db:#0061FF; }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; line-height:1.5; }
-  .container { max-width:1100px; margin:0 auto; padding:2rem 1.5rem; }
-  header { margin-bottom:2rem; }
-  h1 { font-size:1.5rem; color:#fff; display:flex; align-items:center; gap:.5rem; margin-bottom:1rem; }
-  .logo { width:28px; height:28px; }
-  .modes { display:flex; gap:.75rem; flex-wrap:wrap; align-items:flex-start; }
-  .mode-card { flex:1; min-width:280px; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:1.25rem; }
-  .mode-title { font-size:.8rem; font-weight:600; color:var(--mid); margin-bottom:.75rem; text-transform:uppercase; letter-spacing:.5px; }
-  .mode-card input { width:100%; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:.5rem .75rem; border-radius:6px; font-size:.85rem; margin-bottom:.5rem; }
-  .mode-card input::placeholder { color:var(--dim); }
-  .mode-card button, .btn { padding:.6rem 1rem; border-radius:6px; font-size:.85rem; font-weight:600; cursor:pointer; border:none; color:#fff; }
-  .mode-card button { width:100%; }
-  .btn-sm { padding:.35rem .7rem; font-size:.75rem; }
-  .btn-blue { background:var(--blue); }
-  .btn-purple { background:var(--purple); }
-  .btn-starknet { background:#EC796B; }
-  .btn-dropbox { background:var(--db); }
-  .btn-green { background:#059669; }
-  .btn-red { background:#DC2626; }
-  .btn-outline { background:var(--card); border:1px solid var(--border); color:var(--mid); }
-  button:hover { opacity:.9; }
-  button:disabled { background:#374151!important; cursor:not-allowed; }
+  :root { --bg:#0A0A0A; --card:#111; --border:#1F2937; --text:#E5E7EB; --mid:#9CA3AF; --dim:#6B7280; --green:#34D399; --red:#F87171; --blue:#3B82F6; --purple:#8B5CF6; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5}
+  .container{max-width:1000px;margin:0 auto;padding:2rem 1.5rem}
+  h1{font-size:1.5rem;color:#fff;display:flex;align-items:center;gap:.5rem;margin-bottom:2rem}
+  .logo{width:28px;height:28px}
 
-  .status { font-size:.8rem; padding:.25rem .6rem; border-radius:4px; display:inline-block; margin-top:.5rem; }
-  .status-ok { background:#064E3B; color:var(--green); }
-  .status-err { background:#7F1D1D; color:var(--red); }
-  .status-warn { background:#78350F; color:#FBBF24; }
-  .user-bar { display:flex; align-items:center; gap:.75rem; margin-bottom:1.5rem; padding:.75rem 1rem; background:var(--card); border:1px solid var(--border); border-radius:8px; font-size:.85rem; flex-wrap:wrap; }
-  .addr { color:var(--purple); font-family:monospace; font-size:.8rem; }
+  /* Wallet connect screen */
+  .hero{text-align:center;padding:3rem 1rem}
+  .hero h2{font-size:1.8rem;color:#fff;margin-bottom:.5rem}
+  .hero p{color:var(--mid);margin-bottom:2rem;max-width:500px;margin-left:auto;margin-right:auto}
+  .wallets{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+  .wallet-btn{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem 2rem;cursor:pointer;color:var(--text);text-align:center;min-width:200px;transition:border-color .2s}
+  .wallet-btn:hover{border-color:var(--purple)}
+  .wallet-btn .icon{font-size:2rem;margin-bottom:.5rem}
+  .wallet-btn .name{font-weight:600;margin-bottom:.25rem}
+  .wallet-btn .desc{font-size:.75rem;color:var(--dim)}
 
-  .toolbar { display:flex; gap:.5rem; margin-bottom:1rem; flex-wrap:wrap; align-items:center; }
-  .toolbar .spacer { flex:1; }
+  /* Connected state */
+  .topbar{display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;padding:.75rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:.85rem;flex-wrap:wrap}
+  .topbar .addr{color:var(--purple);font-family:monospace;font-size:.8rem}
+  .btn{padding:.5rem 1rem;border-radius:6px;font-size:.85rem;font-weight:600;cursor:pointer;border:none;color:#fff;white-space:nowrap}
+  .btn:hover{opacity:.9}
+  .btn-sm{padding:.3rem .7rem;font-size:.75rem}
+  .btn-blue{background:var(--blue)}
+  .btn-green{background:#059669}
+  .btn-red{background:#DC2626}
+  .btn-outline{background:var(--card);border:1px solid var(--border);color:var(--mid)}
+  .btn-purple{background:var(--purple)}
+  .spacer{flex:1}
+  .status{font-size:.8rem;padding:.2rem .5rem;border-radius:4px;display:inline-block}
+  .status-ok{background:#064E3B;color:var(--green)}
+  .status-warn{background:#78350F;color:#FBBF24}
 
-  h2 { font-size:1.1rem; margin:2rem 0 1rem; color:#fff; display:flex; align-items:center; gap:.5rem; }
+  /* Toolbar */
+  .toolbar{display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
 
-  table { width:100%; border-collapse:collapse; font-size:.83rem; }
-  th,td { padding:.5rem .6rem; text-align:right; border-bottom:1px solid var(--border); }
-  th { background:var(--card); color:var(--mid); font-weight:600; position:sticky; top:0; }
-  th:first-child,td:first-child,th:last-child,td:last-child { text-align:center; }
-  td input,td select { background:var(--bg); border:1px solid var(--border); color:var(--text); padding:.3rem .4rem; border-radius:4px; font-size:.83rem; width:100%; text-align:inherit; }
-  td select { cursor:pointer; }
-  .pos { color:var(--green); } .neg { color:var(--red); }
-  .editable:hover { background:rgba(59,130,246,.1); cursor:text; }
+  /* Table */
+  h2{font-size:1.1rem;margin:2rem 0 1rem;color:#fff;display:flex;align-items:center;gap:.5rem}
+  table{width:100%;border-collapse:collapse;font-size:.83rem}
+  th,td{padding:.45rem .5rem;text-align:right;border-bottom:1px solid var(--border)}
+  th{background:var(--card);color:var(--mid);font-weight:600;position:sticky;top:0}
+  th:first-child,td:first-child,th:last-child,td:last-child{text-align:center}
+  td input,td select{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.3rem;border-radius:4px;font-size:.83rem;text-align:inherit}
+  td select{cursor:pointer}
+  .pos{color:var(--green)}.neg{color:var(--red)}
 
-  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:.75rem; margin:1.5rem 0; }
-  .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:1.25rem; }
-  .card-label { font-size:.8rem; color:var(--mid); margin-bottom:.3rem; }
-  .card-value { font-size:1.3rem; font-weight:700; }
+  /* Summary */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin:1.5rem 0}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem}
+  .card-label{font-size:.8rem;color:var(--mid);margin-bottom:.2rem}
+  .card-value{font-size:1.2rem;font-weight:700}
 
-  .bar-wrap { display:flex; align-items:center; gap:.5rem; margin:.35rem 0; }
-  .bar-label { width:110px; font-size:.8rem; color:var(--mid); text-align:right; flex-shrink:0; }
-  .bar-track { flex:1; background:var(--border); height:8px; border-radius:4px; overflow:hidden; }
-  .bar-fill { height:100%; border-radius:4px; }
+  /* Reports */
+  .report-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:.5rem;font-size:.83rem}
+  .report-card .date{color:var(--dim);font-size:.75rem}
+  .report-card pre{margin-top:.5rem;white-space:pre-wrap;color:var(--mid);max-height:200px;overflow:auto}
 
-  .report-card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:1rem; margin-bottom:.5rem; font-size:.83rem; }
-  .report-card .date { color:var(--dim); font-size:.75rem; }
-  .report-card pre { margin-top:.5rem; white-space:pre-wrap; color:var(--mid); max-height:200px; overflow:auto; }
+  /* Agent */
+  .agent-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.25rem;font-size:.84rem;margin-top:2rem}
+  .agent-box p{color:var(--mid);margin-bottom:.75rem}
+  .agent-box input{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.5rem;border-radius:6px;font-size:.85rem;margin-bottom:.5rem}
+  .agent-box pre{background:var(--bg);padding:.75rem;border-radius:4px;overflow:auto;font-size:.8rem;margin-top:.5rem}
 
-  .empty { text-align:center; color:var(--dim); padding:3rem 1rem; }
-  .footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--border); color:var(--dim); font-size:.75rem; text-align:center; }
-  @media(max-width:640px){ .modes{flex-direction:column} .container{padding:1rem} }
+  .empty{text-align:center;color:var(--dim);padding:2rem 1rem}
+  .footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border);color:var(--dim);font-size:.75rem;text-align:center}
+  @media(max-width:640px){.container{padding:1rem}}
 </style>
 </head>
 <body>
 <div class="container">
-<header>
-  <h1><svg class="logo" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>UOMP Portfolio</h1>
-  <div class="modes">
-    <div class="mode-card" id="gatewayCard">
-      <div class="mode-title">Gateway · uomp gateway start</div>
-      <input id="gwUrl" placeholder="Gateway URL">
-      <input id="gwToken" placeholder="Token (eyJhbG...)" type="password">
-      <button class="btn-blue btn" onclick="connectGateway()">Connect via Gateway</button>
-      <div id="gwStatus"></div>
-    </div>
-    <div class="mode-card" id="directCard">
-      <div class="mode-title">Wallet + Browser</div>
-      <button class="btn-purple btn" onclick="connectWallet('ethereum')">🔑 MetaMask</button>
-      <button class="btn-starknet btn" onclick="connectWallet('starknet')" style="margin-top:.5rem">🦁 Argent X</button>
-      <div style="font-size:.75rem;color:var(--dim);margin-top:.5rem">签名 → 派生密钥 → 浏览器本地加密</div>
-      <div id="directStatus"></div>
-    </div>
-    <div class="mode-card" id="dropboxCard">
-      <div class="mode-title">Dropbox · 你的云存储</div>
-      <button class="btn-dropbox btn" onclick="connectDropbox()">📦 Connect Dropbox</button>
-      <div style="font-size:.75rem;color:var(--dim);margin-top:.5rem">OAuth → /Apps/UOMP/ (AES-256 加密)</div>
-      <div id="dropboxStatus"></div>
-    </div>
-  </div>
-  <div id="userBar" class="user-bar" style="display:none"></div>
-</header>
 
-<main id="app" style="display:none">
-  <!-- Toolbar -->
+<!-- Wallet Connect Screen -->
+<div id="connectScreen">
+  <div class="hero">
+    <h2>Your Portfolio.<br>Your Wallet.</h2>
+    <p>Connect your wallet to manage your portfolio. Data is encrypted in your browser — no server, no signup.</p>
+    <div class="wallets">
+      <button class="wallet-btn" onclick="connect('ethereum')">
+        <div class="icon">🦊</div>
+        <div class="name">MetaMask</div>
+        <div class="desc">Ethereum · personal_sign</div>
+      </button>
+      <button class="wallet-btn" onclick="connect('starknet')">
+        <div class="icon">🦁</div>
+        <div class="name">Argent X</div>
+        <div class="desc">Starknet · signMessage</div>
+      </button>
+    </div>
+    <p style="margin-top:2rem;font-size:.8rem;color:var(--dim)">No installation. No account. No server. Just your wallet.</p>
+    <div id="connectStatus" style="margin-top:1rem"></div>
+  </div>
+</div>
+
+<!-- App (hidden until connected) -->
+<div id="app" style="display:none">
+  <div class="topbar" id="topbar"></div>
+
   <div class="toolbar">
     <button class="btn btn-green" onclick="addRow()">+ Add Stock</button>
-    <button class="btn btn-outline" onclick="triggerCSV()">📄 Import CSV</button>
+    <button class="btn btn-outline" onclick="document.getElementById('csvFile').click()">📄 Import CSV</button>
     <input type="file" id="csvFile" accept=".csv" style="display:none" onchange="handleCSV(event)">
     <span class="spacer"></span>
-    <span style="font-size:.75rem;color:var(--dim)" id="saveStatus"></span>
-    <button class="btn btn-blue" id="saveBtn" onclick="saveData()" style="display:none">💾 Save Changes</button>
+    <span id="saveStatus" style="font-size:.75rem;color:var(--dim)"></span>
+    <button class="btn btn-blue" id="saveBtn" onclick="save()" style="display:none">💾 Save Changes</button>
   </div>
 
-  <!-- Holdings Table -->
-  <h2>📊 Holdings · <span style="font-weight:400;font-size:.85rem;color:var(--mid)">Click any cell to edit</span></h2>
+  <h2>📊 Holdings <span style="font-weight:400;font-size:.8rem;color:var(--mid)">— click any cell to edit</span></h2>
   <div style="overflow-x:auto">
-    <table id="holdingsTable"><thead><tr>
-      <th style="width:60px">Symbol</th><th>Name</th><th style="width:80px">Qty</th><th style="width:80px">Cost</th><th style="width:100px">Sector</th><th style="width:60px">Value</th><th style="width:70px">P&amp;L</th><th style="width:40px"></th>
-    </tr></thead><tbody></tbody></table>
+    <table><thead><tr>
+      <th>Symbol</th><th>Name</th><th>Qty</th><th>Cost</th><th>Sector</th><th>Value</th><th>P&L</th><th></th>
+    </tr></thead><tbody id="tableBody"></tbody></table>
   </div>
-  <div id="summaryGrid" class="grid"></div>
+  <div class="grid" id="summaryGrid"></div>
 
-  <!-- Reports -->
   <h2>📝 Reports</h2>
-  <div id="reports"><div class="empty">No reports yet. Run the Agent to generate analysis.</div></div>
+  <div id="reports"><div class="empty">No reports yet.</div></div>
 
-  <!-- Agent Section -->
-  <h2>🤖 Run Analysis Agent</h2>
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.25rem;font-size:.84rem">
-    <p style="color:var(--mid);margin-bottom:1rem">Send your portfolio to the Stock Analyst Agent to get a full investment analysis (P&L, Sharpe, Beta, signals, scenarios).</p>
-    <div id="agentInstructions" style="display:none">
-      <p style="color:var(--green);margin-bottom:.5rem">✓ Gateway running at:</p>
-      <code id="agentGateway" style="display:block;background:var(--bg);padding:.5rem;border-radius:4px;margin-bottom:1rem;word-break:break-all"></code>
-      <p style="color:var(--green);margin-bottom:.5rem">Run this on your machine or anywhere with the token:</p>
-      <pre id="agentCommands" style="background:var(--bg);padding:.75rem;border-radius:4px;overflow:auto;font-size:.8rem"></pre>
-      <p style="color:var(--dim);margin-top:.5rem">Or paste this token into the <a href="https://uomp-stock-analyst-mvblm.ondigitalocean.app" target="_blank">DO Stock Analyst</a> web UI.</p>
-    </div>
+  <!-- Agent Integration -->
+  <div class="agent-box">
+    <h3 style="color:#fff;margin-bottom:.5rem">🤖 Run Stock Analyst</h3>
+    <p>Connect to a UOMP Agent to analyze your portfolio. Generates P&L, Sharpe, Beta, signals, and scenario analysis.</p>
+    <input id="gwUrl" placeholder="Gateway URL from 'uomp gateway start --browser'">
     <div style="display:flex;gap:.5rem;margin-top:.5rem">
-      <input id="agentGwUrl" placeholder="Gateway URL (uomp gateway start --browser)" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.5rem;border-radius:6px;font-size:.85rem">
-      <button class="btn btn-green" onclick="generateAgentLink()">Generate Agent Token</button>
+      <button class="btn btn-purple" onclick="generateToken()">Generate Agent Token</button>
     </div>
-    <div id="agentStatus" style="margin-top:.5rem"></div>
+    <div id="agentResult" style="margin-top:.75rem"></div>
   </div>
-</main>
+</div>
 
-<div class="footer">Powered by <a href="https://www.uomp.org">UOMP</a> · Data encrypted. You hold the keys.</div>
+<div class="footer">Powered by <a href="https://www.uomp.org" style="color:var(--mid)">UOMP</a> · Data encrypted. You hold the keys.</div>
 </div>
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-// Gateway Client
+// Crypto (Web Crypto API — Browser Native)
 // ═══════════════════════════════════════════════════════════════
-class GatewayClient {
-  constructor(token,url){this.token=token;this.base=url.replace(/\/$/,'');}
-  async get(path){const r=await fetch(`${this.base}${path}`,{headers:{Authorization:`Bearer ${this.token}`,Accept:'application/json','X-UOMP-Agent-Id':'dashboard'}});if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||`HTTP ${r.status}`)}return r.json();}
-  async getByTag(t){const d=await this.get(`/v1/memory?tag=${encodeURIComponent(t)}`);return d.items||[];}
-  async health(){return this.get('/v1/health');}
-}
-
-// ═══════════════════════════════════════════════════════════════
-// Crypto (Web Crypto API)
-// ═══════════════════════════════════════════════════════════════
-const enc=new TextEncoder();
-async function deriveMasterKey(sig,addr,chain){
-  const s=enc.encode(sig).slice(0,64),a=enc.encode(addr.toLowerCase());
+const E=new TextEncoder();
+async function hmacSign(key,data){const k=await crypto.subtle.importKey('raw',key,{name:'HMAC',hash:'SHA-256'},false,['sign']);return new Uint8Array(await crypto.subtle.sign('HMAC',k,data))}
+async function deriveKey(signature,address,chain){
+  const s=E.encode(signature).slice(0,64),a=E.encode(address.toLowerCase());
   const ikm=new Uint8Array([...s,...a]).slice(0,64);
-  const k=await crypto.subtle.importKey('raw',ikm,{name:'HKDF'},false,['deriveKey']);
-  return crypto.subtle.deriveKey({name:'HKDF',hash:'SHA-256',salt:enc.encode('uomp-store-v1'),info:enc.encode(`${chain}:${addr}`)},k,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+  const prk=await hmacSign(E.encode('uomp-store-v1'),ikm);
+  const info=E.encode(`${chain}:${address}`);
+  const t=new Uint8Array([...info,1]);
+  const okm=await hmacSign(prk,t);
+  return crypto.subtle.importKey('raw',okm.slice(0,32),{name:'AES-GCM'},false,['encrypt','decrypt']);
 }
-async function encrypt(cryptoKey,plaintext){
+async function enc(cKey,text){
   const iv=crypto.getRandomValues(new Uint8Array(12));
-  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},cryptoKey,enc.encode(plaintext));
-  return {iv:Array.from(iv),data:Array.from(new Uint8Array(ct))};
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},cKey,E.encode(text));
+  return {iv:Array.from(iv),d:Array.from(new Uint8Array(ct))};
 }
-async function decrypt(cryptoKey,encData){
-  const iv=new Uint8Array(encData.iv),data=new Uint8Array(encData.data);
-  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv},cryptoKey,data);
+async function dec(cKey,obj){
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:new Uint8Array(obj.iv)},cKey,new Uint8Array(obj.d));
   return new TextDecoder().decode(pt);
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Dropbox PKCE OAuth + API
+// State
 // ═══════════════════════════════════════════════════════════════
-const DB_KEY='k6k81wrvc90ke45',DB_REDIRECT=location.origin+location.pathname;
-const DB_TOKEN='https://api.dropboxapi.com/oauth2/token';
-const DB_CONTENT='https://content.dropboxapi.com/2';
-const DB_API='https://api.dropboxapi.com/2';
-
-function gToken(){return sessionStorage.getItem('uomp_db')||'';}
-function sToken(t){sessionStorage.setItem('uomp_db',t);}
-function dbPrefix(p){return`/Apps/UOMP${p}`;}
-
-class DropboxStore {
-  constructor(t){this.t=t;}
-  async upload(path,data){
-    const r=await fetch(`${DB_CONTENT}/files/upload`,{method:'POST',headers:{Authorization:`Bearer ${this.t}`,'Content-Type':'application/octet-stream','Dropbox-API-Arg':JSON.stringify({path:dbPrefix(`/${path}`),mode:'overwrite'})},body:typeof data==='string'?enc.encode(data):data});
-    return r.ok;
-  }
-  async download(path){
-    const r=await fetch(`${DB_CONTENT}/files/download`,{method:'POST',headers:{Authorization:`Bearer ${this.t}`,'Dropbox-API-Arg':JSON.stringify({path:dbPrefix(`/${path}`)})}});
-    if(!r.ok)return null;return new Uint8Array(await r.arrayBuffer());
-  }
-  async list(path){
-    const r=await fetch(`${DB_API}/files/list_folder`,{method:'POST',headers:{Authorization:`Bearer ${this.t}`,'Content-Type':'application/json'},body:JSON.stringify({path:dbPrefix(path),limit:100})});
-    if(!r.ok)return[];const d=await r.json();return d.entries||[];
-  }
-  async deleteFile(path){await fetch(`${DB_API}/files/delete_v2`,{method:'POST',headers:{Authorization:`Bearer ${this.t}`,'Content-Type':'application/json'},body:JSON.stringify({path:dbPrefix(`/${path}`)})});}
-}
-
-// PKCE
-function genVerifier(){const a=new Uint8Array(32);crypto.getRandomValues(a);return btoa(String.fromCharCode(...a)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');}
-async function genChallenge(v){const h=await crypto.subtle.digest('SHA-256',enc.encode(v));return btoa(String.fromCharCode(...new Uint8Array(h))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');}
-async function exchangeCode(code,verifier){
-  const r=await fetch(DB_TOKEN,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({code,grant_type:'authorization_code',client_id:DB_KEY,code_verifier:verifier,redirect_uri:DB_REDIRECT})});
-  if(!r.ok)throw new Error('Token exchange failed');const d=await r.json();return d.access_token;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// App State
-// ═══════════════════════════════════════════════════════════════
-let cryptoKey=null,userId=null,storage='local',dropbox=null;
+let cKey=null,uid=null;
 let holdings=[],reports=[],changed=false;
+const THEAD='<tr><th>Symbol</th><th>Name</th><th>Qty</th><th>Cost</th><th>Sector</th><th>Value</th><th>P&L</th><th></th></tr>';
+const SAMPLE=[{s:'AAPL',n:'Apple Inc.',q:'100',c:'150',sec:'Technology'},{s:'MSFT',n:'Microsoft Corp.',q:'40',c:'320',sec:'Technology'},{s:'GOOGL',n:'Alphabet Inc.',q:'30',c:'140',sec:'Technology'},{s:'NVDA',n:'NVIDIA Corp.',q:'30',c:'300',sec:'Technology'},{s:'TSLA',n:'Tesla Inc.',q:'50',c:'200',sec:'Consumer Cyclical'},{s:'AMZN',n:'Amazon.com',q:'25',c:'170',sec:'Consumer Cyclical'},{s:'JPM',n:'JPMorgan Chase',q:'60',c:'155',sec:'Financial'},{s:'BAC',n:'Bank of America',q:'200',c:'32',sec:'Financial'},{s:'JNJ',n:'Johnson & Johnson',q:'40',c:'160',sec:'Healthcare'},{s:'XOM',n:'Exxon Mobil',q:'50',c:'100',sec:'Energy'}];
+const SECS=['Technology','Consumer Cyclical','Financial','Healthcare','Energy','Utilities','Real Estate','Materials','Industrials','Communication','Other'];
 
-const SAMPLE=[{sym:'AAPL',name:'Apple Inc.',qty:'100',cost:'150',sector:'Technology'},{sym:'MSFT',name:'Microsoft Corp.',qty:'40',cost:'320',sector:'Technology'},{sym:'GOOGL',name:'Alphabet Inc.',qty:'30',cost:'140',sector:'Technology'},{sym:'NVDA',name:'NVIDIA Corp.',qty:'30',cost:'300',sector:'Technology'},{sym:'TSLA',name:'Tesla Inc.',qty:'50',cost:'200',sector:'Consumer Cyclical'},{sym:'AMZN',name:'Amazon.com',qty:'25',cost:'170',sector:'Consumer Cyclical'},{sym:'JPM',name:'JPMorgan Chase',qty:'60',cost:'155',sector:'Financial'},{sym:'BAC',name:'Bank of America',qty:'200',cost:'32',sector:'Financial'},{sym:'JNJ',name:'Johnson & Johnson',qty:'40',cost:'160',sector:'Healthcare'},{sym:'XOM',name:'Exxon Mobil',qty:'50',cost:'100',sector:'Energy'}];
-const SECTORS=['Technology','Consumer Cyclical','Financial','Healthcare','Energy','Utilities','Real Estate','Materials','Industrials','Communication','Other'];
-
-function localGet(k){try{const d=localStorage.getItem('uomp_'+k);return d?JSON.parse(d):null}catch{return null}}
-function localSet(k,v){localStorage.setItem('uomp_'+k,JSON.stringify(v))}
+function ls(k,v){if(v!==undefined)localStorage.setItem('uomp_'+k,JSON.stringify(v));try{const d=localStorage.getItem('uomp_'+k);return d?JSON.parse(d):null}catch{return null}}
 
 // ═══════════════════════════════════════════════════════════════
-// Wallet Connection
+// Wallet Connect
 // ═══════════════════════════════════════════════════════════════
-async function connectWallet(chain){
-  const s=document.getElementById('directStatus');
+async function connect(chain){
+  const s=document.getElementById('connectStatus');
   try{
     s.innerHTML='<span class="status status-ok">Requesting wallet...</span>';
     let addr,sig;
     if(chain==='ethereum'){
-      if(!window.ethereum)throw new Error('MetaMask not detected');
+      if(!window.ethereum)throw new Error('MetaMask extension not detected');
       const a=await window.ethereum.request({method:'eth_requestAccounts'});addr=a[0];
       sig=await window.ethereum.request({method:'personal_sign',params:['UOMP Store v1',addr]});
     }else{
-      if(!window.starknet)throw new Error('Argent X not detected');
+      if(!window.starknet)throw new Error('Argent X extension not detected');
       await window.starknet.enable();addr=window.starknet.selectedAddress;
-      if(!addr)throw new Error('No account');
+      if(!addr)throw new Error('No Starknet account');
       const td={domain:{name:'UOMP Store',version:'1',chainId:'SN_MAIN'},types:{StarkNetDomain:[{name:'name',type:'felt'},{name:'version',type:'felt'},{name:'chainId',type:'felt'}],Message:[{name:'message',type:'felt'}]},primaryType:'Message',message:{message:'UOMP Store v1'}};
       const r=await window.starknet.account.signMessage(td);sig=Array.isArray(r)?r.join(','):String(r);
     }
     s.innerHTML='<span class="status status-ok">Deriving key...</span>';
-    cryptoKey=await deriveMasterKey(sig,addr,chain);userId=`${chain}:${addr.toLowerCase()}`;storage='local';
-    await loadData();showUI(chain,addr);
-  }catch(e){s.innerHTML=`<span class="status status-err">✗ ${e.message}</span>`}
+    cKey=await deriveKey(sig,addr,chain);uid=`${chain}:${addr.toLowerCase()}`;
+    await load();showApp(chain,addr);
+  }catch(e){s.innerHTML=`<span class="status status-err">${e.message}</span>`}
 }
 
-async function connectDropbox(){
-  const s=document.getElementById('dropboxStatus');
-  const qs=new URLSearchParams(location.search);
-  if(qs.get('code')){
-    s.innerHTML='<span class="status status-ok">Exchanging code...</span>';
-    try{
-      const v=sessionStorage.getItem('uomp_db_v');if(!v)throw new Error('Restart login');
-      const t=await exchangeCode(qs.get('code'),v);sToken(t);sessionStorage.removeItem('uomp_db_v');
-      history.replaceState({},'',location.pathname);
-      s.innerHTML='<span class="status status-ok">✓ Dropbox connected</span>';
-      dropbox=new DropboxStore(t);storage='dropbox';
-      if(cryptoKey) await loadData();
-      else s.innerHTML='<span class="status status-ok">✓ Dropbox ready. Connect wallet to decrypt.</span>';
-    }catch(e){s.innerHTML=`<span class="status status-err">✗ ${e.message}</span>`}return;
-  }
-  if(gToken()){dropbox=new DropboxStore(gToken());storage='dropbox';s.innerHTML='<span class="status status-ok">✓ Dropbox</span>';if(cryptoKey)await loadData();return}
-  s.innerHTML='<span class="status status-ok">Redirecting...</span>';
-  const v=genVerifier();sessionStorage.setItem('uomp_db_v',v);
-  const c=await genChallenge(v);
-  location.href=`https://www.dropbox.com/oauth2/authorize?client_id=${DB_KEY}&response_type=code&code_challenge=${c}&code_challenge_method=S256&redirect_uri=${encodeURIComponent(DB_REDIRECT)}`;
+async function load(){
+  const raw=ls(uid);
+  if(raw){try{const p=await dec(cKey,raw);const d=JSON.parse(p);holdings=d.h||SAMPLE.map(x=>({...x}));reports=d.r||[];}catch{holdings=SAMPLE.map(x=>({...x}));reports=[]}}
+  else{holdings=SAMPLE.map(x=>({...x}));reports=[]}
 }
 
-async function loadData(){
-  try{
-    let raw=null;
-    if(storage==='dropbox'&&dropbox) raw=await dropbox.download('holdings.enc');
-    if(!raw&&storage==='local') raw=localGet(userId);
-    if(raw&&cryptoKey){
-      const plain=await decrypt(cryptoKey,storage==='dropbox'?JSON.parse(new TextDecoder().decode(raw)):raw);
-      const d=JSON.parse(plain);holdings=d.holdings||SAMPLE;reports=d.reports||[];
-    }
-    if(!holdings.length){holdings=SAMPLE.map(h=>({...h}));reports=[];}
-    // Load reports from Dropbox too
-    if(storage==='dropbox'&&dropbox){
-      const reportList=await dropbox.list('/reports');
-      for(const entry of reportList){
-        if(entry['.tag']==='file'&&!reports.find(r=>r.name===entry.name)){
-          const rd=await dropbox.download(`reports/${entry.name}`);
-          if(rd){try{const plain=await decrypt(cryptoKey,JSON.parse(new TextDecoder().decode(rd)));reports.push({name:entry.name,date:entry.client_modified,content:plain});}catch{}}
-        }
-      }
-    }
-    renderAll();
-  }catch(e){console.error(e);holdings=SAMPLE.map(h=>({...h}));reports=[];renderAll();}
-}
-
-async function saveData(){
-  if(!cryptoKey)return alert('Connect wallet first');
-  const saveObj={holdings,reports:reports.slice(0,10)};
-  const plain=JSON.stringify(saveObj);
-  const encData=await encrypt(cryptoKey,plain);
-  if(storage==='dropbox'&&dropbox) await dropbox.upload('holdings.enc',JSON.stringify(encData));
-  if(storage==='local') localSet(userId,encData);
+async function save(){
+  if(!cKey)return;
+  const obj={h:holdings,r:reports.slice(0,50)};
+  const encrypted=await enc(cKey,JSON.stringify(obj));
+  ls(uid,encrypted);
   changed=false;
   document.getElementById('saveBtn').style.display='none';
-  document.getElementById('saveStatus').innerHTML='<span class="status status-ok">✓ Saved</span>';
+  document.getElementById('saveStatus').innerHTML='<span class="status status-ok">✓ Saved & encrypted</span>';
   setTimeout(()=>document.getElementById('saveStatus').innerHTML='',2000);
-  renderAll();
+  render();
 }
+
+function showApp(chain,addr){
+  document.getElementById('connectScreen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('topbar').innerHTML=`
+    <span style="color:var(--mid)">Connected:</span><span class="addr">${addr.slice(0,12)}...${addr.slice(-4)}</span>
+    <span style="color:var(--dim);font-size:.8rem">${chain}</span>
+    <span class="spacer"></span>
+    <span class="status status-ok">Encrypted in browser localStorage</span>
+    <button class="btn btn-outline btn-sm" onclick="disconnect()">Lock</button>
+  `;
+  render();
+}
+
+function disconnect(){cKey=null;uid=null;location.reload()}
 
 // ═══════════════════════════════════════════════════════════════
 // CSV Import
 // ═══════════════════════════════════════════════════════════════
-function triggerCSV(){document.getElementById('csvFile').click();}
 function handleCSV(e){
-  const file=e.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=function(ev){
-    const text=ev.target.result;const lines=text.split('\n').filter(l=>l.trim());
-    if(lines.length<2)return alert('Invalid CSV');
-    const headers=lines[0].toLowerCase().split(',').map(h=>h.trim());
-    const symIdx=headers.findIndex(h=>h==='symbol'||h==='sym'||h==='ticker');
-    const nameIdx=headers.findIndex(h=>h==='name'||h==='company');
-    const qtyIdx=headers.findIndex(h=>h==='quantity'||h==='qty'||h==='shares');
-    const costIdx=headers.findIndex(h=>h==='cost_basis'||h==='cost'||h==='price');
-    const secIdx=headers.findIndex(h=>h==='sector');
-    if(symIdx<0)return alert('CSV must have a "symbol" column');
-    const imported=[];
-    for(let i=1;i<lines.length;i++){
-      const cols=lines[i].split(',').map(c=>c.trim());
-      if(!cols[symIdx])continue;
-      imported.push({sym:cols[symIdx],name:nameIdx>=0?cols[nameIdx]||cols[symIdx]:cols[symIdx],qty:qtyIdx>=0?cols[qtyIdx]||'0':'0',cost:costIdx>=0?cols[costIdx]||'0':'0',sector:secIdx>=0?cols[secIdx]||'Other':'Other'});
-    }
-    holdings=imported;changed=true;
-    document.getElementById('saveBtn').style.display='inline-block';
-    renderAll();
-  };
-  reader.readAsText(file);
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();r.onload=ev=>{
+    const lines=ev.target.result.split('\n').filter(l=>l.trim());if(lines.length<2)return;
+    const h=lines[0].toLowerCase().split(',').map(x=>x.trim());
+    const si=h.findIndex(x=>x==='symbol'||x==='sym'),ni=h.findIndex(x=>x==='name'),qi=h.findIndex(x=>x==='quantity'||x==='qty'),ci=h.findIndex(x=>x==='cost_basis'||x==='cost'),ei=h.findIndex(x=>x==='sector');
+    if(si<0)return alert('CSV must have a "symbol" column');
+    const imp=[];
+    for(let i=1;i<lines.length;i++){const c=lines[i].split(',').map(x=>x.trim());if(!c[si])continue;imp.push({s:c[si],n:ni>=0?c[ni]||c[si]:c[si],q:qi>=0?c[qi]||'0':'0',c:ci>=0?c[ci]||'0':'0',sec:ei>=0?c[ei]||'Other':'Other'})}
+    holdings=imp;changed=true;document.getElementById('saveBtn').style.display='inline-block';render();
+  };r.readAsText(f);
 }
 
 // ═══════════════════════════════════════════════════════════════
 // Table Editing
 // ═══════════════════════════════════════════════════════════════
-function addRow(){holdings.push({sym:'NEW',name:'New Stock',qty:'0',cost:'0',sector:'Other'});changed=true;document.getElementById('saveBtn').style.display='inline-block';renderAll();}
-function deleteRow(i){holdings.splice(i,1);changed=true;document.getElementById('saveBtn').style.display='inline-block';renderAll();}
-function editCell(i,field,value){holdings[i][field]=value;changed=true;document.getElementById('saveBtn').style.display='inline-block';renderAll();}
-function onCellKey(e,i,field){if(e.key==='Enter'){editCell(i,field,e.target.value);e.target.blur();renderAll();}}
+function addRow(){holdings.push({s:'NEW',n:'New Stock',q:'0',c:'0',sec:'Other'});changed=true;document.getElementById('saveBtn').style.display='inline-block';render()}
+function delRow(i){holdings.splice(i,1);changed=true;document.getElementById('saveBtn').style.display='inline-block';render()}
+function editCell(i,f,v){holdings[i][f]=v;changed=true;document.getElementById('saveBtn').style.display='inline-block';render()}
 
 // ═══════════════════════════════════════════════════════════════
 // Render
 // ═══════════════════════════════════════════════════════════════
-function fmt(n){const v=parseFloat(n);return isNaN(v)?'0':v.toFixed(2);}
-function renderAll(){
-  // Table
-  const tbody=document.getElementById('holdingsTable').querySelector('tbody');
-  tbody.innerHTML=holdings.map((h,i)=>{
-    const q=parseFloat(h.qty)||0,c=parseFloat(h.cost)||0,val=q*c,pnl=0;
+function render(){
+  const f=n=>{const v=parseFloat(n);return isNaN(v)?'0':v.toFixed(2);};
+
+  document.getElementById('tableBody').innerHTML=holdings.map((h,i)=>{
+    const q=parseFloat(h.q)||0,c=parseFloat(h.c)||0,val=q*c;
     return `<tr>
-      <td><input value="${h.sym}" onchange="editCell(${i},'sym',this.value)" onkeydown="onCellKey(event,${i},'sym')" style="width:60px"></td>
-      <td><input value="${h.name||''}" onchange="editCell(${i},'name',this.value)" onkeydown="onCellKey(event,${i},'name')"></td>
-      <td><input value="${h.qty}" onchange="editCell(${i},'qty',this.value)" onkeydown="onCellKey(event,${i},'qty')" type="number" style="width:80px"></td>
-      <td><input value="${h.cost}" onchange="editCell(${i},'cost',this.value)" onkeydown="onCellKey(event,${i},'cost')" type="number" style="width:80px"></td>
-      <td><select onchange="editCell(${i},'sector',this.value)">${SECTORS.map(s=>`<option value="${s}" ${h.sector===s?'selected':''}>${s}</option>`).join('')}</select></td>
-      <td style="color:var(--mid)">$${fmt(val)}</td>
-      <td class="${pnl>=0?'pos':'neg'}">$${fmt(pnl)}</td>
-      <td><button class="btn btn-red btn-sm" onclick="deleteRow(${i})" title="Delete">×</button></td>
+      <td><input value="${h.s}" onchange="editCell(${i},'s',this.value)" style="width:60px"></td>
+      <td><input value="${h.n||''}" onchange="editCell(${i},'n',this.value)"></td>
+      <td><input value="${h.q}" onchange="editCell(${i},'q',this.value)" type="number" style="width:80px"></td>
+      <td><input value="${h.c}" onchange="editCell(${i},'c',this.value)" type="number" style="width:80px"></td>
+      <td><select onchange="editCell(${i},'sec',this.value)">${SECS.map(x=>`<option value="${x}" ${h.sec===x?'selected':''}>${x}</option>`).join('')}</select></td>
+      <td style="color:var(--mid)">$${f(val)}</td>
+      <td class="pos">—</td>
+      <td><button class="btn btn-red btn-sm" onclick="delRow(${i})">×</button></td>
     </tr>`;
   }).join('');
 
-  // Summary
   let tc=0,tv=0;const secs={};
-  for(const h of holdings){const q=parseFloat(h.qty)||0,c=parseFloat(h.cost)||0,val=q*c;tc+=val;tv+=val;const s=h.sector||'Other';secs[s]=(secs[s]||0)+val;}
-  const hhi=holdings.reduce((s,h)=>{const v=(parseFloat(h.qty)||0)*(parseFloat(h.cost)||0);const w=tv>0?(v/tv)*100:0;return s+w*w},0);
+  for(const h of holdings){const q=parseFloat(h.q)||0,c=parseFloat(h.c)||0,v=q*c;tc+=v;tv+=v;secs[h.sec||'Other']=(secs[h.sec||'Other']||0)+v}
+  const hhi=holdings.reduce((s,h)=>{const v=(parseFloat(h.q)||0)*(parseFloat(h.c)||0);const w=tv>0?(v/tv)*100:0;return s+w*w},0);
   document.getElementById('summaryGrid').innerHTML=`
-    <div class="card"><div class="card-label">Portfolio Value</div><div class="card-value">$${fmt(tv)}</div></div>
+    <div class="card"><div class="card-label">Portfolio Value</div><div class="card-value">$${f(tv)}</div></div>
     <div class="card"><div class="card-label">HHI</div><div class="card-value">${hhi.toFixed(0)}</div></div>
     <div class="card"><div class="card-label">Positions</div><div class="card-value">${holdings.length}</div></div>
     <div class="card"><div class="card-label">Sectors</div><div class="card-value">${Object.keys(secs).length}</div></div>
   `;
 
-  // Reports
   const rDiv=document.getElementById('reports');
-  if(!reports.length){rDiv.innerHTML='<div class="empty">No reports yet. Connect an Agent to generate analysis.</div>';}
-  else{rDiv.innerHTML=reports.map(r=>`<div class="report-card"><div class="date">${r.date||r.name}</div><pre>${(r.content||'').slice(0,500)}</pre></div>`).join('');}
-}
-
-function showUI(chain,addr){
-  document.getElementById('directCard').style.display='none';
-  document.getElementById('gatewayCard').style.display='none';
-  document.getElementById('dropboxCard').style.display='none';
-  document.getElementById('userBar').style.display='flex';
-  document.getElementById('userBar').innerHTML=`
-    <span style="color:var(--mid)">Storage:</span><span class="addr" style="color:var(--db)">${storage==='dropbox'?'Dropbox':'Browser (localStorage)'}</span>
-    <span style="color:var(--mid)">ID:</span><span class="addr">${userId.slice(0,20)}...</span>
-    <span class="status status-warn" id="sampleWarn" style="${isSampleData?'':'display:none'}">⚠ Sample data — import your CSV or edit above</span>
-    <button class="btn btn-outline btn-sm" onclick="disconnect()">Disconnect</button>
-  `;
-  document.getElementById('app').style.display='block';
-  if(changed)document.getElementById('saveBtn').style.display='inline-block';
-}
-
-async function connectGateway(){
-  const u=document.getElementById('gwUrl').value.trim(),t=document.getElementById('gwToken').value.trim(),s=document.getElementById('gwStatus');
-  if(!t||!u){s.innerHTML='<span class="status status-err">Enter URL & Token</span>';return}
-  try{
-    const c=new GatewayClient(t,u);await c.health();s.innerHTML='<span class="status status-ok">✓ Connected</span>';
-    const h=await c.getByTag('portfolio:holdings'),r=await c.getByTag('profile:risk');
-    holdings=h.map(i=>({sym:i.value.symbol||i.key,name:i.value.name||'',qty:i.value.quantity||'0',cost:i.value.cost_basis||'0',sector:i.value.sector||'Other'}));
-    const risk=r[0]?.value||{};
-    document.getElementById('directCard').style.display='none';
-    document.getElementById('dropboxCard').style.display='none';
-    storage='gateway';
-    document.getElementById('userBar').style.display='flex';
-    document.getElementById('userBar').innerHTML=`<span class="status status-ok">Gateway Mode</span><span style="color:var(--dim);font-size:.8rem">${u}</span><button class="btn btn-outline btn-sm" onclick="disconnect()">Disconnect</button>`;
-    document.getElementById('app').style.display='block';
-    document.getElementById('saveBtn').style.display='none';
-    renderAll();
-  }catch(e){s.innerHTML=`<span class="status status-err">✗ ${e.message}</span>`}
+  if(!reports.length)rDiv.innerHTML='<div class="empty">No reports yet. Use the Agent section below to generate analysis.</div>';
+  else rDiv.innerHTML=reports.map(r=>`<div class="report-card"><div class="date">${r.d||r.name||'Unknown date'}</div><pre>${(r.c||'').slice(0,800)}</pre></div>`).join('');
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Agent Integration
+// Agent Token Generation
 // ═══════════════════════════════════════════════════════════════
-async function generateAgentLink(){
-  const gw=document.getElementById('agentGwUrl').value.trim();
-  const status=document.getElementById('agentStatus');
-  if(!gw){status.innerHTML='<span class="status status-err">Enter Gateway URL first (run: uomp gateway start --browser)</span>';return}
-  if(!holdings.length){status.innerHTML='<span class="status status-err">Add holdings first</span>';return}
+async function generateToken(){
+  const gw=document.getElementById('gwUrl').value.trim();
+  const aDiv=document.getElementById('agentResult');
+  if(!gw){aDiv.innerHTML='<span class="status" style="background:#7F1D1D;color:var(--red)">Enter Gateway URL. Run: uomp gateway start --browser</span>';return}
+  if(!holdings.length){aDiv.innerHTML='<span class="status" style="background:#7F1D1D;color:var(--red)">Add holdings first</span>';return}
 
-  status.innerHTML='<span class="status status-ok">Generating token...</span>';
-
-  // Build scopes from edited holdings
   const tags=['portfolio:holdings','profile:risk'];
-  const keys=holdings.map(h=>h.sym).filter(Boolean);
+  const keys=holdings.map(h=>h.s).filter(Boolean);
+  aDiv.innerHTML='<span class="status status-ok">Generating token...</span>';
 
   try{
-    // Create session + grant token using the Gateway
-    const sessResp=await fetch(`${gw.replace(/\/$/,'')}/v1/sessions`,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({agent_id:'stock-analyst',agent_name:'Stock Analyst',requested_scopes:{read:{tags,keys,denyTags:[],denyKeys:[]},write:{tags:[],keys:[],denyTags:[],denyKeys:[]}},duration_minutes:30})
-    });
-    if(!sessResp.ok)throw new Error('Failed to create session. Is Gateway running?');
-    const sess=await sessResp.json();
+    const base=gw.replace(/\/$/,'');
+    const sess=await fetch(`${base}/v1/sessions`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent_id:'stock-analyst',requested_scopes:{read:{tags,keys,denyTags:[],denyKeys:[]},write:{tags:[],keys:[],denyTags:[],denyKeys:[]}},duration_minutes:30})}).then(r=>r.json());
+    const grant=await fetch(`${base}/v1/sessions/${sess.session_id}/grant`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({granted_scopes:{read:{tags,keys,denyTags:[],denyKeys:[]},write:{tags:[],keys:[],denyTags:[],denyKeys:[]}},profile:'local'})}).then(r=>r.json());
 
-    const grantResp=await fetch(`${gw.replace(/\/$/,'')}/v1/sessions/${sess.session_id}/grant`,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({granted_scopes:{read:{tags,keys,denyTags:[],denyKeys:[]},write:{tags:[],keys:[],denyTags:[],denyKeys:[]}},profile:'local',audience:gw})
-    });
-    if(!grantResp.ok)throw new Error('Failed to grant session');
-    const grant=await grantResp.json();
-
-    // Show instructions
-    document.getElementById('agentInstructions').style.display='block';
-    document.getElementById('agentGateway').textContent=gw;
-    document.getElementById('agentCommands').textContent=
-      `# Option 1: Run locally
-export UOM_TOKEN="${grant.token}"
+    aDiv.innerHTML=`
+      <span class="status status-ok">✓ Token generated</span>
+      <pre style="margin-top:.5rem"># Run locally:
+export UOM_TOKEN="${grant.token.slice(0,30)}..."
 export UOMP_BASE_URL="${gw}"
 node examples/stock-analyst/index.js
 
-# Option 2: Use DO Agent
-# Open https://uomp-stock-analyst-mvblm.ondigitalocean.app
-# Paste Token: ${grant.token.slice(0,30)}...
-# Gateway URL: ${gw}
-
-# Option 3: One-click (copy this URL):
-# https://uomp-stock-analyst-mvblm.ondigitalocean.app/analyze`;
-
-    status.innerHTML='<span class="status status-ok">✓ Token generated. Agent can now analyze your portfolio.</span>';
-  }catch(e){
-    status.innerHTML=`<span class="status status-err">✗ ${e.message}. Make sure "uomp gateway start --browser" is running.</span>`;
-  }
+# Or open DO Agent and paste:
+# Token: ${grant.token.slice(0,40)}...
+# Gateway: ${gw}</pre>
+      <p style="margin-top:.5rem;font-size:.8rem">Agent will read your portfolio, fetch market data, and generate a full analysis report.</p>
+    `;
+  }catch(e){aDiv.innerHTML=`<span class="status" style="background:#7F1D1D;color:var(--red)">${e.message}</span>`}
 }
-
-function disconnect(){cryptoKey=null;userId=null;dropbox=null;sToken('');location.reload();}
-
-// Init
-(function(){
-  const qs=new URLSearchParams(location.search);
-  if(qs.get('code')){connectDropbox();return}
-  const h=location.hash.slice(1);if(!h)return;
-  const p=new URLSearchParams(h);
-  const t=p.get('token'),g=p.get('gateway');
-  if(t)document.getElementById('gwToken').value=t;
-  if(g)document.getElementById('gwUrl').value=g;
-})();
 </script>
 </body>
 </html>

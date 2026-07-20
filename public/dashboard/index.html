@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>UOMP Portfolio</title><link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<!-- v2026-07-20.4 -->
 <style>
   :root{--bg:#0A0A0A;--card:#111;--border:#1F2937;--txt:#E5E7EB;--mid:#9CA3AF;--dim:#6B7280;--grn:#34D399;--red:#F87171;--blu:#3B82F6;--pur:#8B5CF6;--db:#0061FF}*{margin:0;padding:0;box-sizing:border-box}
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;line-height:1.5}
@@ -68,7 +69,7 @@
   <h2>📝 Reports</h2>
   <div id="reports"><div class="empty">No reports yet. Send your portfolio to the Agent above.</div></div>
 </div>
-<div class="footer">Powered by <a href="https://www.uomp.org" style="color:var(--mid)">UOMP</a> · Data encrypted. You hold the keys.</div>
+<div class="footer">Powered by <a href="https://www.uomp.org" style="color:var(--mid)">UOMP</a> · Data encrypted. You hold the keys. <span style="color:var(--dim);font-size:.7rem">v2026-07-20.4</span></div>
 </div>
 
 <script>
@@ -78,7 +79,7 @@ function connect(chain){if(window._connect)window._connect(chain);else document.
 function linkDropbox(){if(window._linkDropbox)window._linkDropbox();else document.getElementById('connectStatus').innerHTML='<span class="status status-ok">Loading SDK...</span>'}
 </script>
 <script type="module">
-import { BrowserSDK, DropboxStore, connectDropbox as dbConnect, encryptData, decryptData } from './sdk.js';
+import { BrowserSDK, DropboxStore, connectDropbox as dbConnect, encryptData, decryptData } from './sdk.js?v=2026-07-20.4';
 
 let cKey=null,uid=null,dropbox=null,holdings=[],reports=[],changed=false,isSample=false;
 const SAMPLE=[{s:'AAPL',n:'Apple',q:'100',c:'150',sec:'Technology'},{s:'MSFT',n:'Microsoft',q:'40',c:'320',sec:'Technology'},{s:'GOOGL',n:'Alphabet',q:'30',c:'140',sec:'Technology'},{s:'NVDA',n:'NVIDIA',q:'30',c:'300',sec:'Technology'},{s:'TSLA',n:'Tesla',q:'50',c:'200',sec:'Consumer Cyclical'},{s:'AMZN',n:'Amazon',q:'25',c:'170',sec:'Consumer Cyclical'},{s:'JPM',n:'JPMorgan',q:'60',c:'155',sec:'Financial'},{s:'BAC',n:'BofA',q:'200',c:'32',sec:'Financial'},{s:'JNJ',n:'J&J',q:'40',c:'160',sec:'Healthcare'},{s:'XOM',n:'Exxon',q:'50',c:'100',sec:'Energy'}];

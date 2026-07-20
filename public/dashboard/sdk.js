@@ -1,5 +1,6 @@
 /**
- * UOMP Browser SDK — self-contained bundle for browser use.
+ * UOMP Browser SDK v2026-07-20.4
+ * Self-contained bundle for browser use.
  * No Node.js dependencies. Uses Web Crypto API + window.fetch.
  */
 const E=new TextEncoder(),D=new TextDecoder();

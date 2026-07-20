@@ -125,22 +125,43 @@ class DropboxStore{
 function dbToken(){return typeof sessionStorage!=='undefined'?sessionStorage.getItem('uomp_db')||'':''}
 function dbSetToken(t){if(typeof sessionStorage!=='undefined')sessionStorage.setItem('uomp_db',t)}
 async function connectDropbox(){
-  const qs=new URLSearchParams(location.search);
-  if(qs.get('code')){
-    const v=sessionStorage.getItem('uomp_db_v');if(!v)throw new Error('Restart login');
-    const r=await fetch('https://api.dropboxapi.com/oauth2/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({code:qs.get('code'),grant_type:'authorization_code',client_id:DB_KEY,code_verifier:v,redirect_uri:DB_REDIRECT})});
-    if(!r.ok)throw new Error('Token exchange failed');
-    const d=await r.json();dbSetToken(d.access_token);sessionStorage.removeItem('uomp_db_v');
-    history.replaceState({},'',location.pathname);
-    return new DropboxStore(d.access_token);
-  }
+  // Check for existing token
   if(dbToken())return new DropboxStore(dbToken());
+
+  // Open Dropbox OAuth in popup (no page reload!)
   const cv=(()=>{const a=new Uint8Array(32);crypto.getRandomValues(a);return btoa(String.fromCharCode(...a)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'')})();
   sessionStorage.setItem('uomp_db_v',cv);
-  const h=await crypto.subtle.digest('SHA-256',E.encode(cv));
+  const h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(cv));
   const cc=btoa(String.fromCharCode(...new Uint8Array(h))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
-  location.href=`https://www.dropbox.com/oauth2/authorize?client_id=${DB_KEY}&response_type=code&code_challenge=${cc}&code_challenge_method=S256&redirect_uri=${encodeURIComponent(DB_REDIRECT)}`;
-  throw new Error('Redirecting to Dropbox');
+  const authUrl=`https://www.dropbox.com/oauth2/authorize?client_id=${DB_KEY}&response_type=code&code_challenge=${cc}&code_challenge_method=S256&redirect_uri=${encodeURIComponent(DB_REDIRECT)}`;
+
+  return new Promise((resolve,reject)=>{
+    const popup=window.open(authUrl,'dropbox-auth','width=600,height=700');
+    if(!popup){reject(new Error('Popup blocked. Allow popups for this site.'));return}
+    const timer=setInterval(()=>{
+      try{
+        if(popup.closed){clearInterval(timer);reject(new Error('Dropbox login cancelled'));return}
+        const url=popup.location.href;
+        if(url.includes('?code=')){
+          const code=new URLSearchParams(url.split('?')[1]).get('code');
+          popup.close();clearInterval(timer);
+          if(!code){reject(new Error('No code received'));return}
+          // Exchange code for token
+          fetch('https://api.dropboxapi.com/oauth2/token',{
+            method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+            body:new URLSearchParams({code,grant_type:'authorization_code',client_id:DB_KEY,code_verifier:cv,redirect_uri:DB_REDIRECT})
+          }).then(async r=>{
+            if(!r.ok){reject(new Error('Token exchange failed'));return}
+            const d=await r.json();
+            dbSetToken(d.access_token);
+            sessionStorage.removeItem('uomp_db_v');
+            resolve(new DropboxStore(d.access_token));
+          }).catch(reject);
+        }
+      }catch(e){/* cross-origin before redirect — ignore */}
+    },500);
+    setTimeout(()=>{clearInterval(timer);reject(new Error('Dropbox login timed out'))},120000);
+  });
 }
 
 export { UompClient, BrowserSDK, UompError, UompErrorCode, DropboxStore, connectDropbox, encryptData, decryptData, deriveMasterKey, createUserId };

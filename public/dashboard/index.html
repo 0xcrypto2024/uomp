@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>UOMP Portfolio</title><link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<!-- v20260720-43de2a4 -->
+<!-- v20260720-3f0de27 -->
 <style>
   :root{--bg:#0A0A0A;--card:#111;--border:#1F2937;--txt:#E5E7EB;--mid:#9CA3AF;--dim:#6B7280;--grn:#34D399;--red:#F87171;--blu:#3B82F6;--pur:#8B5CF6;--db:#0061FF}*{margin:0;padding:0;box-sizing:border-box}
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;line-height:1.5}
@@ -69,7 +69,7 @@
   <h2>📝 Reports</h2>
   <div id="reports"><div class="empty">No reports yet. Send your portfolio to the Agent above.</div></div>
 </div>
-<div class="footer">Powered by <a href="https://www.uomp.org" style="color:var(--mid)">UOMP</a> · Data encrypted. You hold the keys. <span style="color:var(--dim);font-size:.7rem">v20260720-43de2a4</span></div>
+<div class="footer">Powered by <a href="https://www.uomp.org" style="color:var(--mid)">UOMP</a> · Data encrypted. You hold the keys. <span style="color:var(--dim);font-size:.7rem">v20260720-3f0de27</span></div>
 </div>
 
 <script>
@@ -79,6 +79,10 @@ function connect(chain){if(window._connect)window._connect(chain);else document.
 function linkDropbox(){if(window._linkDropbox)window._linkDropbox();else document.getElementById('connectStatus').innerHTML='<span class="status status-ok">Loading SDK...</span>'}
 </script>
 <script type="module">
+// Immediately set the connect function so buttons work even if SDK loads later
+window._connect = async function(chain){document.getElementById('connectStatus').innerHTML='<span class="status status-err">Module still loading...</span>'};
+window._linkDropbox = async function(){document.getElementById('connectStatus').innerHTML='<span class="status status-err">Module still loading...</span>'};
+
 import { BrowserSDK, DropboxStore, connectDropbox as dbConnect, encryptData, decryptData } from './sdk.js?v=2026-07-20.6';
 
 let cKey=null,uid=null,dropbox=null,holdings=[],reports=[],changed=false,isSample=false;

@@ -307,7 +307,7 @@ async function generateToken(){
   try{
     const base=gw.replace(/\/$/,'');
     const sess=await fetch(`${base}/v1/sessions`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent_id:'stock-analyst',requested_scopes:{read:{tags,keys,denyTags:[],denyKeys:[]},write:{tags:[],keys:[],denyTags:[],denyKeys:[]}},duration_minutes:30})}).then(r=>r.json());
-    const grant=await fetch(`${base}/v1/sessions/${sess.session_id}/grant`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({granted_scopes:{read:{tags,keys,denyTags:[],denyKeys:[]},write:{tags:[],keys:[],denyTags:[],denyKeys:[]}},profile:'local'})}).then(r=>r.json());
+    const grant=await fetch(`${base}/v1/sessions/${sess.session_id}/grant`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({granted_scopes:{read:{tags,keys,denyTags:[],denyKeys:[]},write:{tags:[],keys:[],denyTags:[],denyKeys:[]}},profile:'local',audience:gw})}).then(r=>r.json());
 
     aDiv.innerHTML=`
       <span class="status status-ok">✓ Token generated</span>

@@ -1,454 +1,175 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UOMP Portfolio</title>
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>UOMP Portfolio</title><link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <style>
-  :root { --bg:#0A0A0A; --card:#111; --border:#1F2937; --text:#E5E7EB; --mid:#9CA3AF; --dim:#6B7280; --green:#34D399; --red:#F87171; --blue:#3B82F6; --purple:#8B5CF6; }
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5}
+  :root{--bg:#0A0A0A;--card:#111;--border:#1F2937;--txt:#E5E7EB;--mid:#9CA3AF;--dim:#6B7280;--grn:#34D399;--red:#F87171;--blu:#3B82F6;--pur:#8B5CF6;--db:#0061FF}*{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;line-height:1.5}
   .container{max-width:1000px;margin:0 auto;padding:2rem 1.5rem}
-  h1{font-size:1.5rem;color:#fff;display:flex;align-items:center;gap:.5rem;margin-bottom:2rem}
-  .logo{width:28px;height:28px}
-
-  /* Wallet connect screen */
-  .hero{text-align:center;padding:3rem 1rem}
-  .hero h2{font-size:1.8rem;color:#fff;margin-bottom:.5rem}
-  .hero p{color:var(--mid);margin-bottom:2rem;max-width:500px;margin-left:auto;margin-right:auto}
+  h1{font-size:1.5rem;color:#fff;display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem}.logo{width:28px;height:28px}
+  .hero{text-align:center;padding:3rem 1rem}.hero h2{font-size:1.8rem;color:#fff;margin-bottom:.5rem}.hero p{color:var(--mid);margin-bottom:2rem;max-width:500px;margin-left:auto;margin-right:auto}
   .wallets{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
-  .wallet-btn{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem 2rem;cursor:pointer;color:var(--text);text-align:center;min-width:200px;transition:border-color .2s}
-  .wallet-btn:hover{border-color:var(--purple)}
-  .wallet-btn .icon{font-size:2rem;margin-bottom:.5rem}
-  .wallet-btn .name{font-weight:600;margin-bottom:.25rem}
-  .wallet-btn .desc{font-size:.75rem;color:var(--dim)}
-
-  /* Connected state */
-  .topbar{display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;padding:.75rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:.85rem;flex-wrap:wrap}
-  .topbar .addr{color:var(--purple);font-family:monospace;font-size:.8rem}
-  .btn{padding:.5rem 1rem;border-radius:6px;font-size:.85rem;font-weight:600;cursor:pointer;border:none;color:#fff;white-space:nowrap}
-  .btn:hover{opacity:.9}
-  .btn-sm{padding:.3rem .7rem;font-size:.75rem}
-  .btn-blue{background:var(--blue)}
-  .btn-green{background:#059669}
-  .btn-red{background:#DC2626}
-  .btn-outline{background:var(--card);border:1px solid var(--border);color:var(--mid)}
-  .btn-purple{background:var(--purple)}
-  .spacer{flex:1}
-  .status{font-size:.8rem;padding:.2rem .5rem;border-radius:4px;display:inline-block}
-  .status-ok{background:#064E3B;color:var(--green)}
-  .status-warn{background:#78350F;color:#FBBF24}
-
-  /* Toolbar */
+  .wallet-btn{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem 2rem;cursor:pointer;color:var(--txt);text-align:center;min-width:200px;transition:border-color .2s}.wallet-btn:hover{border-color:var(--pur)}.wallet-btn .icon{font-size:2rem;margin-bottom:.5rem}.wallet-btn .name{font-weight:600;margin-bottom:.25rem}.wallet-btn .desc{font-size:.75rem;color:var(--dim)}
+  .topbar{display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;padding:.75rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:.85rem;flex-wrap:wrap}.topbar .addr{color:var(--pur);font-family:monospace;font-size:.8rem}
+  .btn{padding:.5rem 1rem;border-radius:6px;font-size:.85rem;font-weight:600;cursor:pointer;border:none;color:#fff;white-space:nowrap}.btn:hover{opacity:.9}.btn-sm{padding:.3rem .7rem;font-size:.75rem}.btn-bl{background:var(--blu)}.btn-gr{background:#059669}.btn-rd{background:#DC2626}.btn-out{background:var(--card);border:1px solid var(--border);color:var(--mid)}.btn-pur{background:var(--pur)}.btn-db{background:var(--db)}.spacer{flex:1}.status{font-size:.8rem;padding:.2rem .5rem;border-radius:4px;display:inline-block}.status-ok{background:#064E3B;color:var(--grn)}.status-warn{background:#78350F;color:#FBBF24}.status-err{background:#7F1D1D;color:var(--red)}
   .toolbar{display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
-
-  /* Table */
   h2{font-size:1.1rem;margin:2rem 0 1rem;color:#fff;display:flex;align-items:center;gap:.5rem}
-  table{width:100%;border-collapse:collapse;font-size:.83rem}
-  th,td{padding:.45rem .5rem;text-align:right;border-bottom:1px solid var(--border)}
-  th{background:var(--card);color:var(--mid);font-weight:600;position:sticky;top:0}
-  th:first-child,td:first-child,th:last-child,td:last-child{text-align:center}
-  td input,td select{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.3rem;border-radius:4px;font-size:.83rem;text-align:inherit}
-  td select{cursor:pointer}
-  .pos{color:var(--green)}.neg{color:var(--red)}
-
-  /* Summary */
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin:1.5rem 0}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem}
-  .card-label{font-size:.8rem;color:var(--mid);margin-bottom:.2rem}
-  .card-value{font-size:1.2rem;font-weight:700}
-
-  /* Reports */
-  .report-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:.5rem;font-size:.83rem}
-  .report-card .date{color:var(--dim);font-size:.75rem}
-  .report-card pre{margin-top:.5rem;white-space:pre-wrap;color:var(--mid);max-height:200px;overflow:auto}
-
-  /* Agent */
-  .agent-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.25rem;font-size:.84rem;margin-top:2rem}
-  .agent-box p{color:var(--mid);margin-bottom:.75rem}
-  .agent-box input{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.5rem;border-radius:6px;font-size:.85rem;margin-bottom:.5rem}
-  .agent-box pre{background:var(--bg);padding:.75rem;border-radius:4px;overflow:auto;font-size:.8rem;margin-top:.5rem}
-
-  .empty{text-align:center;color:var(--dim);padding:2rem 1rem}
-  .footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border);color:var(--dim);font-size:.75rem;text-align:center}
+  table{width:100%;border-collapse:collapse;font-size:.83rem}th,td{padding:.45rem .5rem;text-align:right;border-bottom:1px solid var(--border)}th{background:var(--card);color:var(--mid);font-weight:600}th:first-child,td:first-child,th:last-child,td:last-child{text-align:center}td input,td select{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--txt);padding:.3rem;border-radius:4px;font-size:.83rem;text-align:inherit}td select{cursor:pointer}.pos{color:var(--grn)}.neg{color:var(--red)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin:1.5rem 0}.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem}.card-label{font-size:.8rem;color:var(--mid);margin-bottom:.2rem}.card-value{font-size:1.2rem;font-weight:700}
+  .report-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:.5rem;font-size:.83rem}.report-card .date{color:var(--dim);font-size:.75rem}.report-card pre{margin-top:.5rem;white-space:pre-wrap;color:var(--mid);max-height:200px;overflow:auto}
+  .empty{text-align:center;color:var(--dim);padding:2rem 1rem}.footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border);color:var(--dim);font-size:.75rem;text-align:center}
   @media(max-width:640px){.container{padding:1rem}}
-</style>
-</head>
+</style></head>
 <body>
 <div class="container">
 
-<!-- Wallet Connect Screen -->
-<div id="connectScreen">
+<!-- Connect -->
+<div id="connect">
   <div class="hero">
-    <h2>Your Portfolio.<br>Your Wallet.</h2>
-    <p>Connect your wallet to manage your portfolio. Data is encrypted in your browser — no server, no signup.</p>
+    <h2>Your Portfolio.<br>Your Data.</h2>
+    <p>Connect your wallet and Dropbox to manage your portfolio. Everything is encrypted — no server, no signup.</p>
     <div class="wallets">
-      <button class="wallet-btn" onclick="connect('ethereum')">
-        <div class="icon">🦊</div>
-        <div class="name">MetaMask</div>
-        <div class="desc">Ethereum · personal_sign</div>
-      </button>
-      <button class="wallet-btn" onclick="connect('starknet')">
-        <div class="icon">🦁</div>
-        <div class="name">Argent X</div>
-        <div class="desc">Starknet · signMessage</div>
-      </button>
+      <button class="wallet-btn" onclick="connect('ethereum')"><div class="icon">🦊</div><div class="name">MetaMask</div><div class="desc">Ethereum · personal_sign</div></button>
+      <button class="wallet-btn" onclick="connect('starknet')"><div class="icon">🦁</div><div class="name">Argent X</div><div class="desc">Starknet · signMessage</div></button>
     </div>
-    <p style="margin-top:2rem;font-size:.8rem;color:var(--dim)">No installation. No account. No server. Just your wallet.</p>
+    <p style="margin-top:2rem"><button class="btn btn-db" onclick="linkDropbox()">📦 Connect Dropbox</button></p>
+    <p style="margin-top:.5rem;font-size:.8rem;color:var(--dim)">Dropbox stores your encrypted data · Wallet unlocks it</p>
     <div id="connectStatus" style="margin-top:1rem"></div>
   </div>
 </div>
 
-<!-- App (hidden until connected) -->
+<!-- App -->
 <div id="app" style="display:none">
   <div class="topbar" id="topbar"></div>
-
   <div class="toolbar">
-    <button class="btn btn-green" onclick="addRow()">+ Add Stock</button>
-    <button class="btn btn-outline" onclick="document.getElementById('csvFile').click()">📄 Import CSV</button>
+    <button class="btn btn-gr" onclick="addRow()">+ Add Stock</button>
+    <button class="btn btn-out" onclick="document.getElementById('csvFile').click()">📄 Import CSV</button>
     <input type="file" id="csvFile" accept=".csv" style="display:none" onchange="handleCSV(event)">
     <span class="spacer"></span>
-    <button class="btn btn-purple" onclick="runAnalysis()">📊 Analyze</button>
+    <button class="btn btn-pur" onclick="runAnalysis()">📊 Analyze</button>
     <span id="saveStatus" style="font-size:.75rem;color:var(--dim)"></span>
-    <button class="btn btn-blue" id="saveBtn" onclick="save()" style="display:none">💾 Save Changes</button>
+    <button class="btn btn-bl" id="saveBtn" onclick="save()" style="display:none">💾 Save</button>
   </div>
-
-  <h2>📊 Holdings <span style="font-weight:400;font-size:.8rem;color:var(--mid)">— click any cell to edit</span></h2>
-  <div style="overflow-x:auto">
-    <table><thead><tr>
-      <th>Symbol</th><th>Name</th><th>Qty</th><th>Cost</th><th>Sector</th><th>Value</th><th>P&L</th><th></th>
-    </tr></thead><tbody id="tableBody"></tbody></table>
-  </div>
+  <h2>📊 Holdings <span style="font-weight:400;font-size:.8rem;color:var(--mid)">— click to edit</span></h2>
+  <div style="overflow-x:auto"><table><thead><tr><th>Sym</th><th>Name</th><th>Qty</th><th>Cost</th><th>Sector</th><th>Value</th><th></th></tr></thead><tbody id="tbody"></tbody></table></div>
   <div class="grid" id="summaryGrid"></div>
-
   <h2>📝 Reports</h2>
-  <div id="reports"><div class="empty">No reports yet. Click "Analyze" or connect an Agent.</div></div>
+  <div id="reports"><div class="empty">No reports yet.</div></div>
 
   <!-- Agent Discovery -->
   <h2>🤖 Agents</h2>
   <div style="display:flex;gap:1rem;flex-wrap:wrap" id="agentCards"></div>
 </div>
-
 <div class="footer">Powered by <a href="https://www.uomp.org" style="color:var(--mid)">UOMP</a> · Data encrypted. You hold the keys.</div>
 </div>
 
-<script>
-// ═══════════════════════════════════════════════════════════════
-// Crypto (Web Crypto API — Browser Native)
-// ═══════════════════════════════════════════════════════════════
-const E=new TextEncoder();
-async function hmacSign(key,data){const k=await crypto.subtle.importKey('raw',key,{name:'HMAC',hash:'SHA-256'},false,['sign']);return new Uint8Array(await crypto.subtle.sign('HMAC',k,data))}
-async function deriveKey(signature,address,chain){
-  const s=E.encode(signature).slice(0,64),a=E.encode(address.toLowerCase());
-  const ikm=new Uint8Array([...s,...a]).slice(0,64);
-  const prk=await hmacSign(E.encode('uomp-store-v1'),ikm);
-  const info=E.encode(`${chain}:${address}`);
-  const t=new Uint8Array([...info,1]);
-  const okm=await hmacSign(prk,t);
-  return crypto.subtle.importKey('raw',okm.slice(0,32),{name:'AES-GCM'},false,['encrypt','decrypt']);
-}
-async function enc(cKey,text){
-  const iv=crypto.getRandomValues(new Uint8Array(12));
-  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},cKey,E.encode(text));
-  return {iv:Array.from(iv),d:Array.from(new Uint8Array(ct))};
-}
-async function dec(cKey,obj){
-  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:new Uint8Array(obj.iv)},cKey,new Uint8Array(obj.d));
-  return new TextDecoder().decode(pt);
-}
+<script type="module">
+import { BrowserSDK, DropboxStore, connectDropbox as doConnectDropbox, encryptData, decryptData, deriveMasterKey, createUserId, UompClient, UompError } from './sdk.js';
 
-// ═══════════════════════════════════════════════════════════════
 // State
-// ═══════════════════════════════════════════════════════════════
-let cKey=null,uid=null;
-let holdings=[],reports=[],changed=false;
-const THEAD='<tr><th>Symbol</th><th>Name</th><th>Qty</th><th>Cost</th><th>Sector</th><th>Value</th><th>P&L</th><th></th></tr>';
-const SAMPLE=[{s:'AAPL',n:'Apple Inc.',q:'100',c:'150',sec:'Technology'},{s:'MSFT',n:'Microsoft Corp.',q:'40',c:'320',sec:'Technology'},{s:'GOOGL',n:'Alphabet Inc.',q:'30',c:'140',sec:'Technology'},{s:'NVDA',n:'NVIDIA Corp.',q:'30',c:'300',sec:'Technology'},{s:'TSLA',n:'Tesla Inc.',q:'50',c:'200',sec:'Consumer Cyclical'},{s:'AMZN',n:'Amazon.com',q:'25',c:'170',sec:'Consumer Cyclical'},{s:'JPM',n:'JPMorgan Chase',q:'60',c:'155',sec:'Financial'},{s:'BAC',n:'Bank of America',q:'200',c:'32',sec:'Financial'},{s:'JNJ',n:'Johnson & Johnson',q:'40',c:'160',sec:'Healthcare'},{s:'XOM',n:'Exxon Mobil',q:'50',c:'100',sec:'Energy'}];
+let cKey=null,uid=null,dropbox=null,holdings=[],reports=[],changed=false,isSample=false;
+const SAMPLE=[{s:'AAPL',n:'Apple',q:'100',c:'150',sec:'Technology'},{s:'MSFT',n:'Microsoft',q:'40',c:'320',sec:'Technology'},{s:'GOOGL',n:'Alphabet',q:'30',c:'140',sec:'Technology'},{s:'NVDA',n:'NVIDIA',q:'30',c:'300',sec:'Technology'},{s:'TSLA',n:'Tesla',q:'50',c:'200',sec:'Consumer Cyclical'},{s:'AMZN',n:'Amazon',q:'25',c:'170',sec:'Consumer Cyclical'},{s:'JPM',n:'JPMorgan',q:'60',c:'155',sec:'Financial'},{s:'BAC',n:'BofA',q:'200',c:'32',sec:'Financial'},{s:'JNJ',n:'J&J',q:'40',c:'160',sec:'Healthcare'},{s:'XOM',n:'Exxon',q:'50',c:'100',sec:'Energy'}];
 const SECS=['Technology','Consumer Cyclical','Financial','Healthcare','Energy','Utilities','Real Estate','Materials','Industrials','Communication','Other'];
+const AGENTS=[{id:'stock-analyst',name:'Stock Analyst',desc:'P&L, Sharpe, Beta, RSI, signals',url:'https://uomp-stock-analyst-mvblm.ondigitalocean.app'}];
 
-function ls(k,v){if(v!==undefined)localStorage.setItem('uomp_'+k,JSON.stringify(v));try{const d=localStorage.getItem('uomp_'+k);return d?JSON.parse(d):null}catch{return null}}
+// ── Connect ────────────────────────────────────────────
+async function connect(chain){const s=document.getElementById('connectStatus');try{s.innerHTML='<span class="status status-ok">Requesting wallet...</span>';const r=await BrowserSDK.fromWallet(chain);cKey=r.key;uid=r.userId;s.innerHTML='<span class="status status-ok">✓ Wallet connected</span>';if(dropbox||(typeof dbToken!=='undefined'&&dbToken()))await load();else await loadLocal();showApp(r.chain,r.address)}catch(e){s.innerHTML=`<span class="status status-err">${e.message}</span>`}}
 
-// ═══════════════════════════════════════════════════════════════
-// Wallet Connect
-// ═══════════════════════════════════════════════════════════════
-async function connect(chain){
-  const s=document.getElementById('connectStatus');
-  try{
-    s.innerHTML='<span class="status status-ok">Requesting wallet...</span>';
-    let addr,sig;
-    if(chain==='ethereum'){
-      if(!window.ethereum)throw new Error('MetaMask extension not detected');
-      const a=await window.ethereum.request({method:'eth_requestAccounts'});addr=a[0];
-      sig=await window.ethereum.request({method:'personal_sign',params:['UOMP Store v1',addr]});
-    }else{
-      if(!window.starknet)throw new Error('Argent X extension not detected');
-      await window.starknet.enable();addr=window.starknet.selectedAddress;
-      if(!addr)throw new Error('No Starknet account');
-      const td={domain:{name:'UOMP Store',version:'1',chainId:'SN_MAIN'},types:{StarkNetDomain:[{name:'name',type:'felt'},{name:'version',type:'felt'},{name:'chainId',type:'felt'}],Message:[{name:'message',type:'felt'}]},primaryType:'Message',message:{message:'UOMP Store v1'}};
-      const r=await window.starknet.account.signMessage(td);sig=Array.isArray(r)?r.join(','):String(r);
-    }
-    s.innerHTML='<span class="status status-ok">Deriving key...</span>';
-    cKey=await deriveKey(sig,addr,chain);uid=`${chain}:${addr.toLowerCase()}`;
-    await load();showApp(chain,addr);
-  }catch(e){s.innerHTML=`<span class="status status-err">${e.message}</span>`}
-}
+window.connect=connect;
+
+async function linkDropbox(){const s=document.getElementById('connectStatus');s.innerHTML='<span class="status status-ok">Connecting Dropbox...</span>';try{dropbox=await doConnectDropbox();s.innerHTML='<span class="status status-ok">✓ Dropbox connected</span>';if(cKey)await load()}catch(e){if(e.message==='Redirecting to Dropbox')return;s.innerHTML=`<span class="status status-err">${e.message}</span>`}}
+window.linkDropbox=linkDropbox;
 
 async function load(){
-  const raw=ls(uid);
-  if(raw){try{const p=await dec(cKey,raw);const d=JSON.parse(p);holdings=d.h||SAMPLE.map(x=>({...x}));reports=d.r||[];}catch{holdings=SAMPLE.map(x=>({...x}));reports=[]}}
-  else{holdings=SAMPLE.map(x=>({...x}));reports=[]}
+  try{
+    // Try loading from Dropbox first
+    const raw=await dropbox.download('holdings.enc');
+    if(raw&&cKey){const obj=JSON.parse(raw);const p=await decryptData(cKey,obj);const d=JSON.parse(p);holdings=d.h||[];reports=d.r||[];isSample=false}
+  }catch{}
+  if(!holdings.length){holdings=SAMPLE.map(x=>({...x}));isSample=true}
+  // Load reports from Dropbox
+  try{
+    const entries=await dropbox.list('/reports');
+    for(const e of entries){if(e['.tag']==='file'&&!reports.find(r=>r.n===e.name)){const rd=await dropbox.download(`reports/${e.name}`);if(rd){try{const p=await decryptData(cKey,JSON.parse(rd));reports.push({n:e.name,d:e.client_modified,c:p});}catch{}}}}
+  }catch{}
+}
+
+async function loadLocal(){
+  const d=await BrowserSDK.loadEncrypted(cKey,uid);
+  if(d){holdings=d.h||[];reports=d.r||[];isSample=false}else{holdings=SAMPLE.map(x=>({...x}));isSample=true}
 }
 
 async function save(){
-  if(!cKey)return;
   const obj={h:holdings,r:reports.slice(0,50)};
-  const encrypted=await enc(cKey,JSON.stringify(obj));
-  ls(uid,encrypted);
-  changed=false;
-  document.getElementById('saveBtn').style.display='none';
-  document.getElementById('saveStatus').innerHTML='<span class="status status-ok">✓ Saved & encrypted</span>';
+  if(dropbox){
+    const e=await encryptData(cKey,JSON.stringify(obj));
+    await dropbox.upload('holdings.enc',JSON.stringify(e));
+  }else{
+    await BrowserSDK.saveEncrypted(cKey,uid,obj);
+  }
+  changed=false;document.getElementById('saveBtn').style.display='none';
+  document.getElementById('saveStatus').innerHTML='<span class="status status-ok">✓ Saved</span>';
   setTimeout(()=>document.getElementById('saveStatus').innerHTML='',2000);
-  render();
 }
+window.save=save;
 
-function showApp(chain,addr){
-  document.getElementById('connectScreen').style.display='none';
-  document.getElementById('app').style.display='block';
+function showApp(ch,addr){
+  document.getElementById('connect').style.display='none';document.getElementById('app').style.display='block';
+  const storage=dropbox?'Dropbox':'Browser';
   document.getElementById('topbar').innerHTML=`
-    <span style="color:var(--mid)">Connected:</span><span class="addr">${addr.slice(0,12)}...${addr.slice(-4)}</span>
-    <span style="color:var(--dim);font-size:.8rem">${chain}</span>
+    <span style="color:var(--mid)">${storage}</span><span class="addr">${addr.slice(0,12)}...${addr.slice(-4)}</span>
     <span class="spacer"></span>
-    <span class="status status-ok">Encrypted in browser localStorage</span>
-    <button class="btn btn-outline btn-sm" onclick="disconnect()">Lock</button>
-  `;
-  render();
+    ${isSample?'<span class="status status-warn">Sample data — edit or import CSV</span>':''}
+    <span class="status status-ok">AES-256 encrypted</span>
+    <button class="btn btn-out btn-sm" onclick="location.reload()">Lock</button>`;
+  render();checkAgents();
 }
 
-// ═══════════════════════════════════════════════════════════════
-// In-Browser Analysis (No Gateway Required)
-// ═══════════════════════════════════════════════════════════════
-function runAnalysis(){
-  if(!holdings.length) return;
-  const risk={stop_loss_pct:15,take_profit_pct:50,max_drawdown:0.20};
+// ── CSV ────────────────────────────────────────────────
+window.handleCSV=function(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{const lines=ev.target.result.split('\n').filter(l=>l.trim());if(lines.length<2)return;const h=lines[0].toLowerCase().split(',').map(x=>x.trim());const si=h.findIndex(x=>x==='symbol'||x==='sym'),ni=h.findIndex(x=>x==='name'),qi=h.findIndex(x=>x==='quantity'||x==='qty'),ci=h.findIndex(x=>x==='cost_basis'||x==='cost'),ei=h.findIndex(x=>x==='sector');if(si<0)return alert('CSV needs "symbol" column');const imp=[];for(let i=1;i<lines.length;i++){const c=lines[i].split(',').map(x=>x.trim());if(!c[si])continue;imp.push({s:c[si],n:ni>=0?c[ni]||c[si]:c[si],q:qi>=0?c[qi]||'0':'0',c:ci>=0?c[ci]||'0':'0',sec:ei>=0?c[ei]||'Other':'Other'})}holdings=imp;changed=true;document.getElementById('saveBtn').style.display='inline-block';render()};r.readAsText(f)}
 
-  let tc=0,tv=0;const secs={},rows=[];
-  for(const h of holdings){
-    const q=parseFloat(h.q)||0,c=parseFloat(h.c)||0,val=q*c,price=c>0?val/q:0;
-    tc+=val;tv+=val;const s=h.sec||'Other';secs[s]=(secs[s]||0)+val;
-    rows.push({sym:h.s,n:h.n,qty:q,cost:c,val,price,weight:0,sector:s});
-  }
-  for(const r of rows) r.weight=tv>0?(r.val/tv)*100:0;
+// ── Table ───────────────────────────────────────────────
+window.addRow=function(){holdings.push({s:'NEW',n:'New Stock',q:'0',c:'0',sec:'Other'});changed=true;document.getElementById('saveBtn').style.display='inline-block';render()}
+window.editCell=function(i,f,v){holdings[i][f]=v;changed=true;document.getElementById('saveBtn').style.display='inline-block';render()}
+window.delRow=function(i){holdings.splice(i,1);changed=true;document.getElementById('saveBtn').style.display='inline-block';render()}
 
-  const hhi=rows.reduce((s,r)=>s+r.weight*r.weight,0);
-  const sigs=[],sl=risk.stop_loss_pct,tp=risk.take_profit_pct;
-  for(const r of rows){
-    // Simulated current price = cost * 1.15 (15% average gain for demo)
-    const cp=r.cost*1.15,curVal=cp*r.qty,pnl=curVal-r.val,pnlPct=r.val>0?(pnl/r.val)*100:0;
-    if(pnlPct<=-sl) sigs.push({t:'stop_loss',m:`${r.sym} ${pnlPct.toFixed(1)}% (SL:${sl}%)`});
-    if(pnlPct>=tp) sigs.push({t:'take_profit',m:`${r.sym} +${pnlPct.toFixed(1)}% (TP:${tp}%)`});
-  }
-
-  const f=n=>parseFloat(n).toFixed(2);
-  const report=`UOMP Portfolio Analysis
-═══════════════════
-Date: ${new Date().toISOString().slice(0,10)}
-Positions: ${holdings.length} | Sectors: ${Object.keys(secs).length}
-
-SUMMARY
-  Portfolio Value: $${f(tv)}
-  Concentration (HHI): ${hhi.toFixed(0)} ${hhi>2500?'⚠ High':'✓ Healthy'}
-
-SECTOR ALLOCATION
-${Object.entries(secs).sort((a,b)=>b[1]-a[1]).map(([s,v])=>`  ${s}: ${f(tv>0?(v/tv)*100:0)}%`).join('\n')}
-
-${sigs.length?`SIGNALS\n${sigs.map(s=>`  ${s.t==='stop_loss'?'🔴':'🟢'} ${s.m}`).join('\n')}`:'No signals triggered.'}
-
-TOP HOLDINGS
-${rows.sort((a,b)=>b.val-a.val).slice(0,5).map(r=>`  ${r.sym}: $${f(r.val)} (${f(r.weight)}%)`).join('\n')}
-
-Generated by UOMP Dashboard — zero servers, wallet only.`;
-
-
-  const now=new Date().toISOString();
-  reports.push({d:now.slice(0,16),c:report,n:`analysis-${now.slice(0,10)}`});
-  changed=true;
-  document.getElementById('saveBtn').style.display='inline-block';
-
-  const rDiv=document.getElementById('reports');
-  rDiv.innerHTML=reports.map((r,i)=>`<div class="report-card">
-    <div class="date">${r.d||r.n||'Unknown'}</div>
-    <pre>${(r.c||'').slice(0,1000)}</pre>
-    ${i===0?'<span class="status status-ok" style="margin-top:.5rem">New! Save to keep this report.</span>':''}
-  </div>`).join('');
-}
-
-// ═══════════════════════════════════════════════════════════════
-// Agent Discovery & Integration
-// ═══════════════════════════════════════════════════════════════
-const AGENTS=[
-  {id:'stock-analyst',name:'Stock Analyst',desc:'P&L, Sharpe, Beta, RSI, signals, scenarios',url:'https://uomp-stock-analyst-mvblm.ondigitalocean.app',online:false,api:'/analyze'},
-];
-
-async function checkAgents(){
-  for(const a of AGENTS){
-    try{const r=await fetch(`${a.url}/health`);a.online=r.ok}
-    catch{a.online=false}
-  }
-  renderAgents();
-}
-
-function renderAgents(){
-  document.getElementById('agentCards').innerHTML=AGENTS.map(a=>`
-    <div class="card" style="flex:1;min-width:280px">
-      <div class="card-label">${a.online?'<span class="status status-ok">● Online</span>':'<span class="status" style="background:#374151;color:#9CA3AF">○ Offline</span>'} · ${a.id}</div>
-      <div class="card-value" style="font-size:1.1rem;margin:.3rem 0">${a.name}</div>
-      <div style="color:var(--mid);font-size:.83rem;margin-bottom:.75rem">${a.desc}</div>
-      <button class="btn btn-purple btn-sm" onclick="sendToAgent('${a.id}')" ${a.online?'':'disabled'}>Send Portfolio → Agent</button>
-      <span id="agentStatus_${a.id}" style="font-size:.75rem;display:block;margin-top:.5rem"></span>
-    </div>
-  `).join('');
-}
-
-async function sendToAgent(agentId){
-  const a=AGENTS.find(x=>x.id===agentId);if(!a)return;
-  const status=document.getElementById(`agentStatus_${a.id}`);
-  status.innerHTML='<span class="status status-ok">Sending...</span>';
-
-  // Build portfolio payload from current holdings
-  const payload={
-    holdings:holdings.map(h=>({key:h.s,value:{symbol:h.s,name:h.n,quantity:h.q,cost_basis:h.c,market_value:(parseFloat(h.q)*parseFloat(h.c)*1.15).toFixed(2),sector:h.sec,currency:'USD'},tags:['portfolio:holdings']})),
-    risk:{risk_level:'moderate',max_drawdown:0.20,investment_horizon:'5_years',stop_loss_pct:15,take_profit_pct:50}
-  };
-
-  try{
-    const resp=await fetch(`${a.url}${a.api}`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(payload)
-    });
-    if(!resp.ok){const e=await resp.json().catch(()=>({}));throw new Error(e.error?.message||`HTTP ${resp.status}`)}
-    const result=await resp.json();
-
-    // Save report
-    const now=new Date().toISOString();
-    const content=result.results?.markdown_zh||result.results?.markdown_en||result.results?.html||JSON.stringify(result.summary,null,2);
-    reports.push({d:now.slice(0,16),c:content,n:`${agentId}-${now.slice(0,10)}`,a:agentId});
-    changed=true;document.getElementById('saveBtn').style.display='inline-block';
-
-    // Show report
-    const rDiv=document.getElementById('reports');
-    rDiv.innerHTML=reports.map(r=>`<div class="report-card"><div class="date">${r.a||''} · ${r.d||r.n}</div><pre>${(r.c||'').slice(0,1500)}</pre></div>`).join('');
-    status.innerHTML='<span class="status status-ok">✓ Analysis complete</span>';
-  }catch(e){status.innerHTML=`<span class="status" style="background:#7F1D1D;color:#F87171">${e.message}</span>`}
-}
-
-function showApp(chain,addr){
-  document.getElementById('connectScreen').style.display='none';
-  document.getElementById('app').style.display='block';
-  document.getElementById('topbar').innerHTML=`
-    <span style="color:var(--mid)">Connected:</span><span class="addr">${addr.slice(0,12)}...${addr.slice(-4)}</span>
-    <span style="color:var(--dim);font-size:.8rem">${chain}</span>
-    <span class="spacer"></span>
-    <span class="status status-ok">Encrypted in browser</span>
-    <button class="btn btn-outline btn-sm" onclick="disconnect()">Lock</button>
-  `;
-  render();
-  checkAgents();
-}
-
-function disconnect(){cKey=null;uid=null;location.reload()}
-
-// ═══════════════════════════════════════════════════════════════
-// CSV Import
-// ═══════════════════════════════════════════════════════════════
-function handleCSV(e){
-  const f=e.target.files[0];if(!f)return;
-  const r=new FileReader();r.onload=ev=>{
-    const lines=ev.target.result.split('\n').filter(l=>l.trim());if(lines.length<2)return;
-    const h=lines[0].toLowerCase().split(',').map(x=>x.trim());
-    const si=h.findIndex(x=>x==='symbol'||x==='sym'),ni=h.findIndex(x=>x==='name'),qi=h.findIndex(x=>x==='quantity'||x==='qty'),ci=h.findIndex(x=>x==='cost_basis'||x==='cost'),ei=h.findIndex(x=>x==='sector');
-    if(si<0)return alert('CSV must have a "symbol" column');
-    const imp=[];
-    for(let i=1;i<lines.length;i++){const c=lines[i].split(',').map(x=>x.trim());if(!c[si])continue;imp.push({s:c[si],n:ni>=0?c[ni]||c[si]:c[si],q:qi>=0?c[qi]||'0':'0',c:ci>=0?c[ci]||'0':'0',sec:ei>=0?c[ei]||'Other':'Other'})}
-    holdings=imp;changed=true;document.getElementById('saveBtn').style.display='inline-block';render();
-  };r.readAsText(f);
-}
-
-// ═══════════════════════════════════════════════════════════════
-// Table Editing
-// ═══════════════════════════════════════════════════════════════
-function addRow(){holdings.push({s:'NEW',n:'New Stock',q:'0',c:'0',sec:'Other'});changed=true;document.getElementById('saveBtn').style.display='inline-block';render()}
-function delRow(i){holdings.splice(i,1);changed=true;document.getElementById('saveBtn').style.display='inline-block';render()}
-function editCell(i,f,v){holdings[i][f]=v;changed=true;document.getElementById('saveBtn').style.display='inline-block';render()}
-
-// ═══════════════════════════════════════════════════════════════
-// Render
-// ═══════════════════════════════════════════════════════════════
+// ── Render ──────────────────────────────────────────────
 function render(){
-  const f=n=>{const v=parseFloat(n);return isNaN(v)?'0':v.toFixed(2);};
-
-  document.getElementById('tableBody').innerHTML=holdings.map((h,i)=>{
-    const q=parseFloat(h.q)||0,c=parseFloat(h.c)||0,val=q*c;
-    return `<tr>
-      <td><input value="${h.s}" onchange="editCell(${i},'s',this.value)" style="width:60px"></td>
-      <td><input value="${h.n||''}" onchange="editCell(${i},'n',this.value)"></td>
-      <td><input value="${h.q}" onchange="editCell(${i},'q',this.value)" type="number" style="width:80px"></td>
-      <td><input value="${h.c}" onchange="editCell(${i},'c',this.value)" type="number" style="width:80px"></td>
-      <td><select onchange="editCell(${i},'sec',this.value)">${SECS.map(x=>`<option value="${x}" ${h.sec===x?'selected':''}>${x}</option>`).join('')}</select></td>
-      <td style="color:var(--mid)">$${f(val)}</td>
-      <td class="pos">—</td>
-      <td><button class="btn btn-red btn-sm" onclick="delRow(${i})">×</button></td>
-    </tr>`;
-  }).join('');
-
-  let tc=0,tv=0;const secs={};
-  for(const h of holdings){const q=parseFloat(h.q)||0,c=parseFloat(h.c)||0,v=q*c;tc+=v;tv+=v;secs[h.sec||'Other']=(secs[h.sec||'Other']||0)+v}
+  const f=n=>{const v=parseFloat(n);return isNaN(v)?'0':v.toFixed(2)};
+  document.getElementById('tbody').innerHTML=holdings.map((h,i)=>{const q=parseFloat(h.q)||0,c=parseFloat(h.c)||0,val=q*c;return`<tr>
+    <td><input value="${h.s}" onchange="editCell(${i},'s',this.value)" style="width:60px"></td>
+    <td><input value="${h.n||''}" onchange="editCell(${i},'n',this.value)"></td>
+    <td><input value="${h.q}" onchange="editCell(${i},'q',this.value)" type="number" style="width:80px"></td>
+    <td><input value="${h.c}" onchange="editCell(${i},'c',this.value)" type="number" style="width:80px"></td>
+    <td><select onchange="editCell(${i},'sec',this.value)">${SECS.map(x=>`<option value="${x}" ${h.sec===x?'selected':''}>${x}</option>`).join('')}</select></td>
+    <td style="color:var(--mid)">$${f(val)}</td>
+    <td><button class="btn btn-rd btn-sm" onclick="delRow(${i})">×</button></td></tr>`}).join('');
+  let tc=0,tv=0;const secs={};for(const h of holdings){const q=parseFloat(h.q)||0,c=parseFloat(h.c)||0,v=q*c;tc+=v;tv+=v;secs[h.sec||'Other']=(secs[h.sec||'Other']||0)+v}
   const hhi=holdings.reduce((s,h)=>{const v=(parseFloat(h.q)||0)*(parseFloat(h.c)||0);const w=tv>0?(v/tv)*100:0;return s+w*w},0);
-  document.getElementById('summaryGrid').innerHTML=`
-    <div class="card"><div class="card-label">Portfolio Value</div><div class="card-value">$${f(tv)}</div></div>
-    <div class="card"><div class="card-label">HHI</div><div class="card-value">${hhi.toFixed(0)}</div></div>
-    <div class="card"><div class="card-label">Positions</div><div class="card-value">${holdings.length}</div></div>
-    <div class="card"><div class="card-label">Sectors</div><div class="card-value">${Object.keys(secs).length}</div></div>
-  `;
-
-  const rDiv=document.getElementById('reports');
-  if(!reports.length)rDiv.innerHTML='<div class="empty">No reports yet. Use the Agent section below to generate analysis.</div>';
-  else rDiv.innerHTML=reports.map(r=>`<div class="report-card"><div class="date">${r.d||r.name||'Unknown date'}</div><pre>${(r.c||'').slice(0,800)}</pre></div>`).join('');
+  document.getElementById('summaryGrid').innerHTML=`<div class="card"><div class="card-label">Portfolio Value</div><div class="card-value">$${f(tv)}</div></div><div class="card"><div class="card-label">HHI</div><div class="card-value">${hhi.toFixed(0)}</div></div><div class="card"><div class="card-label">Positions</div><div class="card-value">${holdings.length}</div></div><div class="card"><div class="card-label">Sectors</div><div class="card-value">${Object.keys(secs).length}</div></div>`;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// Agent Token Generation
-// ═══════════════════════════════════════════════════════════════
-async function generateToken(){
-  const gw=document.getElementById('gwUrl').value.trim();
-  const aDiv=document.getElementById('agentResult');
-  if(!gw){aDiv.innerHTML='<span class="status" style="background:#7F1D1D;color:var(--red)">Enter Gateway URL. Run: uomp gateway start --browser</span>';return}
-  if(!holdings.length){aDiv.innerHTML='<span class="status" style="background:#7F1D1D;color:var(--red)">Add holdings first</span>';return}
-
-  const tags=['portfolio:holdings','profile:risk'];
-  const keys=holdings.map(h=>h.s).filter(Boolean);
-  aDiv.innerHTML='<span class="status status-ok">Generating token...</span>';
-
-  try{
-    const base=gw.replace(/\/$/,'');
-    const sess=await fetch(`${base}/v1/sessions`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent_id:'stock-analyst',requested_scopes:{read:{tags,keys,denyTags:[],denyKeys:[]},write:{tags:[],keys:[],denyTags:[],denyKeys:[]}},duration_minutes:30})}).then(r=>r.json());
-    const grant=await fetch(`${base}/v1/sessions/${sess.session_id}/grant`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({granted_scopes:{read:{tags,keys,denyTags:[],denyKeys:[]},write:{tags:[],keys:[],denyTags:[],denyKeys:[]}},profile:'local',audience:gw})}).then(r=>r.json());
-
-    aDiv.innerHTML=`
-      <span class="status status-ok">✓ Token generated</span>
-      <pre style="margin-top:.5rem"># Run locally:
-export UOM_TOKEN="${grant.token.slice(0,30)}..."
-export UOMP_BASE_URL="${gw}"
-node examples/stock-analyst/index.js
-
-# Or open DO Agent and paste:
-# Token: ${grant.token.slice(0,40)}...
-# Gateway: ${gw}</pre>
-      <p style="margin-top:.5rem;font-size:.8rem">Agent will read your portfolio, fetch market data, and generate a full analysis report.</p>
-    `;
-  }catch(e){aDiv.innerHTML=`<span class="status" style="background:#7F1D1D;color:var(--red)">${e.message}</span>`}
+// ── Analysis ─────────────────────────────────────────────
+window.runAnalysis=function(){
+  const f=n=>parseFloat(n).toFixed(2);let tv=0;const secs={};holdings.forEach(h=>{const v=(parseFloat(h.q)||0)*(parseFloat(h.c)||0);tv+=v;secs[h.sec||'Other']=(secs[h.sec||'Other']||0)+v});
+  const hhi=holdings.reduce((s,h)=>{const v=(parseFloat(h.q)||0)*(parseFloat(h.c)||0);const w=tv>0?(v/tv)*100:0;return s+w*w},0);
+  const report=`UOMP Analysis · ${new Date().toISOString().slice(0,10)}
+Positions: ${holdings.length} | Value: $${f(tv)} | HHI: ${hhi.toFixed(0)} ${hhi>2500?'⚠':'✓'}
+Sectors: ${Object.entries(secs).sort((a,b)=>b[1]-a[1]).map(([s,v])=>`${s} ${f(tv>0?(v/tv)*100:0)}%`).join(' · ')}
+Top: ${holdings.sort((a,b)=>(parseFloat(b.q)*parseFloat(b.c))-(parseFloat(a.q)*parseFloat(a.c))).slice(0,5).map(h=>`${h.s} $${f(parseFloat(h.q)*parseFloat(h.c))}`).join(', ')}`;
+  const now=new Date().toISOString();reports.push({d:now.slice(0,16),c:report,n:`analysis-${now.slice(0,10)}`});changed=true;
+  document.getElementById('saveBtn').style.display='inline-block';
+  showReports();
 }
+
+// ── Agent ────────────────────────────────────────────────
+async function checkAgents(){for(const a of AGENTS){try{const r=await fetch(`${a.url}/health`);a.online=r.ok}catch{a.online=false}}renderAgents()}
+function renderAgents(){document.getElementById('agentCards').innerHTML=AGENTS.map(a=>`<div class="card" style="flex:1;min-width:280px"><div class="card-label">${a.online?'<span class="status status-ok">● Online</span>':'<span class="status" style="background:#374151;color:#9CA3AF">○ Offline</span>'} · ${a.id}</div><div class="card-value" style="font-size:1.1rem;margin:.3rem 0">${a.name}</div><div style="color:var(--mid);font-size:.83rem;margin-bottom:.75rem">${a.desc}</div><button class="btn btn-pur btn-sm" onclick="sendToAgent('${a.id}')" ${a.online?'':'disabled'}>Send to Agent</button><span id="as_${a.id}" style="font-size:.75rem;display:block;margin-top:.5rem"></span></div>`).join('')}
+window.sendToAgent=async function(id){const a=AGENTS.find(x=>x.id===id);if(!a)return;const s=document.getElementById('as_'+id);s.innerHTML='<span class="status status-ok">Sending...</span>';try{const resp=await fetch(`${a.url}/analyze`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({holdings:holdings.map(h=>({key:h.s,value:{symbol:h.s,name:h.n,quantity:h.q,cost_basis:h.c,market_value:(parseFloat(h.q)*parseFloat(h.c)*1.15).toFixed(2),sector:h.sec,currency:'USD'},tags:['portfolio:holdings']})),risk:{risk_level:'moderate'}})});if(!resp.ok){const e=await resp.json().catch(()=>({}));throw new Error(e.error?.message||`HTTP ${resp.status}`)}const r=await resp.json();const c=r.results?.markdown_zh||r.results?.markdown_en||r.results?.html||JSON.stringify(r.summary);reports.push({d:new Date().toISOString().slice(0,16),c,n:`${id}-${new Date().toISOString().slice(0,10)}`});changed=true;document.getElementById('saveBtn').style.display='inline-block';showReports();s.innerHTML='<span class="status status-ok">✓ Done</span>'}catch(e){s.innerHTML=`<span class="status status-err">${e.message}</span>`}}
+
+function showReports(){const rd=document.getElementById('reports');rd.innerHTML=reports.map(r=>`<div class="report-card"><div class="date">${r.d||r.n}</div><pre>${(r.c||'').slice(0,1500)}</pre></div>`).join('')||'<div class="empty">No reports yet.</div>'}
+
+// Init
+(function(){const qs=new URLSearchParams(location.search);if(qs.get('code')){linkDropbox();return}})();
 </script>
 </body>
 </html>

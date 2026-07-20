@@ -6,7 +6,7 @@
 <title>UOMP Portfolio Dashboard</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <style>
-  :root { --bg:#0A0A0A; --card:#111; --border:#1F2937; --text:#E5E7EB; --mid:#9CA3AF; --dim:#6B7280; --green:#34D399; --red:#F87171; --blue:#3B82F6; --purple:#8B5CF6; }
+  :root { --bg:#0A0A0A; --card:#111; --border:#1F2937; --text:#E5E7EB; --mid:#9CA3AF; --dim:#6B7280; --green:#34D399; --red:#F87171; --blue:#3B82F6; --purple:#8B5CF6; --db:#0061FF; }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; line-height:1.5; }
   .container { max-width:1200px; margin:0 auto; padding:2rem 1.5rem; }
@@ -21,13 +21,14 @@
   .mode-card button { width:100%; padding:.6rem; border-radius:6px; font-size:.85rem; font-weight:600; cursor:pointer; border:none; color:#fff; }
   .btn-gateway { background:var(--blue); }
   .btn-wallet { background:var(--purple); }
-  .btn-wallet-starknet { background:#EC796B; }
+  .btn-starknet { background:#EC796B; }
+  .btn-dropbox { background:var(--db); }
   button:hover { opacity:.9; }
   button:disabled { background:#374151!important; cursor:not-allowed; }
   .status { font-size:.8rem; padding:.25rem .6rem; border-radius:4px; display:inline-block; margin-top:.5rem; }
   .status-ok { background:#064E3B; color:var(--green); }
   .status-err { background:#7F1D1D; color:var(--red); }
-  .user-info { display:flex; align-items:center; gap:.75rem; margin-bottom:2rem; padding:.75rem 1rem; background:var(--card); border:1px solid var(--border); border-radius:8px; font-size:.85rem; }
+  .user-info { display:flex; align-items:center; gap:.75rem; margin-bottom:2rem; padding:.75rem 1rem; background:var(--card); border:1px solid var(--border); border-radius:8px; font-size:.85rem; flex-wrap:wrap; }
   .user-info .addr { color:var(--purple); font-family:monospace; }
   .user-info button { padding:.3rem .75rem; font-size:.75rem; background:var(--card); border:1px solid var(--border); color:var(--mid); border-radius:4px; cursor:pointer; }
 
@@ -65,21 +66,28 @@
       UOMP Portfolio
     </h1>
     <div class="modes">
-      <!-- Gateway Mode -->
+      <!-- Gateway -->
       <div class="mode-card" id="gatewayCard">
-        <div class="mode-title">Gateway Mode · 需要运行 uomp gateway start</div>
+        <div class="mode-title">Gateway Mode · uomp gateway start</div>
         <input id="gwUrl" placeholder="Gateway URL (https://xxx.trycloudflare.com)">
         <input id="gwToken" placeholder="Capability Token (eyJhbG...)" type="password">
         <button class="btn-gateway" onclick="connectGateway()">Connect via Gateway</button>
         <div id="gwStatus"></div>
       </div>
-      <!-- Direct Mode (No Gateway) -->
+      <!-- Wallet + Local -->
       <div class="mode-card" id="directCard">
-        <div class="mode-title">Direct Mode · 无需Gateway</div>
+        <div class="mode-title">Direct Mode · Wallet + Browser Storage</div>
         <button class="btn-wallet" onclick="connectWallet('ethereum')">🔑 Connect MetaMask</button>
-        <button class="btn-wallet-starknet" onclick="connectWallet('starknet')" style="margin-top:.5rem">🦁 Connect Argent X (Starknet)</button>
-        <div style="font-size:.75rem;color:var(--dim);margin-top:.5rem">钱包签名 → 派生密钥 → 加密存储</div>
+        <button class="btn-starknet" onclick="connectWallet('starknet')" style="margin-top:.5rem">🦁 Connect Argent X</button>
+        <div style="font-size:.75rem;color:var(--dim);margin-top:.5rem">签名 → 派生密钥 → localStorage 加密存储</div>
         <div id="directStatus"></div>
+      </div>
+      <!-- Dropbox -->
+      <div class="mode-card" id="dropboxCard">
+        <div class="mode-title">Dropbox Mode · 数据存你的 Dropbox</div>
+        <button class="btn-dropbox" onclick="connectDropbox()">📦 Connect Dropbox</button>
+        <div style="font-size:.75rem;color:var(--dim);margin-top:.5rem">OAuth → 加密 → /Apps/UOMP/</div>
+        <div id="dropboxStatus"></div>
       </div>
     </div>
     <div id="userInfo" class="user-info" style="display:none"></div>
@@ -91,7 +99,7 @@
   <div id="signals" style="display:none"></div>
 
   <div class="footer">
-    Powered by <a href="https://www.uomp.org">UOMP</a> · Data stays on your device
+    Powered by <a href="https://www.uomp.org">UOMP</a> · Data encrypted. You hold the keys.
   </div>
 </div>
 
@@ -100,11 +108,9 @@
 // Gateway Client
 // ═══════════════════════════════════════════════════════════════
 class GatewayClient {
-  constructor(token, url) { this.token=token; this.base=url.replace(/\/$/,''); }
-  async get(path) {
-    const r = await fetch(`${this.base}${path}`,{
-      headers:{Authorization:`Bearer ${this.token}`,Accept:'application/json','X-UOMP-Agent-Id':'dashboard'}
-    });
+  constructor(token,url){this.token=token;this.base=url.replace(/\/$/,'');}
+  async get(path){
+    const r=await fetch(`${this.base}${path}`,{headers:{Authorization:`Bearer ${this.token}`,Accept:'application/json','X-UOMP-Agent-Id':'dashboard'}});
     if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error?.message||`HTTP ${r.status}`)}
     return r.json();
   }
@@ -113,226 +119,292 @@ class GatewayClient {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Direct Mode — Wallet Auth + Encrypted localStorage
+// Crypto (Web Crypto API — browser native)
 // ═══════════════════════════════════════════════════════════════
-const STORE_PREFIX = 'uomp_enc_';
+const enc=new TextEncoder();
 
-// HKDF: derive a 256-bit key from signature + chain + address
 async function deriveMasterKey(signature, address, chain) {
-  const enc = new TextEncoder();
-  const sigBytes = enc.encode(signature).slice(0, 64);
-  const addrBytes = enc.encode(address.toLowerCase());
-  const ikm = new Uint8Array([...sigBytes, ...addrBytes]).slice(0, 64);
-  const key = await crypto.subtle.importKey('raw', ikm, {name:'HKDF'}, false, ['deriveKey']);
-  return crypto.subtle.deriveKey(
-    {name:'HKDF', hash:'SHA-256', salt:enc.encode('uomp-store-v1'), info:enc.encode(`${chain}:${address}`)},
-    key, {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']
-  );
+  const sigBytes=enc.encode(signature).slice(0,64);
+  const addrBytes=enc.encode(address.toLowerCase());
+  const ikm=new Uint8Array([...sigBytes,...addrBytes]).slice(0,64);
+  const k=await crypto.subtle.importKey('raw',ikm,{name:'HKDF'},false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'HKDF',hash:'SHA-256',salt:enc.encode('uomp-store-v1'),info:enc.encode(`${chain}:${address}`)},k,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
 }
 
-async function encrypt(cryptoKey, plaintext) {
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const ct = await crypto.subtle.encrypt({name:'AES-GCM',iv}, cryptoKey, new TextEncoder().encode(plaintext));
-  return {iv:Array.from(iv), data:Array.from(new Uint8Array(ct))};
+async function encryptData(cryptoKey, plaintext) {
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},cryptoKey,enc.encode(plaintext));
+  return {iv:Array.from(iv),data:Array.from(new Uint8Array(ct))};
 }
 
-async function decrypt(cryptoKey, enc) {
-  const iv = new Uint8Array(enc.iv);
-  const data = new Uint8Array(enc.data);
-  const pt = await crypto.subtle.decrypt({name:'AES-GCM',iv}, cryptoKey, data);
+async function decryptData(cryptoKey, encData) {
+  const iv=new Uint8Array(encData.iv);const data=new Uint8Array(encData.data);
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv},cryptoKey,data);
   return new TextDecoder().decode(pt);
 }
 
-function storeGet(userId) {
-  try { const d=localStorage.getItem(STORE_PREFIX+userId); return d?JSON.parse(d):null; }
-  catch { return null; }
+// ═══════════════════════════════════════════════════════════════
+// Dropbox Storage (OAuth + API)
+// ═══════════════════════════════════════════════════════════════
+const DB_APP_KEY = 'uomp'; // Replace with your Dropbox App Key
+const DB_REDIRECT = window.location.origin + window.location.pathname;
+const DB_AUTH_URL = `https://www.dropbox.com/oauth2/authorize?client_id=${DB_APP_KEY}&response_type=token&redirect_uri=${encodeURIComponent(DB_REDIRECT)}&token_access_type=offline`;
+const DB_API = 'https://api.dropboxapi.com/2';
+const DB_CONTENT = 'https://content.dropboxapi.com/2';
+const DB_PREFIX = '/Apps/UOMP';
+
+function dbToken() { return sessionStorage.getItem('uomp_db_token')||''; }
+function dbSetToken(t) { sessionStorage.setItem('uomp_db_token', t); }
+
+class DropboxStore {
+  constructor(token) { this.token = token; }
+  // Upload a file
+  async upload(path, data) {
+    const r = await fetch(`${DB_CONTENT}/files/upload`, {
+       method:'POST',
+       headers:{Authorization:`Bearer ${this.token}`,'Content-Type':'application/octet-stream','Dropbox-API-Arg':JSON.stringify({path:`${DB_PREFIX}/${path}`,mode:'overwrite'})},
+       body: typeof data==='string'? new TextEncoder().encode(data) : data
+    });
+    return r.ok;
+  }
+  // Download a file
+  async download(path) {
+    const r = await fetch(`${DB_CONTENT}/files/download`, {
+      method:'POST',
+      headers:{Authorization:`Bearer ${this.token}`,'Dropbox-API-Arg':JSON.stringify({path:`${DB_PREFIX}/${path}`})}
+    });
+    if(!r.ok) return null;
+    return new Uint8Array(await r.arrayBuffer());
+  }
+  // List folder
+  async list(path) {
+    const r = await fetch(`${DB_API}/files/list_folder`, {
+      method:'POST',
+      headers:{Authorization:`Bearer ${this.token}`,'Content-Type':'application/json'},
+      body:JSON.stringify({path:`${DB_PREFIX}${path}`,limit:100})
+    });
+    if(!r.ok) return [];
+    const d = await r.json();
+    return d.entries||[];
+  }
+  // Delete a file
+  async deleteFile(path) {
+    await fetch(`${DB_API}/files/delete_v2`, {
+      method:'POST',
+      headers:{Authorization:`Bearer ${this.token}`,'Content-Type':'application/json'},
+      body:JSON.stringify({path:`${DB_PREFIX}/${path}`})
+    });
+  }
 }
-function storeSet(userId, data) { localStorage.setItem(STORE_PREFIX+userId, JSON.stringify(data)); }
-function storeDel(userId) { localStorage.removeItem(STORE_PREFIX+userId); }
 
 // ═══════════════════════════════════════════════════════════════
 // Wallet Connection
 // ═══════════════════════════════════════════════════════════════
-let currentCryptoKey = null;
-let currentUserId = null;
+let currentCryptoKey=null, currentUserId=null, currentStorage=null, currentDropbox=null;
+const STORE_PREFIX='uomp_enc_';
+
+function localGet(userId){try{const d=localStorage.getItem(STORE_PREFIX+userId);return d?JSON.parse(d):null}catch{return null}}
+function localSet(userId,data){localStorage.setItem(STORE_PREFIX+userId,JSON.stringify(data))}
 
 async function connectWallet(chain) {
-  const status = chain==='ethereum'?document.getElementById('gwStatus'):document.getElementById('directStatus');
-
+  const status = document.getElementById('directStatus');
   try {
-    // Step 1: connect wallet
-    status.innerHTML = '<span class="status status-ok">Requesting wallet...</span>';
-    let address, signature;
+    status.innerHTML='<span class="status status-ok">Requesting wallet...</span>';
+    let address,signature;
 
-    if (chain === 'ethereum') {
-      if (!window.ethereum) throw new Error('MetaMask not detected. Install MetaMask extension.');
-      const accounts = await window.ethereum.request({method:'eth_requestAccounts'});
-      address = accounts[0];
-      signature = await window.ethereum.request({method:'personal_sign', params:['UOMP Store v1', address]});
-    } else if (chain === 'starknet') {
-      if (!window.starknet) throw new Error('Argent X not detected. Install Argent X extension.');
+    if(chain==='ethereum'){
+      if(!window.ethereum)throw new Error('MetaMask not detected');
+      const acc=await window.ethereum.request({method:'eth_requestAccounts'});
+      address=acc[0];
+      signature=await window.ethereum.request({method:'personal_sign',params:['UOMP Store v1',address]});
+    }else if(chain==='starknet'){
+      if(!window.starknet)throw new Error('Argent X not detected');
       await window.starknet.enable();
-      address = window.starknet.selectedAddress;
-      if (!address) throw new Error('No Starknet account selected');
-      // Starknet sign message
-      const typedData = {
-        domain:{name:'UOMP Store',version:'1',chainId:'SN_MAIN'},
-        types:{StarkNetDomain:[{name:'name',type:'felt'},{name:'version',type:'felt'},{name:'chainId',type:'felt'}],Message:[{name:'message',type:'felt'}]},
-        primaryType:'Message', message:{message:'UOMP Store v1'}
-      };
-      const result = await window.starknet.account.signMessage(typedData);
-      signature = Array.isArray(result) ? result.join(',') : String(result);
+      address=window.starknet.selectedAddress;
+      if(!address)throw new Error('No account selected');
+      const td={domain:{name:'UOMP Store',version:'1',chainId:'SN_MAIN'},types:{StarkNetDomain:[{name:'name',type:'felt'},{name:'version',type:'felt'},{name:'chainId',type:'felt'}],Message:[{name:'message',type:'felt'}]},primaryType:'Message',message:{message:'UOMP Store v1'}};
+      const r=await window.starknet.account.signMessage(td);
+      signature=Array.isArray(r)?r.join(','):String(r);
+    }else throw new Error('Unknown chain');
+
+    status.innerHTML='<span class="status status-ok">Deriving key...</span>';
+    currentCryptoKey=await deriveMasterKey(signature,address,chain);
+    currentUserId=`${chain}:${address.toLowerCase()}`;
+    currentStorage='local';
+
+    let holdings,risk;
+    const stored=localGet(currentUserId);
+    if(stored){
+      try { const p=await decryptData(currentCryptoKey,stored);const d=JSON.parse(p);holdings=d.holdings;risk=d.risk;status.innerHTML='<span class="status status-ok">✓ Decrypted from browser</span>'; }
+      catch { /* corrupted */ }
+    }
+    if(!holdings){
+      holdings=SAMPLE;risk=SAMPLE_RISK;
+      const e=await encryptData(currentCryptoKey,JSON.stringify({holdings,risk}));
+      localSet(currentUserId,e);
+      status.innerHTML='<span class="status status-ok">✓ Initialized & encrypted</span>';
+    }
+    showConnected(chain,address);
+    renderDashboard(holdings,risk);
+  }catch(e){status.innerHTML=`<span class="status status-err">✗ ${e.message}</span>`}
+}
+
+async function connectDropbox() {
+  const status = document.getElementById('dropboxStatus');
+
+  // Check if already have token from URL hash
+  const h=new URLSearchParams(window.location.hash.slice(1));
+  const accessToken=h.get('access_token');
+
+  if (accessToken) {
+    // OAuth callback — save token and clean URL
+    dbSetToken(accessToken);
+    window.location.hash='';
+    status.innerHTML='<span class="status status-ok">✓ Dropbox connected</span>';
+    currentDropbox = new DropboxStore(accessToken);
+
+    // If we already have wallet key, load from Dropbox
+    if (currentCryptoKey) {
+      await loadFromDropbox();
     } else {
-      throw new Error('Unknown chain');
+      // Prompt user to also connect wallet
+      status.innerHTML='<span class="status status-ok">✓ Dropbox ready. Now connect wallet to decrypt.</span>';
     }
-
-    // Step 2: derive key
-    status.innerHTML = '<span class="status status-ok">Deriving encryption key...</span>';
-    currentCryptoKey = await deriveMasterKey(signature, address, chain);
-    currentUserId = `${chain}:${address.toLowerCase()}`;
-
-    // Step 3: load or initialize data
-    let holdings, risk;
-    const stored = storeGet(currentUserId);
-
-    if (stored) {
-      try {
-        const plain = await decrypt(currentCryptoKey, stored);
-        const parsed = JSON.parse(plain);
-        holdings = parsed.holdings;
-        risk = parsed.risk;
-        status.innerHTML = '<span class="status status-ok">✓ Data loaded (decrypted in browser)</span>';
-      } catch { /* corrupted */ }
-    }
-
-    if (!holdings) {
-      // Initialize with sample portfolio
-      holdings = SAMPLE_HOLDINGS;
-      risk = SAMPLE_RISK;
-      const encrypted = await encrypt(currentCryptoKey, JSON.stringify({holdings,risk}));
-      storeSet(currentUserId, encrypted);
-      status.innerHTML = '<span class="status status-ok">✓ Portfolio initialized & encrypted</span>';
-    }
-
-    // Update UI
-    document.getElementById('gatewayCard').style.display = 'none';
-    document.getElementById('directCard').style.display = 'none';
-    document.getElementById('userInfo').style.display = 'flex';
-    document.getElementById('userInfo').innerHTML = `
-      <span style="color:var(--mid)">Identity:</span>
-      <span class="addr">${currentUserId.slice(0,30)}...</span>
-      <span class="status status-ok">Encrypted in browser</span>
-      <button onclick="disconnect()">Disconnect</button>
-    `;
-
-    renderDashboard(holdings, risk);
-  } catch(e) {
-    status.innerHTML = `<span class="status status-err">✗ ${e.message}</span>`;
+    return;
   }
+
+  // Check sessionStorage for existing token
+  const token = dbToken();
+  if (token) {
+    status.innerHTML='<span class="status status-ok">✓ Dropbox connected</span>';
+    currentDropbox = new DropboxStore(token);
+    if (currentCryptoKey) await loadFromDropbox();
+    return;
+  }
+
+  // Redirect to Dropbox OAuth
+  status.innerHTML='<span class="status status-ok">Redirecting to Dropbox...</span>';
+  window.location.href = DB_AUTH_URL;
 }
 
-async function disconnect() {
-  currentCryptoKey = null; currentUserId = null;
-  location.reload();
+async function loadFromDropbox() {
+  if (!currentDropbox||!currentCryptoKey||!currentUserId) return;
+  const status = document.getElementById('dropboxStatus');
+  try {
+    currentStorage='dropbox';
+    // Download encrypted portfolio from Dropbox
+    const raw = await currentDropbox.download('holdings.enc');
+    if (raw) {
+      const encData = JSON.parse(new TextDecoder().decode(raw));
+      const plain = await decryptData(currentCryptoKey, encData);
+      const d = JSON.parse(plain);
+      renderDashboard(d.holdings,d.risk);
+      status.innerHTML='<span class="status status-ok">✓ Loaded from Dropbox (encrypted)</span>';
+    } else {
+      // First time — encrypt sample data and upload to Dropbox
+      const e = await encryptData(currentCryptoKey,JSON.stringify({holdings:SAMPLE,risk:SAMPLE_RISK}));
+      await currentDropbox.upload('holdings.enc', JSON.stringify(e));
+      renderDashboard(SAMPLE,SAMPLE_RISK);
+      status.innerHTML='<span class="status status-ok">✓ Initialized on Dropbox (encrypted)</span>';
+    }
+    document.getElementById('directCard').style.display='none';
+    document.getElementById('gatewayCard').style.display='none';
+    updateUserInfo();
+  } catch(e) { status.innerHTML=`<span class="status status-err">✗ ${e.message}</span>`; }
 }
+
+function showConnected(chain,address) {
+  document.getElementById('directCard').style.display='none';
+  document.getElementById('gatewayCard').style.display='none';
+  updateUserInfo();
+}
+
+function updateUserInfo() {
+  const div=document.getElementById('userInfo');div.style.display='flex';
+  const storage=currentStorage==='dropbox'?'Dropbox':currentStorage==='local'?'Browser':'Gateway';
+  div.innerHTML=`<span style="color:var(--mid)">Storage:</span><span class="addr" style="color:var(--db)">${storage}</span>${currentUserId?`<span style="color:var(--mid)">ID:</span><span class="addr">${currentUserId.slice(0,24)}...</span>`:''}<button onclick="disconnect()">Disconnect</button>`;
+}
+
+function disconnect(){currentCryptoKey=null;currentUserId=null;currentStorage=null;dbSetToken('');location.reload();}
 
 // ═══════════════════════════════════════════════════════════════
 // Gateway Mode
 // ═══════════════════════════════════════════════════════════════
-async function connectGateway() {
-  const url = document.getElementById('gwUrl').value.trim();
-  const token = document.getElementById('gwToken').value.trim();
-  const status = document.getElementById('gwStatus');
-  if (!token||!url) { status.innerHTML='<span class="status status-err">Please enter Gateway URL and Token</span>'; return; }
-
-  try {
-    const client = new GatewayClient(token, url);
-    const h = await client.health();
-    status.innerHTML = `<span class="status status-ok">✓ Connected to ${h.audience}</span>`;
-    const holdings = await client.getByTag('portfolio:holdings');
-    const riskItems = await client.getByTag('profile:risk');
-
-    document.getElementById('directCard').style.display = 'none';
-    document.getElementById('userInfo').style.display = 'flex';
-    document.getElementById('userInfo').innerHTML = `<span class="status status-ok">Gateway Mode</span><span style="color:var(--dim);font-size:.8rem">${h.audience}</span><button onclick="disconnect()">Disconnect</button>`;
-
-    renderDashboard(holdings, riskItems[0]?.value||{});
-  } catch(e) {
-    status.innerHTML = `<span class="status status-err">✗ ${e.message}</span>`;
-  }
+async function connectGateway(){
+  const url=document.getElementById('gwUrl').value.trim(),token=document.getElementById('gwToken').value.trim(),s=document.getElementById('gwStatus');
+  if(!token||!url){s.innerHTML='<span class="status status-err">Enter URL & Token</span>';return}
+  try{
+    const c=new GatewayClient(token,url);await c.health();
+    s.innerHTML='<span class="status status-ok">✓ Connected</span>';
+    const h=await c.getByTag('portfolio:holdings'),r=await c.getByTag('profile:risk');
+    document.getElementById('directCard').style.display='none';
+    document.getElementById('dropboxCard').style.display='none';
+    currentStorage='gateway';updateUserInfo();
+    renderDashboard(h,r[0]?.value||{});
+  }catch(e){s.innerHTML=`<span class="status status-err">✗ ${e.message}</span>`}
 }
 
 // ═══════════════════════════════════════════════════════════════
 // Dashboard Rendering
 // ═══════════════════════════════════════════════════════════════
-const SAMPLE_HOLDINGS = [
-  {key:'AAPL',value:{symbol:'AAPL',name:'Apple Inc.',quantity:'100',cost_basis:'150.00',market_value:'22700.00',sector:'Technology'},tags:['portfolio:holdings'],sensitivity:'high'},
-  {key:'MSFT',value:{symbol:'MSFT',name:'Microsoft',quantity:'40',cost_basis:'320.00',market_value:'18000.00',sector:'Technology'},tags:['portfolio:holdings'],sensitivity:'high'},
-  {key:'GOOGL',value:{symbol:'GOOGL',name:'Alphabet',quantity:'30',cost_basis:'140.00',market_value:'5400.00',sector:'Technology'},tags:['portfolio:holdings'],sensitivity:'high'},
-  {key:'NVDA',value:{symbol:'NVDA',name:'NVIDIA',quantity:'30',cost_basis:'300.00',market_value:'13500.00',sector:'Technology'},tags:['portfolio:holdings'],sensitivity:'high'},
-  {key:'TSLA',value:{symbol:'TSLA',name:'Tesla',quantity:'50',cost_basis:'200.00',market_value:'12500.00',sector:'Consumer Cyclical'},tags:['portfolio:holdings'],sensitivity:'high'},
-  {key:'AMZN',value:{symbol:'AMZN',name:'Amazon',quantity:'25',cost_basis:'170.00',market_value:'5500.00',sector:'Consumer Cyclical'},tags:['portfolio:holdings'],sensitivity:'high'},
-  {key:'JPM',value:{symbol:'JPM',name:'JPMorgan',quantity:'60',cost_basis:'155.00',market_value:'12000.00',sector:'Financial'},tags:['portfolio:holdings'],sensitivity:'high'},
-  {key:'BAC',value:{symbol:'BAC',name:'Bank of America',quantity:'200',cost_basis:'32.00',market_value:'7400.00',sector:'Financial'},tags:['portfolio:holdings'],sensitivity:'high'},
-  {key:'JNJ',value:{symbol:'JNJ',name:'J&J',quantity:'40',cost_basis:'160.00',market_value:'7000.00',sector:'Healthcare'},tags:['portfolio:holdings'],sensitivity:'high'},
-  {key:'XOM',value:{symbol:'XOM',name:'Exxon Mobil',quantity:'50',cost_basis:'100.00',market_value:'6200.00',sector:'Energy'},tags:['portfolio:holdings'],sensitivity:'high'},
+const SAMPLE=[
+  {key:'AAPL',value:{symbol:'AAPL',name:'Apple',quantity:'100',cost_basis:'150',market_value:'22700',sector:'Technology'},tags:['portfolio:holdings'],sensitivity:'high'},
+  {key:'MSFT',value:{symbol:'MSFT',name:'Microsoft',quantity:'40',cost_basis:'320',market_value:'18000',sector:'Technology'},tags:['portfolio:holdings'],sensitivity:'high'},
+  {key:'GOOGL',value:{symbol:'GOOGL',name:'Alphabet',quantity:'30',cost_basis:'140',market_value:'5400',sector:'Technology'},tags:['portfolio:holdings'],sensitivity:'high'},
+  {key:'NVDA',value:{symbol:'NVDA',name:'NVIDIA',quantity:'30',cost_basis:'300',market_value:'13500',sector:'Technology'},tags:['portfolio:holdings'],sensitivity:'high'},
+  {key:'TSLA',value:{symbol:'TSLA',name:'Tesla',quantity:'50',cost_basis:'200',market_value:'12500',sector:'Consumer Cyclical'},tags:['portfolio:holdings'],sensitivity:'high'},
+  {key:'AMZN',value:{symbol:'AMZN',name:'Amazon',quantity:'25',cost_basis:'170',market_value:'5500',sector:'Consumer Cyclical'},tags:['portfolio:holdings'],sensitivity:'high'},
+  {key:'JPM',value:{symbol:'JPM',name:'JPMorgan',quantity:'60',cost_basis:'155',market_value:'12000',sector:'Financial'},tags:['portfolio:holdings'],sensitivity:'high'},
+  {key:'BAC',value:{symbol:'BAC',name:'BofA',quantity:'200',cost_basis:'32',market_value:'7400',sector:'Financial'},tags:['portfolio:holdings'],sensitivity:'high'},
+  {key:'JNJ',value:{symbol:'JNJ',name:'J&J',quantity:'40',cost_basis:'160',market_value:'7000',sector:'Healthcare'},tags:['portfolio:holdings'],sensitivity:'high'},
+  {key:'XOM',value:{symbol:'XOM',name:'Exxon',quantity:'50',cost_basis:'100',market_value:'6200',sector:'Energy'},tags:['portfolio:holdings'],sensitivity:'high'},
 ];
-const SAMPLE_RISK = {risk_level:'moderate',max_drawdown:0.20,investment_horizon:'5_years',stop_loss_pct:15,take_profit_pct:50};
-
+const SAMPLE_RISK={risk_level:'moderate',max_drawdown:0.20,investment_horizon:'5_years',stop_loss_pct:15,take_profit_pct:50};
 const COLORS=['#3B82F6','#8B5CF6','#EC4899','#F59E0B','#10B981','#EF4444','#6366F1','#14B8A6'];
 
-function renderDashboard(holdings, risk) {
-  let totalCost=0,totalVal=0; const sectors={},rows=[];
-  for(const item of holdings){
-    const h=item.value; const qty=parseFloat(h.quantity),cost=parseFloat(h.cost_basis);
-    const mkt=parseFloat(h.market_value),price=mkt/qty,costVal=cost*qty,pnl=mkt-costVal,pnlPct=costVal>0?(pnl/costVal)*100:0;
-    totalCost+=costVal;totalVal+=mkt;
-    const sec=h.sector||'Unknown';sectors[sec]=(sectors[sec]||0)+mkt;
-    rows.push({...h,qty,costBasis:cost,price,curVal:mkt,pnl,pnlPct,weight:0,sector:sec});
+function renderDashboard(holdings,risk){
+  let tc=0,tv=0;const secs={},rows=[];
+  for(const i of holdings){
+    const h=i.value;const q=parseFloat(h.quantity),c=parseFloat(h.cost_basis),m=parseFloat(h.market_value);
+    const p=m/q,cv=c*q,pnl=m-cv,pp=cv>0?(pnl/cv)*100:0;tc+=cv;tv+=m;
+    const s=h.sector||'Other';secs[s]=(secs[s]||0)+m;
+    rows.push({...h,qty:q,costBasis:c,price:p,curVal:m,pnl,pnlPct:pp,weight:0,sector:s});
   }
-  for(const r of rows)r.weight=totalVal>0?(r.curVal/totalVal)*100:0;
-  const totalPnl=totalVal-totalCost,totalPnlPct=totalCost>0?(totalPnl/totalCost)*100:0;
-  const hhi=rows.reduce((s,r)=>s+r.weight*r.weight,0);
-
-  // Signals
-  const signals=[],sl=risk?.stop_loss_pct||15,tp=risk?.take_profit_pct||50;
+  for(const r of rows)r.weight=tv>0?(r.curVal/tv)*100:0;
+  const tpnl=tv-tc,tpp=tc>0?(tpnl/tc)*100:0,hhi=rows.reduce((s,r)=>s+r.weight*r.weight,0);
+  const sigs=[],sl=risk?.stop_loss_pct||15,tp=risk?.take_profit_pct||50;
   for(const r of rows){
-    if(r.pnlPct<=-sl)signals.push({type:'stop_loss',msg:`${r.symbol} ${r.pnlPct.toFixed(1)}% (SL:${sl}%)`});
-    if(r.pnlPct>=tp)signals.push({type:'take_profit',msg:`${r.symbol} +${r.pnlPct.toFixed(1)}% (TP:${tp}%)`});
+    if(r.pnlPct<=-sl)sigs.push({t:'stop_loss',m:`${r.symbol} ${r.pnlPct.toFixed(1)}% (SL:${sl}%)`});
+    if(r.pnlPct>=tp)sigs.push({t:'take_profit',m:`${r.symbol} +${r.pnlPct.toFixed(1)}% (TP:${tp}%)`});
   }
-
-  const f=n=>n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-  const p=n=>n.toFixed(2)+'%';
+  const f=n=>n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}),p=n=>n.toFixed(2)+'%';
 
   document.getElementById('summary').innerHTML=`
-    <div class="card"><div class="card-label">Portfolio Value</div><div class="card-value">$${f(totalVal)}</div></div>
-    <div class="card"><div class="card-label">Total P&amp;L</div><div class="card-value ${totalPnl>=0?'pos':'neg'}">$${f(totalPnl)}</div><div class="card-sub ${totalPnl>=0?'pos':'neg'}">${p(totalPnlPct)}</div></div>
-    <div class="card"><div class="card-label">Concentration (HHI)</div><div class="card-value">${hhi.toFixed(0)}</div><div class="card-sub">${hhi>2500?'⚠ High':'✓ Healthy'}</div></div>
-    <div class="card"><div class="card-label">Positions</div><div class="card-value">${holdings.length}</div><div class="card-sub">${Object.keys(sectors).length} sectors</div></div>
+    <div class="card"><div class="card-label">Portfolio Value</div><div class="card-value">$${f(tv)}</div></div>
+    <div class="card"><div class="card-label">Total P&amp;L</div><div class="card-value ${tpnl>=0?'pos':'neg'}">$${f(tpnl)}</div><div class="card-sub ${tpnl>=0?'pos':'neg'}">${p(tpp)}</div></div>
+    <div class="card"><div class="card-label">HHI</div><div class="card-value">${hhi.toFixed(0)}</div><div class="card-sub">${hhi>2500?'⚠ High':'✓ OK'}</div></div>
+    <div class="card"><div class="card-label">Positions</div><div class="card-value">${holdings.length}</div><div class="card-sub">${Object.keys(secs).length} sectors</div></div>
     <div class="card"><div class="card-label">Risk</div><div class="card-value">${risk?.risk_level||'?'}</div><div class="card-sub">DD≤${(risk?.max_drawdown||0)*100}%</div></div>
   `;
 
-  document.getElementById('holdings').innerHTML=`<h2>Holdings</h2><table><thead><tr><th>Sym</th><th>Name</th><th>Qty</th><th>Cost</th><th>Price</th><th>Value</th><th>P&amp;L</th><th>P&amp;L%</th><th>W%</th><th>Sector</th></tr></thead><tbody>
-    ${rows.map(r=>`<tr><td><b>${r.symbol}</b></td><td>${r.name||r.symbol}</td><td>${r.qty}</td><td>${f(r.costBasis)}</td><td>${f(r.price)}</td><td>$${f(r.curVal)}</td><td class="${r.pnl>=0?'pos':'neg'}">$${f(r.pnl)}</td><td class="${r.pnl>=0?'pos':'neg'}">${p(r.pnlPct)}</td><td>${p(r.weight)}</td><td>${r.sector}</td></tr>`).join('')}
-  </tbody></table>`;
+  document.getElementById('holdings').innerHTML=`<h2>Holdings</h2><table><thead><tr><th>Sym</th><th>Name</th><th>Qty</th><th>Cost</th><th>Price</th><th>Value</th><th>P&amp;L</th><th>P&amp;L%</th><th>W%</th><th>Sector</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${r.symbol}</b></td><td>${r.name||''}</td><td>${r.qty}</td><td>${f(r.costBasis)}</td><td>${f(r.price)}</td><td>$${f(r.curVal)}</td><td class="${r.pnl>=0?'pos':'neg'}">$${f(r.pnl)}</td><td class="${r.pnl>=0?'pos':'neg'}">${p(r.pnlPct)}</td><td>${p(r.weight)}</td><td>${r.sector}</td></tr>`).join('')}</tbody></table>`;
 
   const sDiv=document.getElementById('sectors');sDiv.style.display='block';
-  const secs=Object.entries(sectors).sort((a,b)=>b[1]-a[1]);let si=0;
-  sDiv.innerHTML='<h2>Sector Allocation</h2>'+secs.map(([s,v])=>{
-    const pct=totalVal>0?(v/totalVal)*100:0;
-    return `<div class="bar-wrap"><span class="bar-label">${s}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.min(pct,100)}%;background:${COLORS[si++%COLORS.length]}"></div></div><span class="bar-pct">${p(pct)}</span></div>`;
-  }).join('');
+  const se=Object.entries(secs).sort((a,b)=>b[1]-a[1]);let si=0;
+  sDiv.innerHTML='<h2>Sectors</h2>'+se.map(([s,v])=>{const pc=tv>0?(v/tv)*100:0;return`<div class="bar-wrap"><span class="bar-label">${s}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.min(pc,100)}%;background:${COLORS[si++%COLORS.length]}"></div></div><span class="bar-pct">${p(pc)}</span></div>`}).join('');
 
-  if(signals.length){
-    const sigDiv=document.getElementById('signals');sigDiv.style.display='block';
-    sigDiv.innerHTML=`<h2>Signals</h2>${signals.map(s=>`<div class="signal">${s.type==='stop_loss'?'🔴':'🟢'} ${s.msg}</div>`).join('')}`;
-  }
+  if(sigs.length){const sd=document.getElementById('signals');sd.style.display='block';sd.innerHTML=`<h2>Signals</h2>${sigs.map(s=>`<div class="signal">${s.t==='stop_loss'?'🔴':'🟢'} ${s.m}</div>`).join('')}`}
 }
 
-// Auto-fill from URL hash
+// ═══════════════════════════════════════════════════════════════
+// Init: handle OAuth callback & URL hash
+// ═══════════════════════════════════════════════════════════════
 (function(){
   const h=window.location.hash.slice(1);if(!h)return;
   const p=new URLSearchParams(h);
+  // Dropbox OAuth callback
+  if(p.get('access_token')){connectDropbox();return}
+  // Gateway auto-fill
   const t=p.get('token'),g=p.get('gateway');
   if(t)document.getElementById('gwToken').value=t;
   if(g)document.getElementById('gwUrl').value=g;

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>UOMP Portfolio</title><link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<!-- v20260720-df466f1 -->
+<!-- v20260720-7abdb1f -->
 <style>
   :root{--bg:#0A0A0A;--card:#111;--border:#1F2937;--txt:#E5E7EB;--mid:#9CA3AF;--dim:#6B7280;--grn:#34D399;--red:#F87171;--blu:#3B82F6;--pur:#8B5CF6;--db:#0061FF}*{margin:0;padding:0;box-sizing:border-box}
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;line-height:1.5}
@@ -69,7 +69,7 @@
   <h2>📝 Reports</h2>
   <div id="reports"><div class="empty">No reports yet. Send your portfolio to the Agent above.</div></div>
 </div>
-<div class="footer">Powered by <a href="https://www.uomp.org" style="color:var(--mid)">UOMP</a> · Data encrypted. You hold the keys. <span style="color:var(--dim);font-size:.7rem">v20260720-df466f1</span></div>
+<div class="footer">Powered by <a href="https://www.uomp.org" style="color:var(--mid)">UOMP</a> · Data encrypted. You hold the keys. <span style="color:var(--dim);font-size:.7rem">v20260720-7abdb1f</span></div>
 </div>
 
 <script>
@@ -82,7 +82,7 @@ function linkDropbox(){if(window._linkDropbox)window._linkDropbox();else documen
 import { BrowserSDK, DropboxStore, connectDropbox as dbConnect, encryptData, decryptData } from './sdk.js?v=2026-07-20.6';
 
 // Define connect/linkDropbox FIRST so window._connect is never null
-async function connect(chain){const s=document.getElementById('connectStatus');try{s.innerHTML='<span class="status status-ok">Requesting wallet...</span>';const r=await BrowserSDK.fromWallet(chain);cKey=r.key;uid=r.userId;_chain=chain;_address=r.address;sessionStorage.setItem('uomp_wallet',JSON.stringify({chain,address:r.address,uid:r.userId}));s.innerHTML='<span class="status status-ok">✓ Wallet connected</span>';await load();showApp(chain,r.address)}catch(e){s.innerHTML=`<span class="status status-err">${e.message}</span>`}}
+async function connect(chain){const s=document.getElementById('connectStatus');try{s.innerHTML='<span class="status status-ok">Requesting wallet...</span>';const r=await BrowserSDK.fromWallet(chain);cKey=r.key;uid=r.userId;_chain=chain;_addr=r.address;sessionStorage.setItem('uomp_wallet',JSON.stringify({chain,address:r.address,uid:r.userId}));s.innerHTML='<span class="status status-ok">✓ Wallet connected</span>';await load();showApp(chain,r.address)}catch(e){s.innerHTML=`<span class="status status-err">${e.message}</span>`}}
 async function linkDropbox(){const s=document.getElementById('dbStatus');s.innerHTML='<span class="status status-ok">Connecting Dropbox...</span>';try{dropbox=await dbConnect();s.innerHTML='<span class="status status-ok">✓ Dropbox connected</span>';document.getElementById('dbBanner').style.display='none';updateTopbar();await loadFromDb()}catch(e){if(e.message==='Redirecting to Dropbox')return;s.innerHTML=`<span class="status status-err">${e.message}</span>`}}
 window._connect = connect;
 window._linkDropbox = linkDropbox;

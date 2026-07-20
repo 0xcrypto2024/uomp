@@ -84,11 +84,11 @@ async function connectWallet(chain){
   }catch(e){s.innerHTML=`<span class="status status-err">${e.message}</span>`}
 }
 
-async function connectDb(){
+async function connectDb(oauthCode){
   const s=document.getElementById('dbStep');
   try{
     s.innerHTML='<span class="status status-ok">Redirecting...</span>';
-    dropbox=await dbConnect();
+    dropbox=oauthCode ? await dbConnect(oauthCode) : await dbConnect();
     s.innerHTML='<span class="status status-ok">✓ Connected</span>';
     document.getElementById('dbBtn').style.display='none';
     updateTopbar();
@@ -98,7 +98,12 @@ async function connectDb(){
 
 function autoStart(){
   const qs=new URLSearchParams(location.search);
-  if(qs.get('code')){sessionStorage.removeItem('uomp_db_code');history.replaceState({},'',location.pathname);connectDb()}
+  const code=qs.get('code');
+  if(!code)return;
+  // Exchange code for token BEFORE cleaning URL
+  connectDb(code);
+  sessionStorage.removeItem('uomp_db_code');
+  history.replaceState({},'',location.pathname);
 }
 
 async function loadData(){

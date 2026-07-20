@@ -1,5 +1,5 @@
 /**
- * UOMP Browser SDK v20260720-7181585 — fix loadEncrypted error handling
+ * UOMP Browser SDK v20260720-32dabac — fix loadEncrypted error handling
  * Self-contained bundle for browser use.
  * No Node.js dependencies. Uses Web Crypto API + window.fetch.
  */
@@ -124,12 +124,12 @@ class DropboxStore{
 }
 function dbToken(){return typeof sessionStorage!=='undefined'?sessionStorage.getItem('uomp_db')||'':''}
 function dbSetToken(t){if(typeof sessionStorage!=='undefined')sessionStorage.setItem('uomp_db',t)}
-async function connectDropbox(){
+async function connectDropbox(code){
   // Redirect mode: navigate to Dropbox, come back with code
   const qs=new URLSearchParams(location.search);
-  if(qs.get('code')){
+  if(code||qs.get("code")){
     const v=sessionStorage.getItem('uomp_db_v');if(!v)throw new Error('Restart login');
-    const r=await fetch('https://api.dropboxapi.com/oauth2/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({code:qs.get('code'),grant_type:'authorization_code',client_id:DB_KEY,code_verifier:v,redirect_uri:DB_REDIRECT})});
+    const r=await fetch('https://api.dropboxapi.com/oauth2/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({code:code||qs.get("code"),grant_type:'authorization_code',client_id:DB_KEY,code_verifier:v,redirect_uri:DB_REDIRECT})});
     if(!r.ok)throw new Error('Token exchange failed');
     const d=await r.json();dbSetToken(d.access_token);sessionStorage.removeItem('uomp_db_v');
     history.replaceState({},'',location.pathname);

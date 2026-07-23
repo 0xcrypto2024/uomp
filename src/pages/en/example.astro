@@ -4,102 +4,61 @@ import { baseUrl } from '../../utils/base.ts';
 ---
 
 <Layout
-  title="Stock Analyst Example - UOMP"
-  description="A complete UOMP walkthrough: import holdings and risk profile, authorize a stock analyst Agent, and generate a local investment report."
+  title="Examples - UOMP"
+  description="UOMP examples: Browser Dashboard and CLI Stock Analyst Agent"
   lang="en"
-  switchHref={baseUrl}
+  switchHref={`${baseUrl}example/`}
 >
   <section>
     <div class="container">
       <div class="sec-eyebrow">
-        <div class="sec-num">Example</div>
-        <span class="sec-tag">Full flow from import to audit</span>
+        <div class="sec-num">Examples</div>
+        <span class="sec-tag">Two entry points, one protocol</span>
       </div>
-      <h1>Stock Analyst Agent</h1>
+      <h1>UOMP Examples</h1>
       <p>
-        UOMP flagship example Agent (v1.0). Upgraded to a <strong>self-serve HTTP API</strong> deployable to Digital Ocean — anyone can connect, authorize, and analyze. Analysis dimensions: P&L, sector allocation, concentration, volatility, Sharpe, VaR, Beta, Alpha, correlation matrix, RSI/MACD indicators, rebalance suggestions, scenario analysis.
-      </p>
-      <p>
-        Full code and sample data are in the reference implementation under <a href="https://github.com/0xaicrypto/uomp-core/tree/main/examples/stock-analyst" target="_blank" rel="noopener">examples/stock-analyst</a>.
+        UOMP offers two ways to use it, both backed by the same SDK and protocol. Pick what fits you.
       </p>
 
-      <h2>Prerequisites</h2>
-      <ul>
-        <li>Node.js >= 20</li>
-        <li>pnpm 9 (<code>corepack enable</code> or <code>npm install -g pnpm@9</code>)</li>
-        <li>Clone <a href="https://github.com/0xaicrypto/uomp-core" target="_blank" rel="noopener">uomp-core</a></li>
-      </ul>
+      <div style="display:flex;gap:2rem;flex-wrap:wrap;margin-top:2rem">
+        <div class="card" style="flex:1;min-width:300px;border:2px solid var(--purple)">
+          <div class="card-label" style="color:var(--purple);font-size:1.1rem;margin-bottom:.5rem">🖥️ Browser Dashboard</div>
+          <p style="color:var(--mid);margin-bottom:1rem">Zero install. Connect wallet + Dropbox to manage your portfolio and run analysis directly in the browser.</p>
+          <ul style="color:var(--mid);font-size:.85rem;list-style:none;padding:0;margin-bottom:1rem">
+            <li style="padding:.2rem 0">✅ No CLI, no server required</li>
+            <li style="padding:.2rem 0">✅ MetaMask / Argent X wallet auth</li>
+            <li style="padding:.2rem 0">✅ Dropbox encrypted storage</li>
+            <li style="padding:.2rem 0">✅ Agent analysis (P&L, Sharpe, Beta, signals)</li>
+            <li style="padding:.2rem 0">✅ CSV import + inline editing</li>
+          </ul>
+          <a href={`${baseUrl}dashboard/`} style="display:inline-block;padding:.7rem 1.5rem;background:var(--purple);border-radius:6px;color:#fff;text-decoration:none;font-weight:600;font-size:.9rem">Open Dashboard →</a>
+        </div>
 
-      <h2>1. Build and initialize</h2>
-      <pre><code>pnpm install
-pnpm build
-pnpm cli init</code></pre>
+        <div class="card" style="flex:1;min-width:300px">
+          <div class="card-label" style="font-size:1.1rem;margin-bottom:.5rem">⌨️ CLI Stock Analyst</div>
+          <p style="color:var(--mid);margin-bottom:1rem">For developers / AI Agents. Use CLI + SDK, access data remotely via Gateway or locally.</p>
+          <ul style="color:var(--mid);font-size:.85rem;list-style:none;padding:0;margin-bottom:1rem">
+            <li style="padding:.2rem 0">✅ <code>@uomp/sdk</code> TypeScript SDK</li>
+            <li style="padding:.2rem 0">✅ Gateway + Cloudflare Tunnel remote access</li>
+            <li style="padding:.2rem 0">✅ Multi-dim analysis: Sharpe, Beta, MACD, RSI</li>
+            <li style="padding:.2rem 0">✅ Capability Token authorization</li>
+            <li style="padding:.2rem 0">✅ Digital Ocean deployment ready</li>
+          </ul>
+          <a href="https://github.com/0xaicrypto/uomp-core/tree/main/examples/stock-analyst" target="_blank" rel="noopener" style="display:inline-block;padding:.7rem 1.5rem;background:var(--blu);border-radius:6px;color:#fff;text-decoration:none;font-weight:600;font-size:.9rem">GitHub →</a>
+        </div>
+      </div>
 
-      <h2>2. Start the Auth + Guard service</h2>
-      <p>In <strong>Terminal 1</strong>, start the local service:</p>
-      <pre><code>pnpm --filter @uomp/server start</code></pre>
-      <p>Keep this terminal running.</p>
-
-      <h2>3. Import private data</h2>
-      <p>In <strong>Terminal 2</strong>, import the risk profile:</p>
-      <pre><code>pnpm cli import ./examples/stock-analyst/sample-risk.json</code></pre>
-      <p>Import the holdings CSV (high sensitivity):</p>
-      <pre><code>pnpm cli import ./examples/stock-analyst/sample-holdings.csv \
-  --tag portfolio:holdings \
-  --sensitivity high</code></pre>
-
-      <h2>4. Discover and connect the Agent</h2>
-      <pre><code>pnpm cli discover ./examples/stock-analyst
-pnpm cli connect ./examples/stock-analyst</code></pre>
-
-      <h2>5. Authorize the Agent</h2>
-      <p>Interactive authorization (recommended):</p>
-      <pre><code>pnpm cli authorize ./examples/stock-analyst</code></pre>
-      <p>After selecting tags, the CLI prints:</p>
-      <pre><code>export UOM_TOKEN="&lt;token&gt;"
-export UOMP_BASE_URL="http://127.0.0.1:9374"</code></pre>
-      <p>Scripted authorization:</p>
-      <pre><code>pnpm cli authorize ./examples/stock-analyst \
-  --scope portfolio:holdings profile:risk \
-  --output /tmp/uomp.env</code></pre>
-
-      <h2>6. Run the Agent</h2>
-      <pre><code>source /tmp/uomp.env
-node ./examples/stock-analyst/index.js</code></pre>
-      <p>The Agent reads authorized data, fetches market quotes, and writes a Markdown report to <code>output/</code>.</p>
-
-      <h2>7. Review sessions and audit logs</h2>
-      <pre><code>pnpm cli sessions -a
-pnpm cli audit --limit 20</code></pre>
-
-      <h2>8. Revoke authorization</h2>
-      <pre><code>pnpm cli revoke &lt;session-id&gt;</code></pre>
-
-      <h2>9. Self-serve mode (HTTP API)</h2>
-      <p>
-        v1.0 adds an HTTP server mode: the Agent runs as a standalone service with a Web UI and REST API. Users paste their Token in a browser — no CLI needed.
+      <h2 style="margin-top:3rem">How They Relate</h2>
+      <p style="color:var(--mid)">
+        The Browser Dashboard and CLI Agent are two entry points to the <strong>same UOMP implementation</strong>.
+        They share <code>@uomp/sdk</code>, <code>@uomp/core</code>, the Token system, Guard enforcement, and audit logging.
+        The only difference is the UI: one is a browser (wallet + Dropbox), the other is a terminal (Token + SDK).
       </p>
-      <pre><code>node examples/stock-analyst/server.js
-# Visit http://localhost:3080/ and paste your token
-# Or use the API:
-curl -X POST http://localhost:3080/analyze \
-  -H 'Content-Type: application/json' \
-  -d '&#123;"token":"...","gateway_url":"..."&#125;'</code></pre>
-      <p>Deploy to Digital Ocean to make it a public service. See the <a href="https://github.com/0xaicrypto/uomp-core/tree/main/examples/stock-analyst/README.md" target="_blank" rel="noopener">full README</a>.</p>
 
-      <h2>10. Remote mode: access via Gateway</h2>
-      <p>
-        If the Agent runs on a different machine or container, use <code>apps/gateway</code> to expose the local Memory Guard as an HTTPS + mTLS entry point. The Agent connects via mTLS, runs aggregate queries first, reads authorized data, and generates reports — then uploads the encrypted Payload and submits a deletion proof.
-      </p>
-      <p>One-command end-to-end test (covers local + Gateway mode):</p>
-      <pre><code>./scripts/test-stock-analyst.sh</code></pre>
-      <p>Analysis dimensions: P&L, sector allocation with target deviation, HHI concentration, annualized volatility, Beta, stop-loss/take-profit signals, drawdown alerts, portfolio volatility, bilingual reports.</p>
-      <p>See <a href="https://github.com/0xaicrypto/uomp-core/tree/main/apps/gateway/README.md" target="_blank" rel="noopener">apps/gateway/README.md</a> for full configuration.</p>
-
-      <div class="hero-btns" style="margin-top:2.5rem;">
-        <a href={`${baseUrl}dashboard/`} class="btn-h1" style="background:#8B5CF6">Browser Dashboard →</a>
-        <a href="https://github.com/0xaicrypto/uomp-core/tree/main/examples/stock-analyst/README.md" target="_blank" rel="noopener" class="btn-h1">Full README →</a>
-        <a href={`${baseUrl}en/design/`} class="btn-h2">Implementation Design</a>
+      <div class="hero-btns" style="margin-top: 2.5rem;">
+        <a href={`${baseUrl}en/tutorial/`} class="btn-h1">SDK Tutorial →</a>
+        <a href={`${baseUrl}en/design/`} class="btn-h1">Implementation →</a>
+        <a href="https://github.com/0xaicrypto/uomp-core" target="_blank" rel="noopener" class="btn-h2">GitHub</a>
       </div>
     </div>
   </section>

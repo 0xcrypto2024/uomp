@@ -13,7 +13,6 @@ const { title, description = 'User-Owned Memory Protocol - 用户主权型 Agent
 const nav = {
   zh: {
     home: '首页',
-    dashboard: 'Dashboard',
     spec: '规范',
     design: '实现',
     tutorial: '教程',
@@ -31,7 +30,6 @@ const nav = {
   },
   en: {
     home: 'Home',
-    dashboard: 'Dashboard',
     spec: 'Spec',
     design: 'Implementation',
     tutorial: 'Tutorial',
@@ -51,7 +49,6 @@ const nav = {
 
 const t = nav[lang];
 const homeHref = lang === 'zh' ? baseUrl : `${baseUrl}en/`;
-const dashboardHref = `${baseUrl}dashboard/`;
 const specHref = lang === 'zh' ? `${baseUrl}spec/` : `${baseUrl}en/spec/`;
 const designHref = lang === 'zh' ? `${baseUrl}design/` : `${baseUrl}en/design/`;
 const tutorialHref = lang === 'zh' ? `${baseUrl}tutorial/` : `${baseUrl}en/tutorial/`;
@@ -61,7 +58,6 @@ const resolvedSwitchHref = switchHref ?? (lang === 'zh' ? `${baseUrl}en/` : base
 
 const pathname = Astro.url.pathname;
 const isHome = pathname === baseUrl || pathname === `${baseUrl}en/` || pathname === `${baseUrl}index.html`;
-const isDashboard = pathname.startsWith(`${baseUrl}dashboard/`);
 const isSpec = pathname.startsWith(`${baseUrl}spec/`) || pathname.startsWith(`${baseUrl}en/spec/`);
 const isDesign = pathname.startsWith(`${baseUrl}design/`) || pathname.startsWith(`${baseUrl}en/design/`);
 const isTutorial = pathname.startsWith(`${baseUrl}tutorial/`) || pathname.startsWith(`${baseUrl}en/tutorial/`);
@@ -118,7 +114,6 @@ const isRoadmap = pathname.startsWith(`${baseUrl}roadmap/`) || pathname.startsWi
         </a>
         <ul class="nav-links">
           <li><a href={homeHref} class={isHome ? 'active' : ''}>{t.home}</a></li>
-          <li><a href={dashboardHref} class={isDashboard ? 'active' : ''}>{t.dashboard}</a></li>
           <li><a href={specHref} class={isSpec ? 'active' : ''}>{t.spec}</a></li>
           <li><a href={designHref} class={isDesign ? 'active' : ''}>{t.design}</a></li>
           <li><a href={tutorialHref} class={isTutorial ? 'active' : ''}>{t.tutorial}</a></li>

@@ -2,47 +2,41 @@
   <defs>
     <marker id="a" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#7C3AED"/></marker>
     <marker id="g" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#059669"/></marker>
-    <marker id="b" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#0891B2"/></marker>
   </defs>
 
   <text x="350" y="24" text-anchor="middle" fill="#7C3AED" font-size="13" font-family="Inter, system-ui, sans-serif" font-weight="700">Browser Path</text>
-  <text x="350" y="42" text-anchor="middle" fill="#6B7280" font-size="10" font-family="Inter, system-ui, sans-serif">User calls Agent via browser → Agent reads data → returns report</text>
+  <text x="350" y="42" text-anchor="middle" fill="#6B7280" font-size="10" font-family="Inter, system-ui, sans-serif">Wallet auth → Browser calls Gateway/Guard directly → no Agent intermediary</text>
 
-  <rect x="20" y="65" width="120" height="56" rx="8" fill="#F3F0FF" stroke="#7C3AED" stroke-width="2"/>
-  <text x="80" y="88" text-anchor="middle" fill="#7C3AED" font-size="13" font-family="Inter, system-ui, sans-serif" font-weight="700">Browser</text>
-  <text x="80" y="106" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">MetaMask / Argent X</text>
+  <rect x="20" y="65" width="130" height="56" rx="8" fill="#F3F0FF" stroke="#7C3AED" stroke-width="2"/>
+  <text x="85" y="88" text-anchor="middle" fill="#7C3AED" font-size="13" font-family="Inter, system-ui, sans-serif" font-weight="700">Browser</text>
+  <text x="85" y="106" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">Wallet / Dashboard</text>
 
-  <rect x="200" y="65" width="120" height="56" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="2"/>
-  <text x="260" y="85" text-anchor="middle" fill="#0891B2" font-size="12" font-family="Inter, system-ui, sans-serif" font-weight="700">Agent</text>
-  <text x="260" y="103" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">Stock Analyst etc.</text>
+  <rect x="210" y="65" width="130" height="56" rx="8" fill="#FFFBEB" stroke="#B45309" stroke-width="2"/>
+  <text x="275" y="88" text-anchor="middle" fill="#B45309" font-size="12" font-family="Inter, system-ui, sans-serif" font-weight="700">Gateway</text>
+  <text x="275" y="106" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">CORS + Tunnel</text>
 
-  <rect x="380" y="65" width="120" height="56" rx="8" fill="#FFFBEB" stroke="#B45309" stroke-width="2"/>
-  <text x="440" y="85" text-anchor="middle" fill="#B45309" font-size="12" font-family="Inter, system-ui, sans-serif" font-weight="700">Gateway</text>
-  <text x="440" y="103" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">CORS + Tunnel</text>
+  <rect x="400" y="65" width="130" height="56" rx="8" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="2"/>
+  <text x="465" y="88" text-anchor="middle" fill="#0A0A0A" font-size="12" font-family="Inter, system-ui, sans-serif" font-weight="700">Guard</text>
+  <text x="465" y="106" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">scope + audit</text>
 
-  <rect x="560" y="65" width="120" height="56" rx="8" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="2"/>
-  <text x="620" y="85" text-anchor="middle" fill="#0A0A0A" font-size="12" font-family="Inter, system-ui, sans-serif" font-weight="700">Guard + Store</text>
-  <text x="620" y="103" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">scope + SQLite</text>
+  <rect x="570" y="65" width="110" height="56" rx="8" fill="#F0FDF4" stroke="#059669" stroke-width="1.5"/>
+  <text x="625" y="93" text-anchor="middle" fill="#059669" font-size="12" font-family="Inter, system-ui, sans-serif" font-weight="600">Store</text>
 
-  <rect x="80" y="165" width="120" height="36" rx="8" fill="#F0FDF4" stroke="#059669" stroke-width="1.5"/>
-  <text x="140" y="187" text-anchor="middle" fill="#059669" font-size="12" font-family="Inter, system-ui, sans-serif" font-weight="600">Dropbox (encrypted)</text>
+  <rect x="20" y="145" width="130" height="40" rx="8" fill="#F0FDF4" stroke="#059669" stroke-width="1.5"/>
+  <text x="85" y="169" text-anchor="middle" fill="#059669" font-size="12" font-family="Inter, system-ui, sans-serif" font-weight="600">Dropbox</text>
 
-  <line x1="140" y1="86" x2="200" y2="86" stroke="#7C3AED" stroke-width="2" marker-end="url(#a)"/>
-  <text x="170" y="80" text-anchor="middle" fill="#7C3AED" font-size="9" font-family="Inter, system-ui, sans-serif">call</text>
+  <line x1="150" y1="93" x2="210" y2="93" stroke="#7C3AED" stroke-width="2" marker-end="url(#a)"/>
+  <text x="180" y="86" text-anchor="middle" fill="#7C3AED" font-size="9" font-family="Inter, system-ui, sans-serif">fetch()</text>
 
-  <line x1="320" y1="86" x2="380" y2="86" stroke="#0891B2" stroke-width="2" marker-end="url(#b)"/>
-  <text x="350" y="80" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">read data</text>
+  <line x1="340" y1="93" x2="400" y2="93" stroke="#7C3AED" stroke-width="2" marker-end="url(#a)"/>
 
-  <line x1="500" y1="86" x2="560" y2="86" stroke="#B45309" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="530" y1="93" x2="570" y2="93" stroke="#0A0A0A" stroke-width="2" marker-end="url(#a)"/>
 
-  <line x1="560" y1="108" x2="320" y2="108" stroke="#6B7280" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#b)"/>
-  <text x="440" y="122" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">filtered data</text>
+  <line x1="400" y1="115" x2="340" y2="115" stroke="#6B7280" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#a)"/>
+  <text x="370" y="130" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">data</text>
 
-  <line x1="200" y1="108" x2="140" y2="108" stroke="#6B7280" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#a)"/>
-  <text x="170" y="122" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">report</text>
+  <line x1="85" y1="121" x2="85" y2="145" stroke="#059669" stroke-width="1.5" marker-end="url(#g)"/>
+  <text x="95" y="138" text-anchor="start" fill="#6B7280" font-size="8.5" font-family="Inter, system-ui, sans-serif">encrypt &amp; store</text>
 
-  <line x1="80" y1="121" x2="80" y2="165" stroke="#059669" stroke-width="1.5" marker-end="url(#g)"/>
-  <text x="90" y="148" text-anchor="start" fill="#6B7280" font-size="8.5" font-family="Inter, system-ui, sans-serif">wallet sign → encrypt</text>
-
-  <text x="350" y="210" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">User operates browser → browser calls Agent → Agent reads via Gateway → returns report</text>
+  <text x="350" y="205" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">Wallet sign → derive key → BrowserSDK fetch() to Gateway → Guard filters → Store returns</text>
 </svg>

@@ -1,45 +1,47 @@
-<svg viewBox="0 0 580 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Remote path">
+<svg viewBox="0 0 700 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Remote path">
   <defs>
-    <marker id="a" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#B45309"/></marker>
+    <marker id="g" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#B45309"/></marker>
+    <marker id="r" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#0891B2"/></marker>
+    <marker id="a" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#0A0A0A"/></marker>
   </defs>
 
-  <text x="290" y="24" text-anchor="middle" fill="#B45309" font-size="13" font-family="Inter, system-ui, sans-serif" font-weight="700">Remote Path</text>
-  <text x="290" y="42" text-anchor="middle" fill="#6B7280" font-size="10" font-family="Inter, system-ui, sans-serif">Gateway + Cloudflare Tunnel → Remote Agent anywhere</text>
+  <text x="350" y="24" text-anchor="middle" fill="#B45309" font-size="13" font-family="Inter, system-ui, sans-serif" font-weight="700">Remote Path (Two Peer Entry Points)</text>
+  <text x="350" y="42" text-anchor="middle" fill="#6B7280" font-size="10" font-family="Inter, system-ui, sans-serif">Gateway and Cloud Relay are peer entry points — Agent picks one</text>
 
-  <!-- User machine box -->
-  <rect x="15" y="55" width="310" height="130" rx="10" fill="#FAFAF8" stroke="#9CA3AF" stroke-width="1" stroke-dasharray="4 2"/>
-  <text x="170" y="72" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">User's Machine</text>
+  <rect x="15" y="55" width="220" height="180" rx="10" fill="#FAFAF8" stroke="#9CA3AF" stroke-width="1" stroke-dasharray="4 2"/>
+  <text x="125" y="72" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">User's Machine</text>
 
-  <!-- Gateway -->
-  <rect x="40" y="88" width="140" height="44" rx="8" fill="#FFFBEB" stroke="#B45309" stroke-width="2"/>
-  <text x="110" y="114" text-anchor="middle" fill="#B45309" font-size="13" font-family="Inter, system-ui, sans-serif" font-weight="700">Gateway</text>
+  <rect x="35" y="88" width="180" height="44" rx="8" fill="#FFFBEB" stroke="#B45309" stroke-width="2"/>
+  <text x="125" y="114" text-anchor="middle" fill="#B45309" font-size="12" font-family="Inter, system-ui, sans-serif" font-weight="700">Gateway + Tunnel</text>
 
-  <!-- Tunnel label -->
-  <text x="110" y="152" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">+ Cloudflare Tunnel</text>
+  <rect x="35" y="165" width="80" height="40" rx="8" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="1.5"/>
+  <text x="75" y="189" text-anchor="middle" fill="#0A0A0A" font-size="11" font-family="Inter, system-ui, sans-serif" font-weight="600">Auth</text>
 
-  <!-- Auth -->
-  <rect x="200" y="88" width="100" height="44" rx="8" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="1.5"/>
-  <text x="250" y="114" text-anchor="middle" fill="#0A0A0A" font-size="11" font-family="Inter, system-ui, sans-serif" font-weight="600">Auth</text>
+  <rect x="135" y="165" width="80" height="40" rx="8" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="1.5"/>
+  <text x="175" y="189" text-anchor="middle" fill="#0A0A0A" font-size="11" font-family="Inter, system-ui, sans-serif" font-weight="600">Guard</text>
 
-  <!-- Cloud Relay -->
-  <rect x="365" y="88" width="120" height="44" rx="8" fill="#FFFBEB" stroke="#B45309" stroke-width="2" stroke-dasharray="4 2"/>
-  <text x="425" y="108" text-anchor="middle" fill="#B45309" font-size="12" font-family="Inter, system-ui, sans-serif" font-weight="700">Cloud Relay</text>
-  <text x="425" y="124" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">verify → forward</text>
+  <rect x="275" y="88" width="150" height="44" rx="8" fill="#FFFBEB" stroke="#B45309" stroke-width="2" stroke-dasharray="4 2"/>
+  <text x="350" y="108" text-anchor="middle" fill="#B45309" font-size="12" font-family="Inter, system-ui, sans-serif" font-weight="700">Cloud Relay</text>
+  <text x="350" y="124" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">verify · rate-limit · forward</text>
 
-  <!-- Remote Agent -->
-  <rect x="525" y="88" width="120" height="44" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="2" stroke-dasharray="4 2"/>
-  <text x="585" y="108" text-anchor="middle" fill="#0891B2" font-size="12" font-family="Inter, system-ui, sans-serif" font-weight="700">Remote Agent</text>
-  <text x="585" y="124" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">cloud / DO</text>
+  <rect x="480" y="88" width="200" height="44" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="2" stroke-dasharray="4 2"/>
+  <text x="580" y="108" text-anchor="middle" fill="#0891B2" font-size="12" font-family="Inter, system-ui, sans-serif" font-weight="700">Remote Agent</text>
+  <text x="580" y="124" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">anywhere · cloud / DO / etc.</text>
 
-  <!-- Arrows -->
-  <line x1="250" y1="88" x2="180" y2="88" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#a)"/>
-  <text x="215" y="81" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">token</text>
+  <text x="350" y="175" text-anchor="middle" fill="#B45309" font-size="10" font-family="Inter, system-ui, sans-serif" font-weight="600">Path 1: Gateway</text>
+  <text x="350" y="220" text-anchor="middle" fill="#0891B2" font-size="10" font-family="Inter, system-ui, sans-serif" font-weight="600">Path 2: Cloud Relay</text>
 
-  <line x1="180" y1="132" x2="365" y2="110" stroke="#B45309" stroke-width="2" marker-end="url(#a)"/>
-  <text x="272" y="126" text-anchor="middle" fill="#B45309" font-size="9" font-family="Inter, system-ui, sans-serif">Tunnel</text>
+  <line x1="480" y1="76" x2="215" y2="110" stroke="#B45309" stroke-width="1.5" marker-end="url(#g)" stroke-dasharray="6 3"/>
+  <text x="347" y="72" text-anchor="middle" fill="#B45309" font-size="8.5" font-family="Inter, system-ui, sans-serif">UOM_TOKEN + mTLS</text>
 
-  <line x1="485" y1="110" x2="525" y2="110" stroke="#B45309" stroke-width="2" marker-end="url(#a)"/>
-  <text x="505" y="103" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">HTTP</text>
+  <line x1="125" y1="132" x2="175" y2="165" stroke="#B45309" stroke-width="1" stroke-dasharray="3 3"/>
 
-  <text x="360" y="180" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">Auth issues Token → Gateway exposes via Tunnel → Relay verifies → Agent reads</text>
+  <line x1="480" y1="92" x2="425" y2="110" stroke="#0891B2" stroke-width="1.5" marker-end="url(#r)" stroke-dasharray="6 3"/>
+
+  <line x1="275" y1="110" x2="215" y2="185" stroke="#0891B2" stroke-width="1.5" marker-end="url(#r)"/>
+
+  <line x1="115" y1="165" x2="480" y2="132" stroke="#0A0A0A" stroke-width="1" stroke-dasharray="3 3"/>
+  <text x="297" y="152" text-anchor="middle" fill="#6B7280" font-size="8" font-family="Inter, system-ui, sans-serif">UOM_TOKEN (carried by Agent, not through Gateway/Relay)</text>
+
+  <text x="350" y="280" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">Auth issues Token → Agent carries Token, connects via Gateway or Relay → forwarded to Guard → Store</text>
 </svg>

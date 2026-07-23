@@ -1,38 +1,59 @@
-<svg viewBox="0 0 580 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="远程路径">
+<svg viewBox="0 0 700 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="远程路径">
   <defs>
-    <marker id="a" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#B45309"/></marker>
+    <marker id="g" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#B45309"/></marker>
+    <marker id="r" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#0891B2"/></marker>
+    <marker id="a" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#0A0A0A"/></marker>
   </defs>
 
-  <text x="290" y="24" text-anchor="middle" fill="#B45309" font-size="13" font-family="Inter, system-ui, sans-serif" font-weight="700">远程路径</text>
-  <text x="290" y="42" text-anchor="middle" fill="#6B7280" font-size="10" font-family="Inter, system-ui, sans-serif">Gateway + Cloudflare Tunnel → 任意位置远程 Agent</text>
+  <text x="350" y="24" text-anchor="middle" fill="#B45309" font-size="13" font-family="Inter, system-ui, sans-serif" font-weight="700">远程路径（两个平行入口）</text>
+  <text x="350" y="42" text-anchor="middle" fill="#6B7280" font-size="10" font-family="Inter, system-ui, sans-serif">Gateway 和 Cloud Relay 是同级组件，Agent 任选其一</text>
 
-  <rect x="15" y="55" width="310" height="130" rx="10" fill="#FAFAF8" stroke="#9CA3AF" stroke-width="1" stroke-dasharray="4 2"/>
-  <text x="170" y="72" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">用户本机</text>
+  <!-- Left side: User machine -->
+  <rect x="15" y="55" width="220" height="180" rx="10" fill="#FAFAF8" stroke="#9CA3AF" stroke-width="1" stroke-dasharray="4 2"/>
+  <text x="125" y="72" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">用户本机</text>
 
-  <rect x="40" y="88" width="140" height="44" rx="8" fill="#FFFBEB" stroke="#B45309" stroke-width="2"/>
-  <text x="110" y="114" text-anchor="middle" fill="#B45309" font-size="13" font-family="Inter, system-ui, sans-serif" font-weight="700">Gateway</text>
+  <!-- Gateway -->
+  <rect x="35" y="88" width="180" height="44" rx="8" fill="#FFFBEB" stroke="#B45309" stroke-width="2"/>
+  <text x="125" y="114" text-anchor="middle" fill="#B45309" font-size="12" font-family="Inter, system-ui, sans-serif" font-weight="700">Gateway + Tunnel</text>
 
-  <text x="110" y="152" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">+ Cloudflare Tunnel</text>
+  <!-- Auth -->
+  <rect x="35" y="165" width="80" height="40" rx="8" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="1.5"/>
+  <text x="75" y="189" text-anchor="middle" fill="#0A0A0A" font-size="11" font-family="Inter, system-ui, sans-serif" font-weight="600">Auth</text>
 
-  <rect x="200" y="88" width="100" height="44" rx="8" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="1.5"/>
-  <text x="250" y="114" text-anchor="middle" fill="#0A0A0A" font-size="11" font-family="Inter, system-ui, sans-serif" font-weight="600">Auth</text>
+  <!-- Guard -->
+  <rect x="135" y="165" width="80" height="40" rx="8" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="1.5"/>
+  <text x="175" y="189" text-anchor="middle" fill="#0A0A0A" font-size="11" font-family="Inter, system-ui, sans-serif" font-weight="600">Guard</text>
 
-  <rect x="365" y="88" width="120" height="44" rx="8" fill="#FFFBEB" stroke="#B45309" stroke-width="2" stroke-dasharray="4 2"/>
-  <text x="425" y="108" text-anchor="middle" fill="#B45309" font-size="12" font-family="Inter, system-ui, sans-serif" font-weight="700">Cloud Relay</text>
-  <text x="425" y="124" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">验证 → 转发</text>
+  <!-- Middle: Cloud Relay (peer to Gateway) -->
+  <rect x="275" y="88" width="150" height="44" rx="8" fill="#FFFBEB" stroke="#B45309" stroke-width="2" stroke-dasharray="4 2"/>
+  <text x="350" y="108" text-anchor="middle" fill="#B45309" font-size="12" font-family="Inter, system-ui, sans-serif" font-weight="700">Cloud Relay</text>
+  <text x="350" y="124" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">公钥验签 · 限流 · 转发</text>
 
-  <rect x="525" y="88" width="120" height="44" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="2" stroke-dasharray="4 2"/>
-  <text x="585" y="108" text-anchor="middle" fill="#0891B2" font-size="12" font-family="Inter, system-ui, sans-serif" font-weight="700">远程 Agent</text>
-  <text x="585" y="124" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">云 / DO</text>
+  <!-- Right: Remote Agent -->
+  <rect x="480" y="88" width="200" height="44" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="2" stroke-dasharray="4 2"/>
+  <text x="580" y="108" text-anchor="middle" fill="#0891B2" font-size="12" font-family="Inter, system-ui, sans-serif" font-weight="700">Remote Agent</text>
+  <text x="580" y="124" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">任意位置 · 云 / DO / 等</text>
 
-  <line x1="250" y1="88" x2="180" y2="88" stroke="#0A0A0A" stroke-width="1.5" marker-end="url(#a)"/>
-  <text x="215" y="81" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">token</text>
+  <!-- Path labels -->
+  <text x="350" y="175" text-anchor="middle" fill="#B45309" font-size="10" font-family="Inter, system-ui, sans-serif" font-weight="600">路径 1: Gateway</text>
+  <text x="350" y="220" text-anchor="middle" fill="#0891B2" font-size="10" font-family="Inter, system-ui, sans-serif" font-weight="600">路径 2: Cloud Relay</text>
 
-  <line x1="180" y1="132" x2="365" y2="110" stroke="#B45309" stroke-width="2" marker-end="url(#a)"/>
-  <text x="272" y="126" text-anchor="middle" fill="#B45309" font-size="9" font-family="Inter, system-ui, sans-serif">Tunnel</text>
+  <!-- Path 1: Agent → Gateway -->
+  <line x1="480" y1="76" x2="215" y2="110" stroke="#B45309" stroke-width="1.5" marker-end="url(#g)" stroke-dasharray="6 3"/>
+  <text x="347" y="72" text-anchor="middle" fill="#B45309" font-size="8.5" font-family="Inter, system-ui, sans-serif">UOM_TOKEN + mTLS</text>
 
-  <line x1="485" y1="110" x2="525" y2="110" stroke="#B45309" stroke-width="2" marker-end="url(#a)"/>
-  <text x="505" y="103" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">HTTP</text>
+  <!-- Path 1: Gateway → Guard -->
+  <line x1="125" y1="132" x2="175" y2="165" stroke="#B45309" stroke-width="1" stroke-dasharray="3 3"/>
 
-  <text x="360" y="180" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">Auth 签发 Token → Gateway 暴露公网 → Relay 验证 → Agent 读取</text>
+  <!-- Path 2: Agent → Cloud Relay -->
+  <line x1="480" y1="92" x2="425" y2="110" stroke="#0891B2" stroke-width="1.5" marker-end="url(#r)" stroke-dasharray="6 3"/>
+
+  <!-- Path 2: Cloud Relay → Guard -->
+  <line x1="275" y1="110" x2="215" y2="185" stroke="#0891B2" stroke-width="1.5" marker-end="url(#r)"/>
+
+  <!-- Auth → Agent (token delivery) -->
+  <line x1="115" y1="165" x2="480" y2="132" stroke="#0A0A0A" stroke-width="1" stroke-dasharray="3 3"/>
+  <text x="297" y="152" text-anchor="middle" fill="#6B7280" font-size="8" font-family="Inter, system-ui, sans-serif">UOM_TOKEN (Agent carries it, doesn't go through Gateway/Relay)</text>
+
+  <text x="350" y="280" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">Auth 签发 Token → Agent 携带 Token 选择 Gateway 或 Relay → 转发到 Guard → Store</text>
 </svg>

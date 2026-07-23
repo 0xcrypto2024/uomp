@@ -27,9 +27,12 @@ import { baseUrl } from '../../utils/base.ts';
             <span style="font-size:2rem">🖥️</span>
             <h2 style="margin:0;font-size:1.35rem">Try in Browser</h2>
           </div>
-          <p style="color:var(--mid);margin-bottom:1.25rem;max-width:400px">
-            Zero install. Connect wallet (MetaMask / Argent X), link Dropbox. Manage portfolio and authorize agents for analysis.
+          <p style="color:var(--mid);margin-bottom:.75rem;max-width:400px">
+            Zero install. Wallet acts as identity & encryption root. Data encrypted in Dropbox. Zero-knowledge server.
           </p>
+          <div style="background:var(--violet-bg);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;margin-bottom:1.25rem;font-size:.8rem;color:var(--violet)">
+            <strong>Why wallet?</strong> Wallet signature derives an encryption key (PBKDF2). Private key never leaves the wallet. Dropbox stores only ciphertext — the server can't decrypt your data.
+          </div>
           <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.25rem">
             <div style="font-size:.8rem;color:var(--mid);margin-bottom:.4rem;font-weight:600">Workflow</div>
             <div style="font-size:.85rem;color:var(--mid);line-height:1.8">
@@ -61,7 +64,7 @@ pnpm cli authorize ./agent    # Issue Token
 pnpm cli sessions -a          # List sessions
 pnpm cli revoke &lt;id&gt;          # Revoke</code></pre>
           </div>
-          <a href={`${baseUrl}en/tutorial/`} style="display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.5rem;background:var(--blu);border-radius:8px;color:#fff;text-decoration:none;font-weight:600;font-size:.9rem">
+          <a href={`${baseUrl}en/tutorial/`} style="display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.5rem;background:#2563EB;border-radius:8px;color:#fff;text-decoration:none;font-weight:600;font-size:.9rem">
             CLI Tutorial →
           </a>
         </div>

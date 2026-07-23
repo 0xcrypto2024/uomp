@@ -22,13 +22,16 @@ import { baseUrl } from '../utils/base.ts';
             <span style="font-size:2rem">🖥️</span>
             <h2 style="margin:0;font-size:1.35rem">在浏览器中试用</h2>
           </div>
-          <p style="color:var(--mid);margin-bottom:1.25rem;max-width:400px">
-            零安装。连接钱包（MetaMask / Argent X），接入 Dropbox，即可管理组合并授权 Agent 分析。
+          <p style="color:var(--mid);margin-bottom:.75rem;max-width:400px">
+            零安装。钱包作为身份和加密根，数据加密后存入 Dropbox，服务器零知识。
           </p>
+          <div style="background:var(--violet-bg);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;margin-bottom:1.25rem;font-size:.8rem;color:var(--violet)">
+            <strong>为什么需要钱包？</strong> 钱包签名派生加密密钥（PBKDF2），私钥不出钱包。Dropbox 中只存密文，服务器无法解密你的数据。
+          </div>
           <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.25rem">
             <div style="font-size:.8rem;color:var(--mid);margin-bottom:.4rem;font-weight:600">连接流程</div>
             <div style="font-size:.85rem;color:var(--mid);line-height:1.8">
-              1. 钱包签名 → 生成加密密钥<br/>
+              1. 钱包签名 → 派生加密密钥<br/>
               2. 连接 Dropbox → 导入持仓<br/>
               3. 编辑组合 → 调用 Agent 分析<br/>
               4. 查看审计日志
@@ -56,7 +59,7 @@ pnpm cli authorize ./agent    # 签发 Token
 pnpm cli sessions -a          # 查看会话
 pnpm cli revoke &lt;id&gt;          # 撤销</code></pre>
           </div>
-          <a href={`${baseUrl}tutorial/`} style="display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.5rem;background:var(--blu);border-radius:8px;color:#fff;text-decoration:none;font-weight:600;font-size:.9rem">
+          <a href={`${baseUrl}tutorial/`} style="display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.5rem;background:#2563EB;border-radius:8px;color:#fff;text-decoration:none;font-weight:600;font-size:.9rem">
             CLI 教程 →
           </a>
         </div>

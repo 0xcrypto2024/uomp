@@ -1,42 +1,124 @@
-<svg viewBox="0 0 820 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="UOMP 架构图">
+<svg viewBox="0 0 880 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="UOMP 架构图">
   <defs>
-    <marker id="arrow-spec-zh" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#0A0A0A"/></marker>
-    <marker id="return-spec-zh" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#6B7280"/></marker>
+    <marker id="a" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#0A0A0A"/></marker>
+    <marker id="r" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#6B7280"/></marker>
   </defs>
-  <rect x="360" y="20" width="440" height="220" rx="12" fill="#FFFFFF" stroke="#9CA3AF" stroke-width="2"/>
-  <text x="580" y="45" text-anchor="middle" fill="#6B7280" font-size="12" font-family="Inter, system-ui, sans-serif">用户本机 / User Host</text>
 
-  <rect x="20" y="100" width="110" height="60" rx="8" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="2"/>
-  <text x="75" y="135" text-anchor="middle" fill="#0A0A0A" font-size="13" font-family="Inter, system-ui, sans-serif" font-weight="600">Agent</text>
+  <!-- User machine boundary -->
+  <rect x="15" y="10" width="850" height="300" rx="12" fill="#FAFAF8" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <text x="440" y="34" text-anchor="middle" fill="#6B7280" font-size="11" font-family="Inter, system-ui, sans-serif">用户本机</text>
 
-  <rect x="190" y="60" width="120" height="44" rx="8" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="2"/>
-  <text x="250" y="82" text-anchor="middle" fill="#0A0A0A" font-size="12" font-family="Inter, system-ui, sans-serif" font-weight="600">Auth Service</text>
-  <text x="250" y="96" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">local or remote</text>
+  <!-- Browser -->
+  <rect x="30" y="55" width="120" height="48" rx="8" fill="#F3F0FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <text x="90" y="75" text-anchor="middle" fill="#7C3AED" font-size="11" font-family="Inter, system-ui, sans-serif" font-weight="600">浏览器</text>
+  <text x="90" y="91" text-anchor="middle" fill="#6B7280" font-size="8.5" font-family="Inter, system-ui, sans-serif">钱包 + Dropbox</text>
 
-  <rect x="380" y="60" width="120" height="44" rx="8" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="2"/>
-  <text x="440" y="87" text-anchor="middle" fill="#0A0A0A" font-size="13" font-family="Inter, system-ui, sans-serif" font-weight="600">用户 UI / CLI</text>
+  <!-- CLI -->
+  <rect x="200" y="55" width="120" height="48" rx="8" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="2"/>
+  <text x="260" y="75" text-anchor="middle" fill="#0A0A0A" font-size="11" font-family="Inter, system-ui, sans-serif" font-weight="600">CLI / UI</text>
+  <text x="260" y="91" text-anchor="middle" fill="#6B7280" font-size="8.5" font-family="Inter, system-ui, sans-serif">authorize / discover</text>
 
-  <rect x="380" y="170" width="120" height="44" rx="8" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="2"/>
-  <text x="440" y="197" text-anchor="middle" fill="#0A0A0A" font-size="13" font-family="Inter, system-ui, sans-serif" font-weight="600">Memory Guard</text>
+  <!-- Auth Service -->
+  <rect x="370" y="55" width="120" height="48" rx="8" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="2"/>
+  <text x="430" y="79" text-anchor="middle" fill="#0A0A0A" font-size="12" font-family="Inter, system-ui, sans-serif" font-weight="600">Auth Service</text>
 
-  <rect x="640" y="170" width="120" height="44" rx="8" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="2"/>
-  <text x="700" y="197" text-anchor="middle" fill="#0A0A0A" font-size="13" font-family="Inter, system-ui, sans-serif" font-weight="600">Memory Store</text>
+  <!-- Agent Process -->
+  <rect x="200" y="140" width="120" height="44" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="260" y="158" text-anchor="middle" fill="#0891B2" font-size="11" font-family="Inter, system-ui, sans-serif" font-weight="600">Agent 进程</text>
+  <text x="260" y="173" text-anchor="middle" fill="#6B7280" font-size="8.5" font-family="Inter, system-ui, sans-serif">独立运行</text>
 
-  <line x1="130" y1="120" x2="380" y2="82" stroke="#0A0A0A" stroke-width="2" marker-end="url(#arrow-spec-zh)"/>
-  <text x="245" y="95" text-anchor="middle" fill="#6B7280" font-size="10" font-family="Inter, system-ui, sans-serif">1. uom.json</text>
+  <!-- Guard -->
+  <rect x="370" y="140" width="120" height="44" rx="8" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="2"/>
+  <text x="430" y="158" text-anchor="middle" fill="#0A0A0A" font-size="11" font-family="Inter, system-ui, sans-serif" font-weight="600">Memory Guard</text>
+  <text x="430" y="173" text-anchor="middle" fill="#6B7280" font-size="8.5" font-family="Inter, system-ui, sans-serif">范围过滤 + 审计</text>
 
-  <line x1="380" y1="82" x2="310" y2="82" stroke="#0A0A0A" stroke-width="2" marker-end="url(#arrow-spec-zh)"/>
-  <text x="345" y="75" text-anchor="middle" fill="#6B7280" font-size="10" font-family="Inter, system-ui, sans-serif">2. create / grant</text>
+  <!-- Store -->
+  <rect x="540" y="140" width="120" height="44" rx="8" fill="#F0FDF4" stroke="#059669" stroke-width="1.5"/>
+  <text x="600" y="158" text-anchor="middle" fill="#059669" font-size="11" font-family="Inter, system-ui, sans-serif" font-weight="600">Memory Store</text>
+  <text x="600" y="173" text-anchor="middle" fill="#6B7280" font-size="8.5" font-family="Inter, system-ui, sans-serif">SQLite / S3 / IPFS</text>
 
-  <line x1="310" y1="104" x2="380" y2="104" stroke="#6B7280" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#return-spec-zh)"/>
-  <text x="345" y="118" text-anchor="middle" fill="#6B7280" font-size="10" font-family="Inter, system-ui, sans-serif">3. Capability Token</text>
+  <!-- Gateway -->
+  <rect x="540" y="55" width="120" height="48" rx="8" fill="#FFFBEB" stroke="#B45309" stroke-width="1.5"/>
+  <text x="600" y="75" text-anchor="middle" fill="#B45309" font-size="11" font-family="Inter, system-ui, sans-serif" font-weight="600">Gateway</text>
+  <text x="600" y="91" text-anchor="middle" fill="#6B7280" font-size="8.5" font-family="Inter, system-ui, sans-serif">mTLS + Tunnel</text>
 
-  <line x1="380" y1="170" x2="130" y2="140" stroke="#0A0A0A" stroke-width="2" marker-end="url(#arrow-spec-zh)"/>
-  <text x="245" y="165" text-anchor="middle" fill="#6B7280" font-size="10" font-family="Inter, system-ui, sans-serif">4. deliver Token</text>
+  <!-- Cloud Relay -->
+  <rect x="370" y="250" width="120" height="44" rx="8" fill="#FFFBEB" stroke="#B45309" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="430" y="268" text-anchor="middle" fill="#B45309" font-size="11" font-family="Inter, system-ui, sans-serif" font-weight="600">Cloud Relay</text>
+  <text x="430" y="283" text-anchor="middle" fill="#6B7280" font-size="8.5" font-family="Inter, system-ui, sans-serif">公钥验签</text>
 
-  <line x1="130" y1="155" x2="380" y2="192" stroke="#0A0A0A" stroke-width="2" marker-end="url(#arrow-spec-zh)"/>
-  <text x="245" y="185" text-anchor="middle" fill="#6B7280" font-size="10" font-family="Inter, system-ui, sans-serif">5. HTTP + Authorization</text>
+  <!-- Remote Agent -->
+  <rect x="540" y="250" width="120" height="44" rx="8" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="600" y="268" text-anchor="middle" fill="#0891B2" font-size="11" font-family="Inter, system-ui, sans-serif" font-weight="600">远程 Agent</text>
+  <text x="600" y="283" text-anchor="middle" fill="#6B7280" font-size="8.5" font-family="Inter, system-ui, sans-serif">云 / DO / 等</text>
 
-  <line x1="500" y1="192" x2="640" y2="192" stroke="#0A0A0A" stroke-width="2" marker-end="url(#arrow-spec-zh)"/>
-  <text x="570" y="215" text-anchor="middle" fill="#6B7280" font-size="10" font-family="Inter, system-ui, sans-serif">6. read / write (filtered)</text>
+  <!-- Dropbox -->
+  <rect x="30" y="140" width="120" height="44" rx="8" fill="#F0FDF4" stroke="#059669" stroke-width="1.5"/>
+  <text x="90" y="158" text-anchor="middle" fill="#059669" font-size="11" font-family="Inter, system-ui, sans-serif" font-weight="600">Dropbox</text>
+  <text x="90" y="173" text-anchor="middle" fill="#6B7280" font-size="8.5" font-family="Inter, system-ui, sans-serif">加密对象</text>
+
+  <!-- ARROWS -->
+
+  <!-- CLI → Auth -->
+  <line x1="320" y1="79" x2="370" y2="79" stroke="#0A0A0A" stroke-width="2" marker-end="url(#a)"/>
+  <text x="345" y="73" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">authorize</text>
+
+  <!-- Auth → CLI (return) -->
+  <line x1="370" y1="103" x2="320" y2="103" stroke="#6B7280" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#r)"/>
+  <text x="345" y="117" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">UOM_TOKEN</text>
+
+  <!-- CLI → Agent (deliver token) -->
+  <line x1="260" y1="103" x2="260" y2="140" stroke="#6B7280" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#r)"/>
+  <text x="270" y="125" text-anchor="start" fill="#6B7280" font-size="8.5" font-family="Inter, system-ui, sans-serif">交付 Token</text>
+
+  <!-- Agent → Guard (read) -->
+  <line x1="320" y1="162" x2="370" y2="162" stroke="#0A0A0A" stroke-width="2" marker-end="url(#a)"/>
+  <text x="345" y="155" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">HTTP + Token</text>
+
+  <!-- Agent → Guard (return) -->
+  <line x1="370" y1="184" x2="320" y2="184" stroke="#6B7280" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#r)"/>
+  <text x="345" y="197" text-anchor="middle" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">过滤后数据</text>
+
+  <!-- Guard → Store -->
+  <line x1="490" y1="162" x2="540" y2="162" stroke="#0A0A0A" stroke-width="2" marker-end="url(#a)"/>
+
+  <!-- Agent → submitDeletionProof to Guard -->
+  <line x1="260" y1="184" x2="370" y2="184" stroke="#6B7280" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#r)"/>
+  <text x="315" y="210" text-anchor="middle" fill="#6B7280" font-size="8" font-family="Inter, system-ui, sans-serif">删除证明 → 关闭</text>
+
+  <!-- Browser → Gateway -->
+  <line x1="120" y1="79" x2="540" y2="79" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="330" y="45" text-anchor="middle" fill="#7C3AED" font-size="9" font-family="Inter, system-ui, sans-serif">浏览器 → Gateway (CORS)</text>
+
+  <!-- Browser → Dropbox -->
+  <line x1="90" y1="103" x2="90" y2="140" stroke="#059669" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="100" y="125" text-anchor="start" fill="#6B7280" font-size="8.5" font-family="Inter, system-ui, sans-serif">加密存储</text>
+
+  <!-- Guard → Gateway -->
+  <line x1="490" y1="103" x2="540" y2="79" stroke="#B45309" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <!-- Gateway → Cloud Relay -->
+  <line x1="600" y1="103" x2="490" y2="250" stroke="#B45309" stroke-width="1.5" stroke-dasharray="6 3" marker-end="url(#a)"/>
+  <text x="560" y="175" text-anchor="middle" fill="#B45309" font-size="8.5" font-family="Inter, system-ui, sans-serif">Tunnel</text>
+
+  <!-- Cloud Relay → Remote Agent -->
+  <line x1="490" y1="272" x2="540" y2="272" stroke="#B45309" stroke-width="1.5" stroke-dasharray="6 3" marker-end="url(#a)"/>
+  <text x="515" y="265" text-anchor="middle" fill="#6B7280" font-size="8.5" font-family="Inter, system-ui, sans-serif">转发</text>
+
+  <!-- Store → Gateway (aggregate) -->
+  <line x1="600" y1="140" x2="600" y2="103" stroke="#B45309" stroke-width="1" stroke-dasharray="3 3"/>
+
+  <!-- Legend -->
+  <rect x="30" y="315" width="10" height="2" fill="#0A0A0A"/>
+  <text x="46" y="319" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">直接流</text>
+  <line x1="120" y1="316" x2="130" y2="316" stroke="#6B7280" stroke-width="1" stroke-dasharray="4 3"/>
+  <text x="136" y="319" fill="#6B7280" font-size="9" font-family="Inter, system-ui, sans-serif">响应 / 可选</text>
+
+  <!-- Labels -->
+  <text x="90" y="345" text-anchor="middle" fill="#7C3AED" font-size="10" font-family="Inter, system-ui, sans-serif" font-weight="600">浏览器路径</text>
+  <text x="260" y="345" text-anchor="middle" fill="#0A0A0A" font-size="10" font-family="Inter, system-ui, sans-serif" font-weight="600">本地路径</text>
+  <text x="570" y="345" text-anchor="middle" fill="#B45309" font-size="10" font-family="Inter, system-ui, sans-serif" font-weight="600">远程路径</text>
+  <line x1="90" y1="355" x2="90" y2="360" stroke="#7C3AED" stroke-width="2"/>
+  <line x1="260" y1="355" x2="260" y2="360" stroke="#0A0A0A" stroke-width="2"/>
+  <line x1="570" y1="355" x2="570" y2="360" stroke="#B45309" stroke-width="2"/>
 </svg>

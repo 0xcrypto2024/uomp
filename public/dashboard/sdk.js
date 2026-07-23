@@ -1,5 +1,5 @@
 /**
- * UOMP Browser SDK v20260723-1ad4e92 — fix loadEncrypted error handling
+ * UOMP Browser SDK v20260723-2d13814 — fix loadEncrypted error handling
  * Self-contained bundle for browser use.
  * No Node.js dependencies. Uses Web Crypto API + window.fetch.
  */

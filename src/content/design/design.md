@@ -165,13 +165,17 @@ const id = await uomp.identity.fromWallet('starknet');
 
 | 子客户端 | 主要方法 |
 |----------|---------|
-| `uomp.memory` | `get(key)`, `getByTag(tag)`, `getByKeys(keys)`, `listTags()`, `has(key)` |
+| `uomp.memory` | `get(key)`, `getByTag(tag)`, `getByKeys(keys)`, `listTags()`, `has(key)`, `set(key, item)`, `delete(key)` |
 | `uomp.aggregate` | `sum(tag, field)`, `avg()`, `count()`, `min()`, `max()` |
 | `uomp.payload` | `upload(data)`, `download(id)`, `info(id)` |
 | `uomp.session` | `submitDeletionProof()`, `finalize()`, `close()`, `trackAccess(key)` |
 | `uomp.audit` | `query({ sessionId, limit })`, `getLastAccess()` |
 | `uomp.auth` | `createSession()`, `grant()`, `revoke()`, `validate()` |
 | `uomp.identity` | `fromWallet(chain)`, `fromSeedPhrase(phrase)` |
+
+`@uomp/sdk` 提供两个入口：`import { UompClient } from '@uomp/sdk'`（Node.js）和 `import { BrowserSDK } from '@uomp/sdk/browser'`（Web App）。
+
+完整 API 参考见 [`docs/sdk-design.md`](https://github.com/0xaicrypto/uomp-core/tree/main/docs/sdk-design.md)。
 
 ---
 

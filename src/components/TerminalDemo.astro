@@ -45,7 +45,7 @@ const stats = lang === 'zh'
     timer = setTimeout(next, 1800);
   }
 
-  el.innerHTML = `<span style="color:${C.dim}">UOMP v1.0</span><br><br>`;
+  el.innerHTML = `<span style="color:${C.dim}">UOMP</span><br><br>`;
   timer = setTimeout(next, 800);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) scroll(); });
   window.addEventListener('beforeunload', () => clearTimeout(timer));

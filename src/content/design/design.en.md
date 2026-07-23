@@ -146,7 +146,7 @@ Seed phrase (12-word BIP-39) retained as fallback for non-wallet scenarios.
 
 | Sub-client | Key Methods |
 |------------|-------------|
-| `uomp.memory` | `get(key)`, `getByTag(tag)`, `getByKeys(keys)`, `listTags()`, `has(key)` |
+| `uomp.memory` | `get(key)`, `getByTag(tag)`, `getByKeys(keys)`, `listTags()`, `has(key)`, `set(key, item)`, `delete(key)` |
 | `uomp.aggregate` | `sum(tag, field)`, `avg()`, `count()`, `min()`, `max()` |
 | `uomp.payload` | `upload(data)`, `download(id)`, `info(id)` |
 | `uomp.session` | `submitDeletionProof()`, `finalize()`, `close()`, `trackAccess(key)` |

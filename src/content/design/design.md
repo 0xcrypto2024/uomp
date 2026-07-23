@@ -26,6 +26,7 @@ description: 'UOMP 参考实现 uomp-mvp 的架构与实现说明：组件职责
 | `apps/server` | — | Auth + Guard 组合 HTTP 服务（`127.0.0.1:9374`） |
 | `apps/gateway` | — | 用户自托管 Gateway：mTLS + Token 转发 + Cloudflare Tunnel |
 | `apps/relay` | Cloud Relay | 无状态公共 Relay（设计阶段）：公钥验签 + 密文转发 |
+| `uomp.org/dashboard/` | Browser UI | 浏览器 Dashboard：钱包认证 + 加密存储 + 组合管理 + Agent 分析 |
 
 ---
 
@@ -75,14 +76,14 @@ uomp gateway start
 
 ### 2.3 浏览器模式（钱包签名 + S3 直读 + Cloud Relay）
 
-Web App 使用 `@uomp/sdk/browser`。**读操作零服务端依赖**（S3 直读 + 浏览器内解密），写操作走 Cloud Relay。
+Web App 使用 `@uomp/sdk/browser`。**读操作零服务端依赖**（Dropbox 或加密云存储直读 + 浏览器内解密），写操作走 Cloud Relay。
 
 ```
-Browser App ──读──► S3 (密文) ──► 浏览器内解密
+Browser App ──读──► Dropbox / 加密存储 (密文) ──► 浏览器内解密
             ──写──► Cloud Relay ──► Guard ──► Store
 ```
 
-用户不需要安装任何本地组件。SDK 自动检测 Gateway 是否在线，不在线降级为 S3 直读。
+用户不需要安装任何本地组件。SDK 自动检测 Gateway 是否在线，不在线降级为直接读取加密存储。
 
 ---
 
@@ -195,7 +196,7 @@ uomp gateway start --browser     # 启用 CORS（浏览器 App 直连）
 
 ### 4.2 Cloud Relay
 
-Cloud Relay 是 Gateway 的无状态公共版本。UOMP 官方运营一个默认实例（`relay.uomp.org`），开源代码允许任何人自建。
+Cloud Relay 是 Gateway 的无状态公共版本。UOMP 运营一个默认实例，开源代码允许任何人自建。
 
 | | 用户 Gateway | Cloud Relay |
 |------|------------|------------|
@@ -294,10 +295,10 @@ Agent 在 `uom.json` 中声明 `requested_scopes`、`data_retention_policy`、`e
 | 聚合查询 | ✅ | sum/avg/count/min/max，配合 `aggregation_only` |
 | 删除证明 | ✅ | Agent 提交签名证明，Session 自动关闭 |
 | 字段过滤 | ✅ | Token 指定 `allowed_fields`，Guard 过滤 |
-| 浏览器 SDK | ✅ | 钱包认证 + S3 直读 + Cloud Relay 写 |
-| Store 抽象 | ⚠️ 设计完成 | SQLite / S3 / IPFS 可插拔，待实现 Phase 2 |
-| Cloud Relay | ⚠️ 设计完成 | 公共 Gateway 实现，待实现 Phase 3.5 |
-| 钱包认证 | ⚠️ 设计完成 | MetaMask / Argent X / Braavos，待实现 Phase 2 |
+| 浏览器 SDK | ✅ | 钱包认证 + Dashboard（uomp.org/dashboard/） |
+| Store 抽象 | ✅ | `IMemoryStore` 接口，SQLite + EncryptedObject 后端 |
+| Cloud Relay | ✅ | `apps/relay/` 已部署，CORS + 限流 + 公钥验签 |
+| 钱包认证 | ✅ | MetaMask/Argent X via PBKDF2，Seed Phrase 备用 |
 | 身份验证 | ⚠️ | DID/GPG 框架存在，验证强度待增强 |
 
 ---

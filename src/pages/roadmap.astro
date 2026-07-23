@@ -25,6 +25,12 @@ import { baseUrl } from '../utils/base.ts';
         <li><span class="status status-done">已完成</span>聚合查询（`/v1/memory/aggregate`）+ 删除证明 API</li>
         <li><span class="status status-done">已完成</span>Token Claims：`allowed_fields`、`aggregation_only`、`task_bound`</li>
         <li><span class="status status-done">已完成</span>Agent Manifest `data_retention_policy`</li>
+        <li><span class="status status-done">已完成</span>UOMP SDK Phase 1（`UompClient`：memory / aggregate / payload / session / audit / auth / identity）</li>
+        <li><span class="status status-done">已完成</span>浏览器 Dashboard（uomp.org/dashboard/）：钱包认证 + Dropbox + Agent 分析</li>
+        <li><span class="status status-done">已完成</span>Cloudflare Tunnel 集成（`uomp gateway start` 一键暴露公网）</li>
+        <li><span class="status status-done">已完成</span>Store 抽象化（`IMemoryStore` 接口，SQLite + EncryptedObject）</li>
+        <li><span class="status status-done">已完成</span>Cloud Relay（`apps/relay/`，CORS + 限流 + 公钥验签）</li>
+        <li><span class="status status-done">已完成</span>钱包认证（MetaMask + Argent X，PBKDF2 密钥推导）</li>
         <li><span class="status status-done">已完成</span>UOMP SDK Phase 1（`UompClient`：memory / aggregate / payload / session / audit）</li>
         <li><span class="status status-done">已完成</span>股票分析 Agent v1.0（自服务 HTTP API + Digital Ocean 部署）</li>
         <li><span class="status status-done">已完成</span>Cloudflare Tunnel 集成（`uomp gateway start` 一键暴露公网）</li>
@@ -38,9 +44,9 @@ import { baseUrl } from '../utils/base.ts';
         <li><span class="status status-next">计划</span><code>uomp config</code> 用户配置</li>
         <li><span class="status status-next">计划</span>Agent 写入暂存区（Staging）机制</li>
         <li><span class="status status-next">计划</span><code>uom memory review</code> 用户审核命令</li>
-        <li><span class="status status-next">计划</span>图形化授权面板</li>
+        <li><span class="status status-done">已完成</span>图形化授权面板（浏览器 Dashboard）</li>
         <li><span class="status status-done">已完成</span>TypeScript SDK（`UompClient`、mTLS、聚合、Payload、删除证明）</li>
-        <li><span class="status status-next">计划</span>Memory Store 抽象化，支持 SQLite / 云服务 / 去中心化存储</li>
+        <li><span class="status status-done">已完成</span>Memory Store 抽象化（SQLite / S3 / IPFS 可插拔）</li>
         <li><span class="status status-next">计划</span>审计日志可视化</li>
         <li><span class="status status-next">计划</span>Token 安全托管模式（反向代理）</li>
       </ul>
@@ -54,7 +60,7 @@ import { baseUrl } from '../utils/base.ts';
       </ul>
     </div>
     <div class="hero-btns" style="margin-top:2.5rem;">
-      <a href={`${baseUrl}spec/`} class="btn-h1">阅读规范 →</a>
+      <a href={`${baseUrl}dashboard/`} class="btn-h1" style="background:#8B5CF6">打开 Dashboard →</a>
       <a href={`${baseUrl}tutorial/`} class="btn-h1">SDK 教程 →</a>
     </div>
   </section>

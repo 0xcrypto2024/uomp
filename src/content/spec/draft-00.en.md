@@ -74,7 +74,9 @@ UOMP's design goals are:
 
 ### 5.1 Architecture
 
-<img src="/diagrams/spec-architecture-en.svg" alt="UOMP architecture diagram" class="diagram" />
+<img src="/diagrams/spec-architecture-browser-en.svg" alt="Browser path: Wallet → Gateway → Guard → Store" class="diagram" />
+<img src="/diagrams/spec-architecture-local-en.svg" alt="Local path: CLI → Auth → Agent → Guard → Store" class="diagram" />
+<img src="/diagrams/spec-architecture-remote-en.svg" alt="Remote path: Gateway + Tunnel → Cloud Relay → Remote Agent" class="diagram" />
 
 UOMP's complete architecture includes the following components:
 

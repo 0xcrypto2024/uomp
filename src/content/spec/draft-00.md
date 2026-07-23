@@ -74,7 +74,9 @@ UOMP 的设计目标是：
 
 ### 5.1 Architecture
 
-<img src="/diagrams/spec-architecture-zh.svg" alt="UOMP 架构图" class="diagram" />
+<img src="/diagrams/spec-architecture-browser-zh.svg" alt="浏览器路径：钱包 → Gateway → Guard → Store" class="diagram" />
+<img src="/diagrams/spec-architecture-local-zh.svg" alt="本地路径：CLI → Auth → Agent → Guard → Store" class="diagram" />
+<img src="/diagrams/spec-architecture-remote-zh.svg" alt="远程路径：Gateway + Tunnel → Cloud Relay → Remote Agent" class="diagram" />
 
 UOMP 的完整架构包含以下组件：
 

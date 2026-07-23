@@ -141,7 +141,6 @@ uomp gateway start
 # audience 指向 Gateway 的公网地址
 pnpm cli authorize ./examples/stock-analyst \
   --scope portfolio:holdings profile:risk \
-  --remote \
   --output /tmp/uomp-remote.env
 
 source /tmp/uomp-remote.env
@@ -197,7 +196,7 @@ uomp gateway status
 | `uomp.payload` | `upload(data)` | 上传 Payload 到 Gateway |
 | `uomp.payload` | `download(id)` | 下载 Payload |
 | `uomp.session` | `submitDeletionProof()` | 提交数据删除证明 |
-| `uomp.session` | `refresh(token)` | 刷新 Token |
+| `uomp.session` | `refresh(refreshToken)` | 刷新 Token |
 | `uomp.audit` | `query({limit})` | 查询审计日志 |
 
 ## CLI 命令速查

@@ -119,9 +119,12 @@ pnpm cli revoke <session-id>
 |--------|--------|-------------|
 | `uomp.memory` | `get(key)` | Read single item by key |
 | `uomp.memory` | `getByTag(tag)` | Read all items by tag |
+| `uomp.memory` | `getByKeys(keys)` | Batch read by keys |
 | `uomp.aggregate` | `sum/avg/count/min/max` | Aggregate without raw data |
 | `uomp.payload` | `upload(data)` | Upload payload to Gateway |
+| `uomp.payload` | `download(id)` | Download payload |
 | `uomp.session` | `submitDeletionProof()` | Submit deletion proof |
+| `uomp.session` | `refresh(refreshToken)` | Refresh Token |
 | `uomp.audit` | `query({limit})` | Query audit logs |
 
 ## CLI Quick Reference
@@ -130,8 +133,11 @@ pnpm cli revoke <session-id>
 |---------|-------------|
 | `pnpm cli init` | Initialize data directory |
 | `pnpm cli import <file>` | Import CSV/JSON data |
+| `pnpm cli discover <agent>` | View agent manifest |
+| `pnpm cli connect <agent>` | Verify and cache agent |
 | `pnpm cli authorize <agent>` | Authorize and issue Token |
 | `pnpm cli sessions -a` | View all sessions |
 | `pnpm cli audit --limit 20` | View audit logs |
 | `pnpm cli revoke <id>` | Revoke a session |
 | `uomp gateway start` | Start Gateway + Cloudflare Tunnel |
+| `uomp gateway status` | View Gateway status |

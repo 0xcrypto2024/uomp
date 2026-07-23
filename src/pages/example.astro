@@ -3,56 +3,157 @@ import Layout from '../layouts/Layout.astro';
 import { baseUrl } from '../utils/base.ts';
 ---
 
-<Layout title="示例 - UOMP" description="UOMP 示例：浏览器 Dashboard 和 CLI 股票分析 Agent" switchHref={`${baseUrl}en/example/`}>
+<Layout title="示例 - UOMP" description="UOMP 示例：浏览器 Dashboard + CLI + SDK Agent" switchHref={`${baseUrl}en/example/`}>
   <section>
     <div class="container">
-      <div class="sec-eyebrow">
-        <div class="sec-num">示例</div>
-        <span class="sec-tag">两个入口，同一套协议</span>
-      </div>
+      <div class="sec-eyebrow"><div class="sec-num">示例</div><span class="sec-tag">浏览器 + CLI + SDK</span></div>
       <h1>UOMP 示例</h1>
-      <p>
-        UOMP 提供两种使用方式，底层共享同一个 SDK 和协议。选择适合你的入口。
-      </p>
+      <p>三种方式体验 UOMP，底层共享同一套协议和 SDK。选择适合你的入口。</p>
 
-      <div style="display:flex;gap:2rem;flex-wrap:wrap;margin-top:2rem">
-        <!-- Browser Dashboard -->
-        <div class="card" style="flex:1;min-width:300px;border:2px solid var(--purple)">
-          <div class="card-label" style="color:var(--purple);font-size:1.1rem;margin-bottom:.5rem">🖥️ 浏览器 Dashboard</div>
-          <p style="color:var(--mid);margin-bottom:1rem">零安装。连接钱包 + Dropbox，直接在浏览器中管理投资组合并运行分析。</p>
-          <ul style="color:var(--mid);font-size:.85rem;list-style:none;padding:0;margin-bottom:1rem">
-            <li style="padding:.2rem 0">✅ 无需 CLI，无需服务器</li>
-            <li style="padding:.2rem 0">✅ MetaMask / Argent X 钱包签名</li>
-            <li style="padding:.2rem 0">✅ Dropbox 加密存储</li>
-            <li style="padding:.2rem 0">✅ Agent 分析（P&L、Sharpe、Beta、信号）</li>
-            <li style="padding:.2rem 0">✅ CSV 导入 + 在线编辑</li>
-          </ul>
-          <a href={`${baseUrl}dashboard/`} style="display:inline-block;padding:.7rem 1.5rem;background:#7C3AED;border:1px solid #A78BFA;border-radius:6px;color:#fff;text-decoration:none;font-weight:600;font-size:.9rem">打开 Dashboard →</a>
-        </div>
-
-        <!-- CLI Stock Analyst -->
-        <div class="card" style="flex:1;min-width:300px">
-          <div class="card-label" style="font-size:1.1rem;margin-bottom:.5rem">⌨️ CLI 股票分析 Agent</div>
-          <p style="color:var(--mid);margin-bottom:1rem">开发者/AI Agent 使用 CLI + SDK，通过 Gateway 远程访问数据或本地运行。</p>
-          <ul style="color:var(--mid);font-size:.85rem;list-style:none;padding:0;margin-bottom:1rem">
-            <li style="padding:.2rem 0">✅ <code>@uomp/sdk</code> TypeScript SDK</li>
-            <li style="padding:.2rem 0">✅ Gateway + Cloudflare Tunnel 远程访问</li>
-            <li style="padding:.2rem 0">✅ 多维度分析：Sharpe、Beta、MACD、RSI</li>
-            <li style="padding:.2rem 0">✅ Capability Token 授权</li>
-            <li style="padding:.2rem 0">✅ Digital Ocean 部署就绪</li>
-          </ul>
-          <a href="https://github.com/0xaicrypto/uomp-core/tree/main/examples/stock-analyst" target="_blank" rel="noopener" style="display:inline-block;padding:.7rem 1.5rem;background:#1D4ED8;border:1px solid #60A5FA;border-radius:6px;color:#fff;text-decoration:none;font-weight:600;font-size:.9rem">GitHub →</a>
-        </div>
+      <!-- Browser -->
+      <h2>🖥️ 浏览器 Dashboard — 零安装</h2>
+      <p>最直接的体验方式。打开网页，连钱包，开始管理组合。</p>
+      <div class="card" style="border:2px solid var(--purple);margin-bottom:2rem">
+        <div class="card-label" style="color:var(--purple);font-size:1rem;margin-bottom:.5rem">无需 CLI · 无需服务器</div>
+        <ul style="color:var(--mid);font-size:.85rem;list-style:none;padding:0;margin-bottom:1rem">
+          <li>✅ MetaMask / Argent X 钱包签名 → 派生加密密钥</li>
+          <li>✅ Dropbox OAuth → 加密存储到你的账号</li>
+          <li>✅ 编辑持仓 / CSV 导入</li>
+          <li>✅ Agent 分析（P&L、Sharpe、Beta、MACD、RSI）</li>
+        </ul>
+        <a href={`${baseUrl}dashboard/`} style="display:inline-block;padding:.7rem 1.5rem;background:#7C3AED;border:1px solid #A78BFA;border-radius:6px;color:#fff;text-decoration:none;font-weight:600">打开 Dashboard →</a>
       </div>
 
-      <h2 style="margin-top:3rem">两者关系的简短说明</h2>
-      <p style="color:var(--mid)">
-        浏览器 Dashboard 和 CLI Agent 是 UOMP 协议的<strong>同一个实现</strong>的两种入口形式。
-        它们共享 <code>@uomp/sdk</code>、<code>@uomp/core</code>、Token 体系、Guard 鉴权和审计日志。
-        区别只在于用户界面：一个是浏览器（钱包 + Dropbox），一个是命令行（Token + SDK）。
-      </p>
+      <!-- CLI Basics -->
+      <h2>⌨️ CLI 基础 — 安装和使用</h2>
+      <p>在安装 Agent 之前，先把 CLI 跑起来。</p>
 
-      <div class="hero-btns" style="margin-top: 2.5rem;">
+      <h3>编译安装</h3>
+      <pre><code>git clone https://github.com/0xaicrypto/uomp-core
+cd uomp-core
+pnpm install
+pnpm build
+pnpm cli init</code></pre>
+
+      <h3>导入数据</h3>
+      <pre><code># 导入 CSV 持仓
+pnpm cli import ./examples/stock-analyst/sample-holdings.csv \
+  --tag portfolio:holdings \
+  --sensitivity high
+
+# 导入 JSON 风险偏好
+pnpm cli import ./examples/stock-analyst/sample-risk.json --replace</code></pre>
+
+      <h3>启动服务 + 授权</h3>
+      <pre><code># 终端 1：启动 Auth + Guard
+pnpm --filter @uomp/server start
+
+# 终端 2：授权
+pnpm cli authorize ./examples/stock-analyst \
+  --scope portfolio:holdings profile:risk \
+  --output /tmp/uomp.env --no-server</code></pre>
+
+      <h3>常用命令速查</h3>
+      <table>
+        <tr><th>命令</th><th>说明</th></tr>
+        <tr><td><code>pnpm cli init</code></td><td>初始化 ~/.uomp</td></tr>
+        <tr><td><code>pnpm cli import &lt;file&gt; --tag &lt;tag&gt;</code></td><td>导入 CSV/JSON</td></tr>
+        <tr><td><code>pnpm cli discover &lt;agent&gt;</code></td><td>查看 Agent 声明</td></tr>
+        <tr><td><code>pnpm cli authorize &lt;agent&gt; --output &lt;file&gt;</code></td><td>签发 Token</td></tr>
+        <tr><td><code>pnpm cli sessions -a</code></td><td>查看所有会话</td></tr>
+        <tr><td><code>pnpm cli audit --limit 20</code></td><td>审计日志</td></tr>
+        <tr><td><code>pnpm cli revoke &lt;session-id&gt;</code></td><td>撤销会话</td></tr>
+        <tr><td><code>uomp gateway start</code></td><td>启动 Gateway + Cloudflare Tunnel</td></tr>
+        <tr><td><code>uomp gateway start --browser</code></td><td>Gateway + CORS（浏览器可用）</td></tr>
+      </table>
+
+      <!-- SDK Agent -->
+      <h2>🤖 构建 Agent — 使用 SDK</h2>
+      <p>用 <code>@uomp/sdk</code> 编写你自己的 Agent。以下以股票分析 Agent 为例。</p>
+
+      <h3>两步接入 SDK</h3>
+      <pre><code>import { UompClient } from '@uomp/sdk';
+
+// 1. 从环境变量初始化
+const uomp = UompClient.fromEnv();
+
+// 2. 读取数据
+const holdings = await uomp.memory.getByTag('portfolio:holdings');
+const risk = await uomp.memory.getByTag('profile:risk');</code></pre>
+
+      <h3>完整 Agent 示例</h3>
+      <pre><code>import { UompClient } from '@uomp/sdk';
+import { fetchQuotes } from './lib/market.js';
+import { analyze } from './lib/analysis.js';
+
+const uomp = UompClient.fromEnv();
+
+// 读取授权数据
+const holdings = await uomp.memory.getByTag('portfolio:holdings');
+const risk = await uomp.memory.getByTag('profile:risk');
+
+// 聚合查询（不暴露原始数据）
+const total = await uomp.aggregate.sum('portfolio:holdings', 'value.market_value');
+
+// 拉取行情
+const symbols = holdings.map(h => h.value.symbol);
+const quotes = await fetchQuotes(symbols);
+
+// 分析
+const report = analyze(holdings, risk, quotes);
+
+// 上传报告 + 提交删除证明
+await uomp.payload.upload(JSON.stringify(report));
+await uomp.session.finalize();</code></pre>
+
+      <h3>SDK 子客户端速查</h3>
+      <table>
+        <tr><th>子客户端</th><th>方法</th></tr>
+        <tr><td><code>uomp.memory</code></td><td><code>get</code>, <code>getByTag</code>, <code>getByKeys</code>, <code>listTags</code>, <code>set</code>, <code>delete</code></td></tr>
+        <tr><td><code>uomp.aggregate</code></td><td><code>sum</code>, <code>avg</code>, <code>count</code>, <code>min</code>, <code>max</code></td></tr>
+        <tr><td><code>uomp.payload</code></td><td><code>upload</code>, <code>download</code></td></tr>
+        <tr><td><code>uomp.session</code></td><td><code>submitDeletionProof</code>, <code>finalize</code>, <code>close</code></td></tr>
+        <tr><td><code>uomp.auth</code></td><td><code>createSession</code>, <code>grant</code>, <code>revoke</code></td></tr>
+        <tr><td><code>uomp.audit</code></td><td><code>query</code></td></tr>
+      </table>
+
+      <p>完整代码和示例数据：<a href="https://github.com/0xaicrypto/uomp-core/tree/main/examples/stock-analyst" target="_blank" rel="noopener">examples/stock-analyst</a></p>
+
+      <!-- Connect to Agent -->
+      <h2>🔗 作为客户端连接 Agent</h2>
+      <p>Agent 部署后（本地或 DO），用 CLI 授权并连接：</p>
+
+      <h3>本地模式</h3>
+      <pre><code># 启动服务
+pnpm --filter @uomp/server start
+
+# 授权
+pnpm cli authorize ./examples/stock-analyst --output /tmp/uomp.env --no-server
+
+# 运行
+source /tmp/uomp.env && node ./examples/stock-analyst/index.js</code></pre>
+
+      <h3>远程模式（Gateway + Cloudflare Tunnel）</h3>
+      <pre><code># 启动 Gateway
+uomp gateway start
+# → https://xxx.trycloudflare.com
+
+# 授权远程 Agent
+pnpm cli authorize ./examples/stock-analyst \
+  --scope portfolio:holdings profile:risk \
+  --remote --output /tmp/uomp-remote.env
+
+# 把 Token 交给 Agent 运行
+source /tmp/uomp-remote.env
+node ./examples/stock-analyst/index.js</code></pre>
+
+      <h3>使用已部署的 Agent（Digital Ocean）</h3>
+      <pre><code># 通过 DO Agent 的 API 直接分析
+curl -X POST https://uomp-stock-analyst-mvblm.ondigitalocean.app/analyze \
+  -H 'Content-Type: application/json' \
+  -d '{"holdings":[...],"risk":{...}}'</code></pre>
+
+      <div class="hero-btns" style="margin-top:2.5rem">
         <a href={`${baseUrl}tutorial/`} class="btn-h1">SDK 教程 →</a>
         <a href={`${baseUrl}design/`} class="btn-h1">实现设计 →</a>
         <a href="https://github.com/0xaicrypto/uomp-core" target="_blank" rel="noopener" class="btn-h2">GitHub</a>

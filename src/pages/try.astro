@@ -1,0 +1,98 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { baseUrl } from '../utils/base.ts';
+---
+
+<Layout title="Try - UOMP" description="两种方式试用 UOMP：浏览器中授权 Agent，或通过 CLI 接入 SDK" switchHref={`${baseUrl}en/try/`}>
+  <section>
+    <div class="container">
+      <h1 style="margin-bottom:.25rem">试用 UOMP</h1>
+      <p style="color:var(--mid);max-width:560px;line-height:1.65">
+        两种入口，一套协议。浏览器中联网授权 Agent，或通过 CLI 接入 SDK 构建 Agent。
+        共享 <code style="font-size:.88rem">@uomp/sdk</code>、Token 体系、Guard 鉴权和审计日志。
+      </p>
+    </div>
+
+    <div class="container" style="margin-top:2.5rem">
+      <div style="display:flex;gap:2rem;flex-wrap:wrap">
+
+        <!-- Browser Card -->
+        <div class="card" style="flex:1;min-width:320px">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">
+            <span style="font-size:2rem">🖥️</span>
+            <h2 style="margin:0;font-size:1.35rem">在浏览器中试用</h2>
+          </div>
+          <p style="color:var(--mid);margin-bottom:1.25rem;max-width:400px">
+            零安装。连接钱包（MetaMask / Argent X），接入 Dropbox，即可管理组合并授权 Agent 分析。
+          </p>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.25rem">
+            <div style="font-size:.8rem;color:var(--mid);margin-bottom:.4rem;font-weight:600">连接流程</div>
+            <div style="font-size:.85rem;color:var(--mid);line-height:1.8">
+              1. 钱包签名 → 生成加密密钥<br/>
+              2. 连接 Dropbox → 导入持仓<br/>
+              3. 编辑组合 → 调用 Agent 分析<br/>
+              4. 查看审计日志
+            </div>
+          </div>
+          <a href={`${baseUrl}dashboard/`} style="display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.5rem;background:#7C3AED;border-radius:8px;color:#fff;text-decoration:none;font-weight:600;font-size:.9rem">
+            开始试用 →
+          </a>
+        </div>
+
+        <!-- CLI Card -->
+        <div class="card" style="flex:1;min-width:320px">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">
+            <span style="font-size:2rem">⌨️</span>
+            <h2 style="margin:0;font-size:1.35rem">通过 CLI 试用</h2>
+          </div>
+          <p style="color:var(--mid);margin-bottom:1.25rem;max-width:400px">
+            适用于开发者、定时任务、远程 Agent。安装 CLI，通过 Capability Token 授权任意 Agent 读取你的数据。
+          </p>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.25rem">
+            <div style="font-size:.8rem;color:var(--mid);margin-bottom:.4rem;font-weight:600">命令速览</div>
+            <pre style="font-size:.8rem;color:var(--mid);line-height:1.75;overflow-x:auto;background:transparent;margin:0"><code>pnpm cli init                  # 初始化
+pnpm cli import data.csv      # 导入数据
+pnpm cli authorize ./agent    # 签发 Token
+pnpm cli sessions -a          # 查看会话
+pnpm cli revoke &lt;id&gt;          # 撤销</code></pre>
+          </div>
+          <a href={`${baseUrl}tutorial/`} style="display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.5rem;background:var(--blu);border-radius:8px;color:#fff;text-decoration:none;font-weight:600;font-size:.9rem">
+            CLI 教程 →
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shared infrastructure -->
+    <div class="container" style="margin-top:3.5rem">
+      <div class="card" style="max-width:720px">
+        <h2 style="font-size:1.15rem;margin-bottom:.75rem">共享基础设施</h2>
+        <p style="color:var(--mid);font-size:.88rem;line-height:1.7">
+          浏览器入口和 CLI 入口是 <strong>同一套实现的两种交互界面</strong>。底层共享 <code>@uomp/sdk</code>、<code>@uomp/core</code>、Capability Token 体系、Guard 鉴权和审计日志。区别仅在于：一个在浏览器中用钱包 + Dropbox 管理数据，一个在终端中用 Token 驱动 Agent。
+        </p>
+      </div>
+    </div>
+
+    <!-- SDK Quick Reference -->
+    <div class="container" style="margin-top:3.5rem">
+      <h2 style="font-size:1.15rem;margin-bottom:.5rem">构建你自己的 Agent</h2>
+      <p style="color:var(--mid);margin-bottom:1.5rem">如果你是 Agent 开发者，通过 <code>@uomp/sdk</code> 接入：</p>
+      <table>
+        <tr><th>子客户端</th><th>方法</th><th>说明</th></tr>
+        <tr><td><code>uomp.memory</code></td><td><code>get</code>, <code>getByTag</code>, <code>getByKeys</code></td><td>读取用户数据</td></tr>
+        <tr><td><code>uomp.memory</code></td><td><code>set</code>, <code>delete</code></td><td>写入（需授权）</td></tr>
+        <tr><td><code>uomp.aggregate</code></td><td><code>sum</code>, <code>avg</code>, <code>count</code>, <code>min</code>, <code>max</code></td><td>聚合查询</td></tr>
+        <tr><td><code>uomp.payload</code></td><td><code>upload</code>, <code>download</code></td><td>上传/下载报告</td></tr>
+        <tr><td><code>uomp.session</code></td><td><code>submitDeletionProof</code>, <code>finalize</code></td><td>删除证明 + 关闭会话</td></tr>
+        <tr><td><code>uomp.auth</code></td><td><code>createSession</code>, <code>grant</code>, <code>revoke</code></td><td>Session 管理</td></tr>
+        <tr><td><code>uomp.audit</code></td><td><code>query</code></td><td>审计日志</td></tr>
+      </table>
+    </div>
+
+    <div class="hero-btns" style="margin-top:3rem">
+      <a href="https://github.com/0xaicrypto/uomp-core/tree/main/examples/stock-analyst" target="_blank" rel="noopener" class="btn-h1" style="background:#059669">股票分析 Agent 源码 →</a>
+      <a href={`${baseUrl}tutorial/`} class="btn-h1">SDK 教程 →</a>
+      <a href="https://github.com/0xaicrypto/uomp-core" target="_blank" rel="noopener" class="btn-h2">GitHub</a>
+    </div>
+  </section>
+</Layout>

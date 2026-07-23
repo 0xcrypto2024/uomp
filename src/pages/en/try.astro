@@ -1,0 +1,103 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { baseUrl } from '../../utils/base.ts';
+---
+
+<Layout
+  title="Try - UOMP"
+  description="Try UOMP two ways: authorize agents in your browser, or integrate with the SDK via CLI."
+  lang="en"
+  switchHref={`${baseUrl}try/`}
+>
+  <section>
+    <div class="container">
+      <h1 style="margin-bottom:.25rem">Try UOMP</h1>
+      <p style="color:var(--mid);max-width:560px;line-height:1.65">
+        Two entry points, one protocol. Authorize agents in your browser, or build agents with the SDK via CLI.
+        Both share <code style="font-size:.88rem">@uomp/sdk</code>, the Token system, Guard auth, and audit logs.
+      </p>
+    </div>
+
+    <div class="container" style="margin-top:2.5rem">
+      <div style="display:flex;gap:2rem;flex-wrap:wrap">
+
+        <!-- Browser Card -->
+        <div class="card" style="flex:1;min-width:320px">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">
+            <span style="font-size:2rem">🖥️</span>
+            <h2 style="margin:0;font-size:1.35rem">Try in Browser</h2>
+          </div>
+          <p style="color:var(--mid);margin-bottom:1.25rem;max-width:400px">
+            Zero install. Connect wallet (MetaMask / Argent X), link Dropbox. Manage portfolio and authorize agents for analysis.
+          </p>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.25rem">
+            <div style="font-size:.8rem;color:var(--mid);margin-bottom:.4rem;font-weight:600">Workflow</div>
+            <div style="font-size:.85rem;color:var(--mid);line-height:1.8">
+              1. Wallet sign → derive encryption key<br/>
+              2. Link Dropbox → import holdings<br/>
+              3. Edit portfolio → call agent for analysis<br/>
+              4. View audit log
+            </div>
+          </div>
+          <a href={`${baseUrl}dashboard/`} style="display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.5rem;background:#7C3AED;border-radius:8px;color:#fff;text-decoration:none;font-weight:600;font-size:.9rem">
+            Try in Browser →
+          </a>
+        </div>
+
+        <!-- CLI Card -->
+        <div class="card" style="flex:1;min-width:320px">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">
+            <span style="font-size:2rem">⌨️</span>
+            <h2 style="margin:0;font-size:1.35rem">Try with CLI</h2>
+          </div>
+          <p style="color:var(--mid);margin-bottom:1.25rem;max-width:400px">
+            For developers, cron jobs, and remote agents. Install CLI, issue Capability Tokens to authorize agents.
+          </p>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.25rem">
+            <div style="font-size:.8rem;color:var(--mid);margin-bottom:.4rem;font-weight:600">Quick commands</div>
+            <pre style="font-size:.8rem;color:var(--mid);line-height:1.75;overflow-x:auto;background:transparent;margin:0"><code>pnpm cli init                  # Initialize
+pnpm cli import data.csv      # Import data
+pnpm cli authorize ./agent    # Issue Token
+pnpm cli sessions -a          # List sessions
+pnpm cli revoke &lt;id&gt;          # Revoke</code></pre>
+          </div>
+          <a href={`${baseUrl}en/tutorial/`} style="display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.5rem;background:var(--blu);border-radius:8px;color:#fff;text-decoration:none;font-weight:600;font-size:.9rem">
+            CLI Tutorial →
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shared infrastructure -->
+    <div class="container" style="margin-top:3.5rem">
+      <div class="card" style="max-width:720px">
+        <h2 style="font-size:1.15rem;margin-bottom:.75rem">Shared Infrastructure</h2>
+        <p style="color:var(--mid);font-size:.88rem;line-height:1.7">
+          Browser and CLI are <strong>two interfaces to the same implementation</strong>. Both share <code>@uomp/sdk</code>, <code>@uomp/core</code>, the Capability Token system, Guard auth, and audit logs. The only difference: one manages data in a browser with wallet + Dropbox, the other drives agents from a terminal with Tokens.
+        </p>
+      </div>
+    </div>
+
+    <!-- SDK Quick Reference -->
+    <div class="container" style="margin-top:3.5rem">
+      <h2 style="font-size:1.15rem;margin-bottom:.5rem">Build Your Own Agent</h2>
+      <p style="color:var(--mid);margin-bottom:1.5rem">For agent developers, integrate via <code>@uomp/sdk</code>:</p>
+      <table>
+        <tr><th>Sub-client</th><th>Method</th><th>Description</th></tr>
+        <tr><td><code>uomp.memory</code></td><td><code>get</code>, <code>getByTag</code>, <code>getByKeys</code></td><td>Read user data</td></tr>
+        <tr><td><code>uomp.memory</code></td><td><code>set</code>, <code>delete</code></td><td>Write (requires auth)</td></tr>
+        <tr><td><code>uomp.aggregate</code></td><td><code>sum</code>, <code>avg</code>, <code>count</code>, <code>min</code>, <code>max</code></td><td>Aggregate queries</td></tr>
+        <tr><td><code>uomp.payload</code></td><td><code>upload</code>, <code>download</code></td><td>Upload / download reports</td></tr>
+        <tr><td><code>uomp.session</code></td><td><code>submitDeletionProof</code>, <code>finalize</code></td><td>Deletion proof + close session</td></tr>
+        <tr><td><code>uomp.auth</code></td><td><code>createSession</code>, <code>grant</code>, <code>revoke</code></td><td>Session management</td></tr>
+        <tr><td><code>uomp.audit</code></td><td><code>query</code></td><td>Audit log</td></tr>
+      </table>
+    </div>
+
+    <div class="hero-btns" style="margin-top:3rem">
+      <a href="https://github.com/0xaicrypto/uomp-core/tree/main/examples/stock-analyst" target="_blank" rel="noopener" class="btn-h1" style="background:#059669">Stock Analyst Source →</a>
+      <a href={`${baseUrl}en/tutorial/`} class="btn-h1">SDK Tutorial →</a>
+      <a href="https://github.com/0xaicrypto/uomp-core" target="_blank" rel="noopener" class="btn-h2">GitHub</a>
+    </div>
+  </section>
+</Layout>

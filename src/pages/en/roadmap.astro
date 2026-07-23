@@ -31,7 +31,7 @@ import { baseUrl } from '../../utils/base.ts';
         <li><span class="status status-done">Done</span>Token claims: `allowed_fields`, `aggregation_only`, `task_bound`</li>
         <li><span class="status status-done">Done</span>Agent Manifest `data_retention_policy`</li>
         <li><span class="status status-done">Done</span>UOMP SDK Phase 1 (`UompClient`: memory / aggregate / payload / session / audit / auth / identity)</li>
-        <li><span class="status status-done">Done</span>Browser Dashboard (uomp.org/dashboard/): wallet auth + Dropbox + Agent analysis</li>
+         <li><span class="status status-done">Done</span>Browser entry (uomp.org/dashboard/): wallet auth + Dropbox + Agent analysis</li>
         <li><span class="status status-done">Done</span>Cloudflare Tunnel integration (`uomp gateway start` one-command public expose)</li>
         <li><span class="status status-done">Done</span>Store abstraction (`IMemoryStore` interface, SQLite + EncryptedObject backends)</li>
         <li><span class="status status-done">Done</span>Cloud Relay (`apps/relay/`, CORS + rate limit + pubkey verification)</li>
@@ -50,7 +50,7 @@ import { baseUrl } from '../../utils/base.ts';
         <li><span class="status status-next">Planned</span>Agent write staging: writes enter <code>pending</code> until user approval</li>
         <li><span class="status status-next">Planned</span><code>uom memory review</code> approval command</li>
         <li><span class="status status-next">Planned</span>Graphical authorization panel</li>
-        <li><span class="status status-done">Done</span>Graphical authorization panel (Browser Dashboard)</li>
+         <li><span class="status status-done">Done</span>Graphical authorization panel (Try in Browser)</li>
         <li><span class="status status-done">Done</span>TypeScript SDK (`UompClient`, mTLS, aggregation, Payload, deletion proof)</li>
         <li><span class="status status-done">Done</span>Memory Store abstraction (SQLite / S3 / IPFS pluggable)</li>
         <li><span class="status status-next">Planned</span>Memory Store abstraction supporting SQLite / cloud / decentralized storage</li>
@@ -67,7 +67,7 @@ import { baseUrl } from '../../utils/base.ts';
       </ul>
     </div>
     <div class="hero-btns" style="margin-top:2.5rem;">
-      <a href={`${baseUrl}dashboard/`} class="btn-h1" style="background:#8B5CF6">Open Dashboard →</a>
+      <a href={`${baseUrl}try/`} class="btn-h1" style="background:#8B5CF6">Try →</a>
       <a href={`${baseUrl}en/tutorial/`} class="btn-h1">SDK Tutorial →</a>
     </div>
   </section>

@@ -16,14 +16,14 @@ const nav = {
     spec: '规范',
     design: '实现',
     tutorial: '教程',
-    example: '示例',
+    example: 'Try',
     roadmap: '路线图',
     github: 'GitHub',
     switch: 'EN',
     brand: 'UOMP',
     brandTagline: '用户主权型 Agent 记忆授权协议',
     footerCols: {
-      protocol: { title: '协议', links: [{ t: '规范', h: `${baseUrl}spec/` }, { t: '实现设计', h: `${baseUrl}design/` }, { t: '教程', h: `${baseUrl}tutorial/` }, { t: '示例', h: `${baseUrl}example/` }, { t: '路线图', h: `${baseUrl}roadmap/` }, { t: 'Dashboard', h: `${baseUrl}dashboard/` }] },
+      protocol: { title: '协议', links: [{ t: '规范', h: `${baseUrl}spec/` }, { t: '实现设计', h: `${baseUrl}design/` }, { t: '教程', h: `${baseUrl}tutorial/` }, { t: '试用', h: `${baseUrl}try/` }, { t: '路线图', h: `${baseUrl}roadmap/` }, { t: 'Try in Browser', h: `${baseUrl}dashboard/` }] },
       community: { title: '社区', links: [{ t: 'GitHub', h: 'https://github.com/0xaicrypto/uomp-core' }, { t: 'Discussions', h: 'https://github.com/0xaicrypto/uomp-core/discussions' }] },
     },
     footerBtm: '© UOMP 贡献者 · 开放协议草案',
@@ -33,14 +33,14 @@ const nav = {
     spec: 'Spec',
     design: 'Implementation',
     tutorial: 'Tutorial',
-    example: 'Example',
+    example: 'Try',
     roadmap: 'Roadmap',
     github: 'GitHub',
     switch: '中文',
     brand: 'UOMP',
     brandTagline: 'User-sovereign Agent memory authorization protocol',
     footerCols: {
-      protocol: { title: 'Protocol', links: [{ t: 'Spec', h: `${baseUrl}en/spec/` }, { t: 'Implementation', h: `${baseUrl}en/design/` }, { t: 'Tutorial', h: `${baseUrl}en/tutorial/` }, { t: 'Example', h: `${baseUrl}en/example/` }, { t: 'Roadmap', h: `${baseUrl}en/roadmap/` }, { t: 'Dashboard', h: `${baseUrl}dashboard/` }] },
+      protocol: { title: 'Protocol', links: [{ t: 'Spec', h: `${baseUrl}en/spec/` }, { t: 'Implementation', h: `${baseUrl}en/design/` }, { t: 'Tutorial', h: `${baseUrl}en/tutorial/` }, { t: 'Try', h: `${baseUrl}en/try/` }, { t: 'Roadmap', h: `${baseUrl}en/roadmap/` }, { t: 'Try in Browser', h: `${baseUrl}dashboard/` }] },
       community: { title: 'Community', links: [{ t: 'GitHub', h: 'https://github.com/0xaicrypto/uomp-core' }, { t: 'Discussions', h: 'https://github.com/0xaicrypto/uomp-core/discussions' }] },
     },
     footerBtm: '© UOMP contributors · Open protocol draft',
@@ -52,7 +52,7 @@ const homeHref = lang === 'zh' ? baseUrl : `${baseUrl}en/`;
 const specHref = lang === 'zh' ? `${baseUrl}spec/` : `${baseUrl}en/spec/`;
 const designHref = lang === 'zh' ? `${baseUrl}design/` : `${baseUrl}en/design/`;
 const tutorialHref = lang === 'zh' ? `${baseUrl}tutorial/` : `${baseUrl}en/tutorial/`;
-const exampleHref = lang === 'zh' ? `${baseUrl}example/` : `${baseUrl}en/example/`;
+const tryHref = lang === 'zh' ? `${baseUrl}try/` : `${baseUrl}en/try/`;
 const roadmapHref = lang === 'zh' ? `${baseUrl}roadmap/` : `${baseUrl}en/roadmap/`;
 const resolvedSwitchHref = switchHref ?? (lang === 'zh' ? `${baseUrl}en/` : baseUrl);
 
@@ -61,7 +61,7 @@ const isHome = pathname === baseUrl || pathname === `${baseUrl}en/` || pathname 
 const isSpec = pathname.startsWith(`${baseUrl}spec/`) || pathname.startsWith(`${baseUrl}en/spec/`);
 const isDesign = pathname.startsWith(`${baseUrl}design/`) || pathname.startsWith(`${baseUrl}en/design/`);
 const isTutorial = pathname.startsWith(`${baseUrl}tutorial/`) || pathname.startsWith(`${baseUrl}en/tutorial/`);
-const isExample = pathname.startsWith(`${baseUrl}example/`) || pathname.startsWith(`${baseUrl}en/example/`);
+const isTry = pathname.startsWith(`${baseUrl}try/`) || pathname.startsWith(`${baseUrl}en/try/`);
 const isRoadmap = pathname.startsWith(`${baseUrl}roadmap/`) || pathname.startsWith(`${baseUrl}en/roadmap/`);
 ---
 
@@ -117,7 +117,7 @@ const isRoadmap = pathname.startsWith(`${baseUrl}roadmap/`) || pathname.startsWi
           <li><a href={specHref} class={isSpec ? 'active' : ''}>{t.spec}</a></li>
           <li><a href={designHref} class={isDesign ? 'active' : ''}>{t.design}</a></li>
           <li><a href={tutorialHref} class={isTutorial ? 'active' : ''}>{t.tutorial}</a></li>
-          <li><a href={exampleHref} class={isExample ? 'active' : ''}>{t.example}</a></li>
+          <li><a href={tryHref} class={isTry ? 'active' : ''}>{t.example}</a></li>
           <li><a href={roadmapHref} class={isRoadmap ? 'active' : ''}>{t.roadmap}</a></li>
         </ul>
         <div class="nav-r">

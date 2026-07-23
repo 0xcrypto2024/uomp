@@ -26,7 +26,7 @@ description: 'UOMP 参考实现 uomp-mvp 的架构与实现说明：组件职责
 | `apps/server` | — | Auth + Guard 组合 HTTP 服务（`127.0.0.1:9374`） |
 | `apps/gateway` | — | 用户自托管 Gateway：mTLS + Token 转发 + Cloudflare Tunnel |
 | `apps/relay` | Cloud Relay | 无状态公共 Relay（设计阶段）：公钥验签 + 密文转发 |
-| `uomp.org/dashboard/` | Browser UI | 浏览器 Dashboard：钱包认证 + 加密存储 + 组合管理 + Agent 分析 |
+| `uomp.org/dashboard/` | Browser UI | 浏览器入口：钱包认证 + 加密存储 + 组合管理 + Agent 分析 |
 
 ---
 
@@ -295,7 +295,7 @@ Agent 在 `uom.json` 中声明 `requested_scopes`、`data_retention_policy`、`e
 | 聚合查询 | ✅ | sum/avg/count/min/max，配合 `aggregation_only` |
 | 删除证明 | ✅ | Agent 提交签名证明，Session 自动关闭 |
 | 字段过滤 | ✅ | Token 指定 `allowed_fields`，Guard 过滤 |
-| 浏览器 SDK | ✅ | 钱包认证 + Dashboard（uomp.org/dashboard/） |
+| 浏览器 SDK | ✅ | 钱包认证 + Try in Browser（uomp.org/dashboard/） |
 | Store 抽象 | ✅ | `IMemoryStore` 接口，SQLite + EncryptedObject 后端 |
 | Cloud Relay | ✅ | `apps/relay/` 已部署，CORS + 限流 + 公钥验签 |
 | 钱包认证 | ✅ | MetaMask/Argent X via PBKDF2，Seed Phrase 备用 |

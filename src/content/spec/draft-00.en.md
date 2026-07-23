@@ -8,7 +8,15 @@ description: 'User-Owned Memory Protocol Specification Draft'
 **Version**: Draft-00  
 **Status**: Draft  
 **Published**: 2026-07-12  
+**Last Updated**: 2026-07-23  
 **Goal**: Public RFC draft for community review
+
+### Version History
+
+| Date | Change |
+|------|--------|
+| 2026-07-12 | Draft-00 initial release. |
+| 2026-07-23 | Added Browser Profile (§5.3), Cloud Relay (§15.7), Store abstraction (§0), Payload API (§15.6). Updated `uom.json` schema (§6.2-6.4) with `fields`, `purposes`, `external_data_sources`, `package`. Updated Architecture diagram to include Gateway, Relay, and Browser path. Added FHE to Future Work (§22). Marked on-chain audit as Phase 4. |
 
 ---
 
@@ -68,6 +76,24 @@ UOMP's design goals are:
 
 <img src="/diagrams/spec-architecture-en.svg" alt="UOMP architecture diagram" class="diagram" />
 
+UOMP's complete architecture includes the following components:
+
+| Component | Location | Responsibility |
+|-----------|----------|----------------|
+| **Memory Store** | User's machine | Persistent memory data storage. Supports pluggable backends (SQLite, encrypted object/S3, IPFS) via the `IMemoryStore` interface. |
+| **Auth Service** | User's machine | Session management, token issuance, identity verification. |
+| **Memory Guard** | User's machine | Token validation, scope filtering, aggregate queries, audit logging. |
+| **CLI / Browser UI** | User's machine | User interface: command line or browser Dashboard. |
+| **Gateway** | User's machine (optional) | mTLS tunnel + Token forwarding, exposing Guard to remote Agents. Supports Cloudflare Tunnel for zero-config public exposure. |
+| **Cloud Relay** | Public network (optional) | Stateless public relay, validates Tokens with only the Guard public key and forwards requests. Provides CORS + rate limiting. |
+| **Agent** | Anywhere | Independent process carrying a Capability Token to read data via Guard or Gateway. |
+
+Three access paths:
+
+1. **Local**: Agent process accesses Guard directly at `127.0.0.1:9374`.
+2. **Remote**: Agent accesses Guard through Gateway (mTLS + Tunnel).
+3. **Browser**: User connects wallet (MetaMask/Argent X) via browser Dashboard, encrypted storage in Dropbox, calls Guard and Agents through Gateway.
+
 ### 5.2 Flow
 
 1. The Agent runs as an independent process and provides a `uom.json` declaring its identity and default requested memory scope.
@@ -82,14 +108,15 @@ The Agent and UI/CLI are separate processes. The UI/CLI runs on the user's machi
 
 ### 5.3 Profiles
 
-UOMP defines two deployment profiles:
+UOMP defines three deployment profiles:
 
-| Profile | Default Port | Transport | Authentication |
-|---------|--------------|-----------|----------------|
-| Local Profile | `127.0.0.1:9374` | HTTP | Capability Token |
-| Remote Profile | User-configured | HTTPS | Capability Token + mTLS |
+| Profile | Default Port | Transport | Authentication | Storage |
+|---------|--------------|-----------|----------------|---------|
+| Local Profile | `127.0.0.1:9374` | HTTP | Capability Token | SQLite (local) |
+| Remote Profile | User-configured | HTTPS | Capability Token + mTLS | User-specified |
+| Browser Profile | Gateway URL | HTTPS + CORS | Wallet sign (MetaMask/Argent X) + Capability Token | Dropbox (encrypted objects) |
 
-Local Profile is the default and RECOMMENDED configuration. Remote Profile MUST be explicitly enabled.
+Local Profile is the default and RECOMMENDED configuration. Remote Profile MUST be explicitly enabled. Browser Profile is designed for zero-install scenarios: wallet signature derives encryption key (PBKDF2), data is stored as ciphertext in Dropbox, server-side zero-knowledge.
 
 ## 6. Agent Manifest: `uom.json`
 
@@ -109,10 +136,23 @@ The Agent MUST provide a `uom.json` in the same directory as the executable or i
     "description": "Helps manage your schedule",
     "publisher": "example-org"
   },
+  "package": {
+    "checksum": "sha256:abc123...",
+    "signature": "ed25519:def456...",
+    "source_url": "https://github.com/example/calendar-agent/releases/v1.2.0"
+  },
   "requested_scopes": {
     "read": {
       "tags": ["preference", "identity:public"],
       "keys": [],
+      "fields": {
+        "preference": ["key", "value"],
+        "identity:public": ["key", "value", "sensitivity"]
+      },
+      "purposes": {
+        "preference": "Read user preferences to personalize schedule suggestions",
+        "identity:public": "Get public identity info to match user timezone"
+      },
       "description": "Read user preferences and public identity info"
     },
     "write": {
@@ -124,6 +164,7 @@ The Agent MUST provide a `uom.json` in the same directory as the executable or i
   "required_capabilities": ["memory.read"],
   "optional_capabilities": ["memory.query"],
   "requires_remote": false,
+  "external_data_sources": [],
   "data_retention_policy": {
     "max_retention_seconds": 300,
     "deletion_method": "process_termination",
@@ -156,6 +197,11 @@ The Agent MUST provide a `uom.json` in the same directory as the executable or i
 | `required_capabilities` | string[] | OPTIONAL | List of required capabilities. |
 | `optional_capabilities` | string[] | OPTIONAL | List of optional capabilities. |
 | `requires_remote` | boolean | OPTIONAL | Whether remote connection is required, default `false`. |
+| `external_data_sources` | object[] | OPTIONAL | External data sources required by the agent (e.g., market data API). |
+| `package` | object | RECOMMENDED | Package integrity verification information. |
+| `package.checksum` | string | OPTIONAL | Package hash (e.g., `sha256:abc123...`), used by `connect`. |
+| `package.signature` | string | OPTIONAL | Publisher's digital signature over the `checksum`. |
+| `package.source_url` | string | OPTIONAL | Source URL of the package. |
 | `data_retention_policy` | object | RECOMMENDED | Agent declares its data retention policy, see §6.5. |
 | `identity` | object | OPTIONAL | Publisher identity verification information. |
 
@@ -170,6 +216,14 @@ The Scope Object is used in `requested_scopes.read` and `requested_scopes.write`
   "deny_tags": ["financial"],
   "deny_keys": ["user.password"],
   "allowed_fields": ["key", "value", "tags", "sensitivity"],
+  "fields": {
+    "preference": ["key", "value"],
+    "identity:public": ["key", "value", "sensitivity"]
+  },
+  "purposes": {
+    "preference": "Read user preferences to personalize suggestions",
+    "identity:public": "Get public identity info to match user timezone"
+  },
   "description": "Why this scope is needed"
 }
 ```
@@ -181,7 +235,9 @@ The Scope Object is used in `requested_scopes.read` and `requested_scopes.write`
 | `deny_tags` | string[] | OPTIONAL | Explicitly denied tags. |
 | `deny_keys` | string[] | OPTIONAL | Explicitly denied keys. |
 | `allowed_fields` | string[] | OPTIONAL | Fields allowed to return per Memory Item. If absent, return the full item. |
-| `description` | string | RECOMMENDED | Purpose description for the authorization panel. |
+| `fields` | object | OPTIONAL | Per-tag field-level allow map. `{ "tag_name": ["field1", "field2"] }`. More granular than `allowed_fields`. |
+| `purposes` | object | OPTIONAL | Per-tag purpose descriptions. `{ "tag_name": "purpose text" }`. Displayed on the authorization panel. |
+| `description` | string | RECOMMENDED | Overall purpose description for the authorization panel. |
 
 ### 6.5 Data Retention Policy
 
@@ -922,7 +978,42 @@ Agent-generated reports and analysis results MUST NOT remain as plaintext on rem
 
 The user's local private key SHOULD be protected by a keystore or system keychain.
 
-### 15.7 Migration to DIDComm
+### 15.7 Cloud Relay
+
+Cloud Relay is a stateless public relay service allowing Agents to access Guard over the public internet without user configuration of mTLS certificates or Cloudflare Tunnel.
+
+**Differences from Gateway**:
+
+| Feature | Gateway | Cloud Relay |
+|---------|---------|-------------|
+| Deployment | User machine | Public server |
+| Authentication | mTLS (mutual TLS) | Public-key signature verification (Ed25519) |
+| Configuration | Required (TLS certs) | None (zero-config) |
+| Tunnel | Cloudflare Tunnel | Independent user tunnel or other |
+| Use case | User-controlled environments | Non-technical users, browser-based |
+
+**Workflow**:
+
+```
+Agent → POST /v1/memory/read → Cloud Relay
+  → Verify Token (Guard public key)
+  → Rate-limit check (per session)
+  → Forward to Guard → Return result
+```
+
+The Relay only requires Guard's Ed25519 **public key** to verify Tokens. It holds no private key and cannot issue Tokens. CORS is enabled for browser-based calls. Default rate limit: 60 req/min per session.
+
+**Gateway + Cloud Relay combined mode**:
+
+```
+User machine: Gateway (mTLS) ← Cloudflare Tunnel → public URL
+Public:       Cloud Relay → verify sig → forward to Gateway
+Remote:       Agent → Cloud Relay
+```
+
+Users need not expose local ports or configure DNS. Relay exposes `UOMP_RELAY_URL` as an alternative to `UOMP_BASE_URL` for Agents.
+
+### 15.8 Migration to DIDComm
 
 UOMP plans to migrate from mTLS HTTPS to **DIDComm v2** for authorization negotiation and Token delivery in the long term. In MVP, mTLS HTTPS is the default channel, and DIDComm is an optional extension.
 
@@ -1030,53 +1121,64 @@ Each audit log MUST contain:
 
 ### 18.4 Blockchain Extension
 
-UOMP MAY anchor summaries of key audit events to a blockchain for immutable audit proof. The protocol itself does not mandate a specific chain, but Starknet is RECOMMENDED as the default (low cost, high-frequency events), with EVM-compatible chains as an option.
+> **[PLANNED — Phase 4]** The on-chain audit capability described in this section is not yet available in the reference implementation. Audit logs are currently stored in local SQLite only. Full design document: `docs/on-chain-audit-design.md`.
+
+UOMP MAY anchor authorization, revocation, and access events to Starknet, leveraging the chain's immutability and low-cost event logs. The protocol itself does not mandate a specific chain, but Starknet is RECOMMENDED as the default (low cost, high-frequency events, native paymaster), with EVM-compatible chains as an option.
 
 #### 18.4.1 Event Types
 
+The on-chain contract `AuditAnchor` is a pure event emitter with zero storage writes:
+
 ```solidity
-event SessionGranted(
-  bytes32 indexed sessionHash,
-  bytes32 indexed agentHash,
-  uint256 expiresAt
+event Authorization(
+  bytes32 indexed sessionId,
+  bytes32 indexed agentId,
+  string[] scopes,           // ["portfolio:holdings", "profile:risk"]
+  string[] allowedFields,    // ["value.market_value", "quantity"]
+  uint64  duration,
+  uint64  timestamp,
+  uint64  nonce
 );
 
-event SessionRevoked(
-  bytes32 indexed sessionHash,
-  bytes32 indexed agentHash
+event Revocation(
+  bytes32 indexed sessionId,
+  uint64  timestamp
 );
 
-event GatewayAccess(
-  bytes32 indexed sessionHash,
-  bytes32 indexed agentHash,
-  bytes32 endpointHash,
-  bool allowed
-);
-
-event PayloadAnchored(
-  bytes32 indexed payloadHash,
-  bytes32 indexed sessionHash,
-  bytes32 agentHash
-);
-
-event DataDeletionProofSubmitted(
-  bytes32 indexed sessionHash,
-  bytes32 indexed agentHash,
-  bytes32 deletionProofHash
+event Access(
+  bytes32 indexed sessionId,
+  bytes32 indexed agentId,
+  string   tag,              // "portfolio:holdings"
+  string[] fields,           // ["value.market_value"]
+  uint64   timestamp
 );
 ```
 
-Hash computation:
+- `sessionId` and `agentId` are `indexed` for efficient filtering.
+- `scopes`, `fields`, and `tag` are plaintext — chain observers can see which data categories were authorized, but not actual data values.
+- A single `Access` event on Starknet L2 costs approximately 600 gas, under $0.001.
 
-- `sessionHash` = `keccak256(session_id || agent_id || granted_tags_json)`
-- `agentHash` = `keccak256(agent_id)`
-- `endpointHash` = `keccak256(request_path)`
-- `payloadHash` = `sha256(ciphertext)`
-- `deletionProofHash` = `keccak256(deletion_proof_id || session_id || memory_hash)`
+#### 18.4.2 Indexer & Verification
 
-On-chain events MUST NOT contain specific Memory keys/values or Payload plaintext.
+An off-chain indexer scans chain events and builds a queryable view:
 
-#### 18.4.2 Batching Strategy
+```
+GET /v1/audit/session/{sessionId}
+  → { authorization, accesses[], revocation }
+```
+
+Verification path:
+1. User queries the indexer for a session's complete audit record.
+2. Independent verification: query chain RPC directly, filter events by sessionId, verify against the indexer.
+3. Third parties need not trust the user or Agent — the chain is the single source of truth.
+
+#### 18.4.3 Paymaster
+
+Starknet natively supports paymasters (sponsored gas). Agents or relays can sponsor transactions so users never pay for individual Access events. The user's wallet only signs once for authorization.
+
+#### 18.4.4 FHE Extension (Future)
+
+When FHE integration is complete (§22), Access events will record ciphertext tags accessed by the Agent. The Agent only ever touches ciphertext and cannot decrypt even if it retains it. Combined with on-chain audit, this achieves a full trustless lifecycle: user encrypts → Agent computes on ciphertext → chain records → user decrypts results.
 
 - **Authorization events** (`SessionGranted`, `SessionRevoked`): low volume and high criticality, SHOULD be anchored near real-time.
 - **Access events** (`GatewayAccess`): high volume, SHOULD be batched. Gateway aggregates events into a Merkle tree every N minutes or every M events, anchors the `merkleRoot` on-chain, and keeps the full log locally for later verification.
@@ -1182,21 +1284,11 @@ When both `task_bound: true` and `proof_required: true` are set, deletion proof 
 
 > **Future extension**: TEE (Trusted Execution Environment) enables hardware-level atomicity — the Agent code runs inside an enclave, memory is automatically zeroed on exit, and hardware attestation is provided.
 
-### 19.6 Deletion Proof Anchoring
+### 19.6 Deletion Proof On-Chain
 
-In addition to the blockchain events in §18.4.1:
+Deletion proofs can be recorded on-chain via the `AuditAnchor` contract (§18.4) using the `Revocation` event. When the Agent calls `session.finalize()`, the Auth Service emits the `Revocation` event with a deletion proof hash, ensuring the "deleted" claim is immutable.
 
-```solidity
-event DataDeletionProofSubmitted(
-  bytes32 indexed sessionHash,
-  bytes32 indexed agentHash,
-  bytes32 deletionProofHash
-);
-```
-
-- `deletionProofHash` = `keccak256(deletion_proof_id || session_id || memory_hash)`
-
-This event SHOULD be anchored near real-time after the Agent submits the deletion proof.
+> Full on-chain audit design: see §18.4 and `docs/on-chain-audit-design.md`.
 
 ## 20. Security Considerations
 
@@ -1232,7 +1324,9 @@ This event SHOULD be anchored near real-time after the Agent submits the deletio
 
 ## 22. Future Work
 
+- **On-chain audit (Phase 4)**: Starknet `AuditAnchor` contract, Authorization / Revocation / Access events on-chain.
 - Agent write staging.
+- **FHE integration (Phase 7-9)**: Fully Homomorphic Encryption. Agents compute on ciphertext, never see plaintext. Combined with on-chain audit for complete trustless data authorization. See `docs/on-chain-audit-design.md` §10.
 - Semantic retrieval (`query` endpoint).
 - Write version history and rollback.
 - Policy templates.
@@ -1254,43 +1348,34 @@ This event SHOULD be anchored near real-time after the Agent submits the deletio
 ## Appendix A: Minimal Interaction Example
 
 ```bash
-# 1. Discover an Agent (via ERC8004 Registry or locally)
-uomp registry search calendar
+# 1. Discover an Agent (via ERC8004 Registry or local path)
+pnpm cli discover ./examples/calendar-agent
 
-# 2. Install Agent
-uomp registry install calendar_agent
+# 2. Verify identity and cache manifest
+pnpm cli connect ./examples/calendar-agent
 
-# 3. Create Session on the user side
-curl -X POST http://127.0.0.1:9374/v1/sessions \
-  -H "Content-Type: application/json" \
-  -d '{
-    "agent_id": "calendar_agent",
-    "agent_name": "Calendar Assistant",
-    "requested_scopes": {
-      "read": { "tags": ["preference"], "keys": [] }
-    },
-    "duration_minutes": 30
-  }'
+# 3. Authorize: CLI shows manifest, user confirms scope, Token issued
+pnpm cli authorize ./examples/calendar-agent \
+  --scope preference \
+  --output /tmp/uomp.env
 
-# 4. User grants authorization
-curl -X POST http://127.0.0.1:9374/v1/sessions/sess_abc123/grant \
-  -H "Content-Type: application/json" \
-  -d '{
-    "granted_scopes": {
-      "read": { "tags": ["preference"], "keys": [] }
-    }
-  }'
+# 4. Load Token into environment (or export UOM_TOKEN manually)
+source /tmp/uomp.env
 
-# 5. Run Agent with Token
-export UOM_TOKEN="<token>"
-uom-calendar-agent
+# 5. Run Agent as independent process with Token
+pnpm cli agent run ./examples/calendar-agent
 
-# 6. Agent reads memory internally
-# const memory = new UserMemory({ token: process.env.UOM_TOKEN });
-# const theme = await memory.get<string>('preference.theme');
+# 6. Agent reads memory via SDK
+# import { UompClient } from '@uomp/sdk';
+# const uomp = UompClient.fromEnv();
+# const theme = await uomp.memory.get('preference.theme');
 
-# 7. Close Session
-curl -X POST http://127.0.0.1:9374/v1/sessions/sess_abc123/close
+# 7. View sessions and audit
+pnpm cli sessions -a
+pnpm cli audit --limit 20
+
+# 8. Revoke session
+pnpm cli revoke <session-id>
 ```
 
 ---
